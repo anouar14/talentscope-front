@@ -1,0 +1,186 @@
+.dashboard-page {
+  min-height: 100vh;
+  background: #f7f8fb;
+  padding: 40px 20px;
+}
+
+.dashboard-container {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.hero-card,
+.completion-card,
+.panel,
+.stat-card {
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 14px 36px rgba(7, 24, 68, 0.09);
+}
+
+.hero-card {
+  padding: 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.eyebrow {
+  color: #667085;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
+.hero-card h1 {
+  color: #071844;
+  font-size: 40px;
+  margin: 0;
+}
+
+.hero-card p {
+  color: #667085;
+  font-size: 17px;
+}
+
+.logout-btn {
+  border: 1px solid #071844;
+  background: white;
+  color: #071844;
+  border-radius: 12px;
+  height: 46px;
+  padding: 0 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.completion-card {
+  margin-top: 24px;
+  padding: 28px;
+}
+
+.completion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.completion-header h2 {
+  margin: 0;
+  color: #071844;
+}
+
+.completion-header p {
+  margin: 6px 0 0;
+  color: #667085;
+}
+
+.completion-header strong {
+  font-size: 28px;
+  color: #071844;
+}
+
+.progress-bar {
+  margin-top: 20px;
+  height: 14px;
+  background: #eef1f6;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #ffd200;
+  border-radius: 999px;
+}
+
+.stats-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.stat-card {
+  padding: 24px;
+}
+
+.stat-card span {
+  font-size: 30px;
+}
+
+.stat-card h3 {
+  color: #071844;
+  margin: 14px 0 6px;
+}
+
+.stat-card p {
+  color: #667085;
+  margin: 0;
+}
+
+.content-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.panel {
+  padding: 28px;
+}
+
+.panel h2 {
+  color: #071844;
+  margin-top: 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.actions a,
+.actions button {
+  height: 48px;
+  border-radius: 12px;
+  border: none;
+  background: #ffd200;
+  color: #071844;
+  font-weight: 900;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.panel li {
+  margin-bottom: 12px;
+  color: #071844;
+  font-weight: 700;
+}
+
+.loading {
+  text-align: center;
+  color: #071844;
+  font-weight: 800;
+}
+
+@media (max-width: 900px) {
+  .hero-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .stats-grid,
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}

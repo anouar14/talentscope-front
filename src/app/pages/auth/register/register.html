@@ -1,0 +1,49 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Créer un compte</h1>
+    <p>Rejoignez TalentScope et trouvez les meilleures opportunités IT.</p>
+
+    <form (ngSubmit)="onRegister()">
+      <label>Nom complet</label>
+      <input
+        type="text"
+        name="name"
+        [(ngModel)]="name"
+        placeholder="Ex: Hichri Anouar"
+      />
+
+      <label>Email</label>
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="exemple@email.com"
+      />
+
+      <label>Mot de passe</label>
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="Votre mot de passe"
+      />
+
+      <label>Type de compte</label>
+      <select name="role" [(ngModel)]="role">
+        <option value="CONSULTANT">Consultant</option>
+        <option value="COMPANY">Entreprise</option>
+      </select>
+
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Création en cours...' : 'Créer mon compte' }}
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      Vous avez déjà un compte ?
+      <a routerLink="/login">Se connecter</a>
+    </div>
+  </div>
+</div>

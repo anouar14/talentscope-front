@@ -1,0 +1,90 @@
+<div class="dashboard-page">
+  <div class="dashboard-container">
+
+    <div *ngIf="loading" class="loading">
+      Chargement du dashboard...
+    </div>
+
+    <ng-container *ngIf="!loading && consultant">
+
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Espace consultant</p>
+          <h1>Bonjour {{ consultant.firstName || 'Consultant' }} 👋</h1>
+          <p>
+            Gérez votre profil, votre CV et vos futures recommandations TalentScope.
+          </p>
+        </div>
+
+        <button class="logout-btn" (click)="logout()">
+          Déconnexion
+        </button>
+      </section>
+
+      <section class="completion-card">
+        <div class="completion-header">
+          <div>
+            <h2>Complétion du profil</h2>
+            <p>{{ profileCompletion }}% complété</p>
+          </div>
+
+          <strong>{{ profileCompletion }}%</strong>
+        </div>
+
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="profileCompletion"></div>
+        </div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span>📄</span>
+          <h3>CV</h3>
+          <p>{{ consultant.cvUrl ? 'Uploadé' : 'Non uploadé' }}</p>
+        </div>
+
+        <div class="stat-card">
+          <span>🤖</span>
+          <h3>Analyse IA</h3>
+          <p>En attente</p>
+        </div>
+
+        <div class="stat-card">
+          <span>⭐</span>
+          <h3>Matching</h3>
+          <p>0 opportunité</p>
+        </div>
+
+        <div class="stat-card">
+          <span>💼</span>
+          <h3>Candidatures</h3>
+          <p>0 candidature</p>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <h2>Actions rapides</h2>
+
+          <div class="actions">
+            <a routerLink="/consultant/profile">Modifier mon profil</a>
+            <a routerLink="/consultant/upload-cv">Uploader / remplacer mon CV</a>
+            <button disabled>Lancer l’analyse IA</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Recommandations</h2>
+
+          <ul>
+            <li *ngIf="!consultant.title">Ajoutez un titre professionnel.</li>
+            <li *ngIf="!consultant.cvUrl">Ajoutez votre CV pour activer l’analyse IA.</li>
+            <li *ngIf="consultant.skills.length < 3">Ajoutez au moins 3 compétences.</li>
+            <li *ngIf="profileCompletion === 100">Votre profil est complet.</li>
+          </ul>
+        </div>
+      </section>
+
+    </ng-container>
+  </div>
+</div>

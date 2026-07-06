@@ -1,0 +1,74 @@
+<div class="dashboard-page">
+  <div class="dashboard-container">
+
+    <div *ngIf="loading" class="loading">
+      Chargement du dashboard...
+    </div>
+
+    <ng-container *ngIf="!loading && company">
+
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Espace entreprise</p>
+          <h1>Bonjour {{ company.companyName || 'Entreprise' }} 👋</h1>
+          <p>
+            Recherchez des consultants IT, gérez vos besoins et suivez vos futurs matchings.
+          </p>
+        </div>
+
+        <button class="logout-btn" (click)="logout()">
+          Déconnexion
+        </button>
+      </section>
+
+      <section class="stats-grid">
+        <div class="stat-card">
+          <span>🔎</span>
+          <h3>Recherche</h3>
+          <p>Consultants disponibles</p>
+        </div>
+
+        <div class="stat-card">
+          <span>⭐</span>
+          <h3>Matching</h3>
+          <p>0 profil recommandé</p>
+        </div>
+
+        <div class="stat-card">
+          <span>📩</span>
+          <h3>Invitations</h3>
+          <p>0 invitation envoyée</p>
+        </div>
+
+        <div class="stat-card">
+          <span>🏢</span>
+          <h3>Profil</h3>
+          <p>{{ company.sector || 'À compléter' }}</p>
+        </div>
+      </section>
+
+      <section class="content-grid">
+        <div class="panel">
+          <h2>Actions rapides</h2>
+
+          <div class="actions">
+            <a routerLink="/company/profile">Modifier le profil entreprise</a>
+            <a routerLink="/company/search-consultants">Rechercher des consultants</a>
+            <button disabled>Lancer le matching IA</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Informations entreprise</h2>
+
+          <ul>
+            <li><strong>Secteur :</strong> {{ company.sector || 'Non renseigné' }}</li>
+            <li><strong>Localisation :</strong> {{ company.location || 'Non renseignée' }}</li>
+            <li><strong>Site web :</strong> {{ company.website || 'Non renseigné' }}</li>
+          </ul>
+        </div>
+      </section>
+
+    </ng-container>
+  </div>
+</div>

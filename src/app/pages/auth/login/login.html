@@ -1,0 +1,55 @@
+<div class="auth-page">
+
+  <div class="auth-card">
+
+    <h1>Connexion</h1>
+
+    <p>
+      Connectez-vous à votre espace TalentScope.
+    </p>
+
+    <form (ngSubmit)="onLogin()">
+
+      <label>Email</label>
+
+      <input
+        type="email"
+        name="email"
+        [(ngModel)]="email"
+        placeholder="votre@email.com">
+
+      <label>Mot de passe</label>
+
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        placeholder="Mot de passe">
+
+      <p class="error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="submit"
+        [disabled]="loading">
+
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+
+      Pas encore de compte ?
+
+      <a routerLink="/register">
+        Créer un compte
+      </a>
+
+    </div>
+
+  </div>
+
+</div>

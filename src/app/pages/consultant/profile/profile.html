@@ -1,0 +1,125 @@
+<div class="profile-page">
+  <div class="profile-card">
+
+    <div class="profile-header">
+      <div class="avatar">
+        {{ consultant.firstName ? consultant.firstName.charAt(0) : 'C' }}
+      </div>
+
+      <h1>Mon profil consultant</h1>
+      <p>Complétez vos informations pour améliorer votre matching.</p>
+    </div>
+
+    <div *ngIf="loading" class="info-message">
+      Chargement du profil...
+    </div>
+
+    <form *ngIf="!loading" (ngSubmit)="saveProfile()">
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Prénom</label>
+          <input type="text" name="firstName" [(ngModel)]="consultant.firstName">
+        </div>
+
+        <div class="form-group">
+          <label>Nom</label>
+          <input type="text" name="lastName" [(ngModel)]="consultant.lastName">
+        </div>
+
+        <div class="form-group full">
+          <label>Titre professionnel</label>
+          <input type="text" name="title" [(ngModel)]="consultant.title" placeholder="Ex: Développeur Full Stack">
+        </div>
+
+        <div class="form-group">
+          <label>Localisation</label>
+          <input type="text" name="location" [(ngModel)]="consultant.location" placeholder="Ex: Tunis">
+        </div>
+
+        <div class="form-group">
+          <label>Années d'expérience</label>
+          <input type="number" name="experienceYears" [(ngModel)]="consultant.experienceYears" min="0">
+        </div>
+      </div>
+
+      <div class="availability">
+        <label>Disponibilité</label>
+
+        <div class="switch-row">
+          <input type="checkbox" name="available" [(ngModel)]="consultant.available">
+          <span>{{ consultant.available ? 'Disponible' : 'Non disponible' }}</span>
+        </div>
+      </div>
+
+      <div class="skills-section">
+        <label>Compétences</label>
+
+        <div class="skill-input">
+          <input
+            type="text"
+            name="newSkill"
+            [(ngModel)]="newSkill"
+            placeholder="Ex: Angular"
+            (keydown.enter)="$event.preventDefault(); addSkill()">
+
+          <button type="button" (click)="addSkill()">
+            <span class="btn-icon">+</span>
+            Ajouter
+          </button>
+        </div>
+
+        <div class="skills-list" *ngIf="consultant.skills.length > 0">
+          <span class="skill-tag" *ngFor="let skill of consultant.skills">
+            {{ skill }}
+            <button type="button" (click)="removeSkill(skill)">×</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="cv-section">
+        <div class="cv-box" *ngIf="consultant.cvUrl; else noCv">
+          <div class="cv-icon">📄</div>
+
+          <div class="cv-info">
+            <p>CV déjà envoyé</p>
+            <strong>{{ consultant.cvUrl.split('/').pop() }}</strong>
+            <span>{{ consultant.cvUrl }}</span>
+          </div>
+
+          <a class="cv-btn secondary" href="#">
+            Télécharger
+          </a>
+
+          <a class="cv-btn primary" routerLink="/consultant/upload-cv">
+            Remplacer le CV
+          </a>
+        </div>
+
+        <ng-template #noCv>
+          <div class="cv-box empty">
+            <div class="cv-icon">📄</div>
+
+            <div class="cv-info">
+              <p>Aucun CV envoyé</p>
+              <span>Ajoutez votre CV au format PDF pour compléter votre profil.</span>
+            </div>
+
+            <a class="cv-btn primary" routerLink="/consultant/upload-cv">
+              Ajouter un CV
+            </a>
+          </div>
+        </ng-template>
+      </div>
+
+      <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <button class="save-btn" type="submit" [disabled]="saving">
+        <span>💾</span>
+        {{ saving ? 'Enregistrement...' : 'Enregistrer le profil' }}
+      </button>
+
+    </form>
+  </div>
+</div>

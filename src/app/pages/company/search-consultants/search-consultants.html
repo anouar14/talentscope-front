@@ -1,0 +1,61 @@
+<div class="search-page">
+  <div class="search-container">
+
+    <section class="search-header">
+      <p class="eyebrow">Espace entreprise</p>
+      <h1>Rechercher des consultants</h1>
+      <p>Trouvez des profils IT disponibles selon leurs compétences, localisation ou titre.</p>
+    </section>
+
+    <section class="search-box">
+      <input
+        type="text"
+        name="searchTerm"
+        [(ngModel)]="searchTerm"
+        (input)="filterConsultants()"
+        placeholder="Rechercher par compétence, nom, titre ou localisation..."
+      />
+    </section>
+
+    <p class="loading" *ngIf="loading">Chargement des consultants...</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <section class="results-info" *ngIf="!loading">
+      {{ filteredConsultants.length }} consultant(s) trouvé(s)
+    </section>
+
+    <section class="consultants-grid" *ngIf="!loading">
+      <div class="consultant-card" *ngFor="let consultant of filteredConsultants">
+
+        <div class="card-header">
+          <div class="avatar">
+            {{ consultant.firstName ? consultant.firstName.charAt(0) : 'C' }}
+          </div>
+
+          <div>
+            <h3>
+              {{ consultant.firstName || 'Prénom' }}
+              {{ consultant.lastName || '' }}
+            </h3>
+            <p>{{ consultant.title || 'Titre non renseigné' }}</p>
+          </div>
+        </div>
+
+        <div class="meta">
+          <span>📍 {{ consultant.location || 'Localisation non renseignée' }}</span>
+          <span>💼 {{ consultant.experienceYears || 0 }} an(s)</span>
+          <span>{{ consultant.available ? '🟢 Disponible' : '⚪ Non disponible' }}</span>
+        </div>
+
+        <div class="skills">
+          <span *ngFor="let skill of consultant.skills">
+            {{ skill }}
+          </span>
+        </div>
+
+        <button disabled>Voir le profil</button>
+      </div>
+    </section>
+
+  </div>
+</div>

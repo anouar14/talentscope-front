@@ -1,0 +1,176 @@
+.search-page {
+  min-height: 100vh;
+  background: #f7f8fb;
+  padding: 50px 20px;
+}
+
+.search-container {
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.search-header {
+  background: white;
+  border-radius: 26px;
+  padding: 36px;
+  box-shadow: 0 14px 36px rgba(7, 24, 68, 0.09);
+}
+
+.eyebrow {
+  color: #667085;
+  font-weight: 900;
+  margin: 0 0 8px;
+}
+
+.search-header h1 {
+  margin: 0;
+  color: #071844;
+  font-size: 42px;
+  font-weight: 900;
+}
+
+.search-header p {
+  color: #667085;
+  font-size: 17px;
+}
+
+.search-box {
+  margin-top: 24px;
+  background: white;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: 0 14px 36px rgba(7, 24, 68, 0.09);
+}
+
+.search-box input {
+  width: 100%;
+  height: 58px;
+  border: 1px solid #d9dde7;
+  border-radius: 14px;
+  padding: 0 18px;
+  font-size: 16px;
+  outline: none;
+}
+
+.search-box input:focus {
+  border-color: #ffd200;
+  box-shadow: 0 0 0 4px rgba(255, 210, 0, 0.18);
+}
+
+.results-info {
+  margin: 24px 0 16px;
+  color: #071844;
+  font-weight: 900;
+}
+
+.consultants-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 22px;
+}
+
+.consultant-card {
+  background: white;
+  border-radius: 24px;
+  padding: 26px;
+  box-shadow: 0 14px 36px rgba(7, 24, 68, 0.09);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #ffd200;
+  color: #071844;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 24px;
+  text-transform: uppercase;
+}
+
+.card-header h3 {
+  margin: 0;
+  color: #071844;
+  font-size: 22px;
+}
+
+.card-header p {
+  margin: 4px 0 0;
+  color: #667085;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.meta span {
+  background: #f1f4f9;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 700;
+  color: #071844;
+  font-size: 14px;
+}
+
+.skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 42px;
+}
+
+.skills span {
+  background: #fff8d6;
+  color: #071844;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.consultant-card button {
+  width: 100%;
+  height: 48px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 12px;
+  background: #ffd200;
+  color: #071844;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.consultant-card button:disabled {
+  opacity: 0.6;
+}
+
+.loading,
+.error {
+  margin-top: 24px;
+  font-weight: 800;
+}
+
+.error {
+  color: #d93025;
+}
+
+@media (max-width: 850px) {
+  .consultants-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-header h1 {
+    font-size: 34px;
+  }
+}

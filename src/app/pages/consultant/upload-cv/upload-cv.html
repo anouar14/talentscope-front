@@ -1,0 +1,44 @@
+<div class="upload-page">
+  <div class="upload-card">
+
+    <div class="upload-header">
+      <div class="icon">📄</div>
+      <h1>Upload CV</h1>
+      <p>Ajoutez votre CV au format PDF pour compléter votre profil.</p>
+    </div>
+
+    <div class="drop-zone">
+      <input
+        type="file"
+        id="cv"
+        accept="application/pdf"
+        (change)="onFileSelected($event)"
+        hidden
+      />
+
+      <label for="cv">
+        <strong>Choisir un fichier PDF</strong>
+        <span *ngIf="!selectedFile">Aucun fichier sélectionné</span>
+        <span *ngIf="selectedFile">{{ selectedFile.name }}</span>
+      </label>
+    </div>
+
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <button class="upload-btn" (click)="uploadCv()" [disabled]="loading">
+      {{ loading ? 'Envoi en cours...' : 'Envoyer le CV' }}
+    </button>
+
+    <div class="cv-result" *ngIf="cvUrl">
+      <p>CV enregistré :</p>
+      <span>{{ cvUrl }}</span>
+    </div>
+
+    <div class="actions">
+      <a routerLink="/consultant/profile">Retour au profil</a>
+      <a routerLink="/consultant/dashboard">Dashboard</a>
+    </div>
+
+  </div>
+</div>

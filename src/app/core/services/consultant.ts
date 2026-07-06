@@ -1,0 +1,38 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Consultant } from '../models/consultant';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ConsultantService {
+
+  private apiUrl = 'http://localhost:8080/api/consultants';
+
+  constructor(private http: HttpClient) {}
+
+  getProfile(): Observable<Consultant> {
+    return this.http.get<Consultant>(`${this.apiUrl}/me`);
+  }
+
+  updateProfile(consultant: Consultant): Observable<Consultant> {
+    return this.http.put<Consultant>(
+      `${this.apiUrl}/me`,
+      consultant
+    );
+  }
+  uploadCv(file: File): Observable<Consultant> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return this.http.post<Consultant>(
+    `${this.apiUrl}/me/cv`,
+    formData
+  );
+  }
+  getAllConsultants(): Observable<Consultant[]> {
+  return this.http.get<Consultant[]>(`${this.apiUrl}`);
+}
+
+}
