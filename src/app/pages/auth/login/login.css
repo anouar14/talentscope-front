@@ -78,3 +78,17 @@ button:disabled {
   font-weight: bold;
   color: #071844;
 }
+.forgot-password-link {
+  margin-top: 8px;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+.forgot-password-link a {
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+}

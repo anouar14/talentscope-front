@@ -16,14 +16,14 @@ export class UploadCv {
   errorMessage = '';
   cvUrl = '';
 
+  analysisSuccess = false;
+  cvPreview: any = null;
+
   constructor(private consultantService: ConsultantService) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-
-    if (!input.files || input.files.length === 0) {
-      return;
-    }
+    if (!input.files || input.files.length === 0) return;
 
     const file = input.files[0];
 
@@ -35,6 +35,8 @@ export class UploadCv {
 
     this.selectedFile = file;
     this.errorMessage = '';
+    this.successMessage = '';
+    this.cvPreview = null;
   }
 
   uploadCv(): void {
@@ -58,5 +60,46 @@ export class UploadCv {
         this.loading = false;
       }
     });
+  }
+
+  previewCvAnalysis(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.analysisSuccess = false;
+
+    this.consultantService.previewCvAnalysis().subscribe({
+      next: (result) => {
+        this.cvPreview = result;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error(error);
+        this.errorMessage = "Erreur lors de l'analyse du CV.";
+        this.loading = false;
+      }
+    });
+  }
+
+  confirmCvAnalysis(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    this.consultantService.analyzeMyCv().subscribe({
+      next: () => {
+        this.analysisSuccess = true;
+        this.cvPreview = null;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error(error);
+        this.errorMessage = 'Erreur lors de la sauvegarde du profil.';
+        this.loading = false;
+      }
+    });
+  }
+
+  closeSuccess(): void {
+    this.analysisSuccess = false;
   }
 }

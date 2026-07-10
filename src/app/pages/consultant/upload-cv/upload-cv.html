@@ -26,19 +26,63 @@
     <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
     <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
-    <button class="upload-btn" (click)="uploadCv()" [disabled]="loading">
-      {{ loading ? 'Envoi en cours...' : 'Envoyer le CV' }}
-    </button>
+    <div class="buttons-container">
+      <button class="upload-btn" (click)="uploadCv()" [disabled]="loading">
+        {{ loading ? 'Traitement en cours...' : 'Envoyer le CV' }}
+      </button>
+
+      <button class="analyze-btn" (click)="previewCvAnalysis()" [disabled]="loading">
+        Analyser mon CV
+      </button>
+    </div>
 
     <div class="cv-result" *ngIf="cvUrl">
       <p>CV enregistré :</p>
       <span>{{ cvUrl }}</span>
     </div>
 
-    <div class="actions">
-      <a routerLink="/consultant/profile">Retour au profil</a>
-      <a routerLink="/consultant/dashboard">Dashboard</a>
+    <div class="cv-preview" *ngIf="cvPreview">
+      <h3>Résultat de l’analyse IA</h3>
+
+      <p><strong>Prénom :</strong> {{ cvPreview.firstName }}</p>
+      <p><strong>Nom :</strong> {{ cvPreview.lastName }}</p>
+      <p><strong>Titre :</strong> {{ cvPreview.title }}</p>
+      <p><strong>Expérience :</strong> {{ cvPreview.experienceYears }} ans</p>
+      <p><strong>Localisation :</strong> {{ cvPreview.location }}</p>
+
+      <p><strong>Compétences :</strong></p>
+      <ul>
+        <li *ngFor="let skill of cvPreview.skills">
+          {{ skill }}
+        </li>
+      </ul>
+
+      <button class="upload-btn" (click)="confirmCvAnalysis()" [disabled]="loading">
+        Confirmer et mettre à jour mon profil
+      </button>
     </div>
 
+    <div class="actions">
+      <a routerLink="/consultant/profile" class="action-link">← Retour au profil</a>
+      <a routerLink="/consultant/dashboard" class="action-link">Aller au Dashboard →</a>
+    </div>
+
+  </div>
+</div>
+
+<div class="analysis-success" *ngIf="analysisSuccess">
+  <div class="success-content">
+    <div class="success-icon">🎉</div>
+    <div class="success-text">
+      <strong>CV analysé avec succès !</strong>
+      <p>Votre profil a été mis à jour avec les nouvelles informations.</p>
+    </div>
+  </div>
+
+  <div class="success-actions">
+    <button class="profile-btn" routerLink="/consultant/profile">
+      Voir mon profil mis à jour
+    </button>
+    <button class="close-btn" (click)="closeSuccess()">✕</button>
   </div>
 </div>

@@ -10,6 +10,8 @@ import { ConsultantProfile } from './pages/consultant/profile/profile';
 import { UploadCv } from './pages/consultant/upload-cv/upload-cv';
 import { CompanyProfile } from './pages/company/profile/profile';
 import { SearchConsultants } from './pages/company/search-consultants/search-consultants';
+import { ResetPassword } from './pages/auth/reset-password/reset-password';
+import { ForgotPassword } from './pages/auth/forgot-password/forgot-password';
 export const routes: Routes = [
   { path: '', component: Welcome },
   { path: 'register', component: Register },
@@ -45,5 +47,13 @@ export const routes: Routes = [
   component: SearchConsultants,
   canActivate: [companyGuard]
   },
+  {
+  path: 'forgot-password',
+  component: ForgotPassword
+},
+{
+  path: 'reset-password',
+  component: ResetPassword
+},
   { path: '**', redirectTo: '' }
 ];

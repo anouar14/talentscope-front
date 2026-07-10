@@ -21,20 +21,65 @@ export interface AuthResponse {
   userId: string;
 }
 
+export interface MessageResponse {
+  message: string;
+}
+
+export interface TokenValidationResponse {
+  valid: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class Auth {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private readonly apiUrl = 'http://localhost:8080/api/auth';
 
   constructor(private http: HttpClient) {}
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data);
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/register`,
+      data
+    );
   }
 
   login(data: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, data);
+    return this.http.post<AuthResponse>(
+      `${this.apiUrl}/login`,
+      data
+    );
+  }
+
+  forgotPassword(email: string): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(
+      `${this.apiUrl}/forgot-password`,
+      { email }
+    );
+  }
+
+  validateResetToken(
+    token: string
+  ): Observable<TokenValidationResponse> {
+    return this.http.get<TokenValidationResponse>(
+      `${this.apiUrl}/reset-password/validate`,
+      {
+        params: { token }
+      }
+    );
+  }
+
+  resetPassword(
+    token: string,
+    newPassword: string
+  ): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(
+      `${this.apiUrl}/reset-password`,
+      {
+        token,
+        newPassword
+      }
+    );
   }
 
   saveAuth(response: AuthResponse): void {
@@ -52,17 +97,22 @@ export class Auth {
     return localStorage.getItem('role');
   }
 
+  getUserId(): string | null {
+    return localStorage.getItem('userId');
+  }
+
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
 
-  logout(): void {
-    localStorage.clear();
-  }
   hasRole(role: string): boolean {
-  return this.getRole() === role;
-}
-  getUserId(): string | null {
-    return localStorage.getItem('userId');
+    return this.getRole() === role;
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('email');
+    localStorage.removeItem('userId');
   }
 }

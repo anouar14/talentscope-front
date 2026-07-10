@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 
@@ -14,9 +15,12 @@ export class Register {
   name = '';
   email = '';
   password = '';
+  confirmPassword = '';
+
   role: 'CONSULTANT' | 'COMPANY' = 'CONSULTANT';
 
   loading = false;
+  submitted = false;
   errorMessage = '';
 
   constructor(
@@ -24,19 +28,32 @@ export class Register {
     private router: Router
   ) {}
 
-  onRegister(): void {
+  get passwordsDoNotMatch(): boolean {
+    return (
+      this.confirmPassword.length > 0 &&
+      this.password !== this.confirmPassword
+    );
+  }
+
+  onRegister(form: NgForm): void {
+    this.submitted = true;
     this.errorMessage = '';
 
-    if (!this.name || !this.email || !this.password || !this.role) {
-      this.errorMessage = 'Veuillez remplir tous les champs.';
+    if (form.invalid) {
+      this.errorMessage = 'Veuillez corriger les champs invalides.';
+      return;
+    }
+
+    if (this.password !== this.confirmPassword) {
+      this.errorMessage = 'Les mots de passe ne correspondent pas.';
       return;
     }
 
     this.loading = true;
 
     this.authService.register({
-      name: this.name,
-      email: this.email,
+      name: this.name.trim(),
+      email: this.email.trim().toLowerCase(),
       password: this.password,
       role: this.role
     }).subscribe({
@@ -51,9 +68,24 @@ export class Register {
           this.router.navigate(['/']);
         }
       },
-      error: () => {
-        this.errorMessage = 'Inscription impossible. Veuillez vérifier vos informations.';
+
+      error: (error: HttpErrorResponse) => {
         this.loading = false;
+
+        if (error.status === 409) {
+          this.errorMessage =
+            'Cette adresse email est déjà associée à un compte.';
+          return;
+        }
+
+        if (error.status === 400) {
+          this.errorMessage =
+            'Certaines informations saisies sont invalides.';
+          return;
+        }
+
+        this.errorMessage =
+          'Inscription impossible. Veuillez réessayer plus tard.';
       }
     });
   }

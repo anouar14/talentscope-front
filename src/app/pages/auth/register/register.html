@@ -1,42 +1,192 @@
 <div class="auth-page">
   <div class="auth-card">
     <h1>Créer un compte</h1>
-    <p>Rejoignez TalentScope et trouvez les meilleures opportunités IT.</p>
 
-    <form (ngSubmit)="onRegister()">
-      <label>Nom complet</label>
+    <p>
+      Rejoignez TalentScope et trouvez les meilleures opportunités IT.
+    </p>
+
+    <form
+      #registerForm="ngForm"
+      (ngSubmit)="onRegister(registerForm)"
+      novalidate
+    >
+      <!-- Nom complet -->
+      <label for="name">Nom complet</label>
+
       <input
+        id="name"
         type="text"
         name="name"
         [(ngModel)]="name"
-        placeholder="Ex: Hichri Anouar"
+        #nameField="ngModel"
+        placeholder="Ex : Hichri Anouar"
+        required
+        minlength="3"
+        maxlength="100"
+        pattern="^[A-Za-zÀ-ÿ' -]+$"
+        autocomplete="name"
       />
 
-      <label>Email</label>
+      <div
+        class="field-error"
+        *ngIf="nameField.invalid && (nameField.touched || submitted)"
+      >
+        <span *ngIf="nameField.errors?.['required']">
+          Le nom complet est obligatoire.
+        </span>
+
+        <span *ngIf="nameField.errors?.['minlength']">
+          Le nom doit contenir au moins 3 caractères.
+        </span>
+
+        <span *ngIf="nameField.errors?.['pattern']">
+          Le nom contient des caractères non autorisés.
+        </span>
+      </div>
+
+      <!-- Email -->
+      <label for="email">Email</label>
+
       <input
+        id="email"
         type="email"
         name="email"
         [(ngModel)]="email"
+        #emailField="ngModel"
         placeholder="exemple@email.com"
+        required
+        email
+        maxlength="150"
+        autocomplete="email"
       />
 
-      <label>Mot de passe</label>
+      <div
+        class="field-error"
+        *ngIf="emailField.invalid && (emailField.touched || submitted)"
+      >
+        <span *ngIf="emailField.errors?.['required']">
+          L’adresse email est obligatoire.
+        </span>
+
+        <span *ngIf="emailField.errors?.['email']">
+          Le format de l’adresse email est invalide.
+        </span>
+      </div>
+
+      <!-- Mot de passe -->
+      <label for="password">Mot de passe</label>
+
       <input
+        id="password"
         type="password"
         name="password"
         [(ngModel)]="password"
+        #passwordField="ngModel"
         placeholder="Votre mot de passe"
+        required
+        minlength="8"
+        maxlength="64"
+        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&._#-])[A-Za-z0-9@$!%*?&._#-]{8,64}$"
+        autocomplete="new-password"
       />
 
-      <label>Type de compte</label>
-      <select name="role" [(ngModel)]="role">
+      <div
+        class="field-error"
+        *ngIf="
+          passwordField.invalid &&
+          (passwordField.touched || submitted)
+        "
+      >
+        <span *ngIf="passwordField.errors?.['required']">
+          Le mot de passe est obligatoire.
+        </span>
+
+        <span *ngIf="passwordField.errors?.['minlength']">
+          Le mot de passe doit contenir au moins 8 caractères.
+        </span>
+
+        <span
+          *ngIf="
+            passwordField.errors?.['pattern'] &&
+            !passwordField.errors?.['minlength']
+          "
+        >
+          Le mot de passe doit contenir une majuscule, une minuscule,
+          un chiffre et un caractère spécial.
+        </span>
+      </div>
+
+      <div class="password-rules">
+        Le mot de passe doit contenir au moins 8 caractères, une majuscule,
+        une minuscule, un chiffre et un caractère spécial.
+      </div>
+
+      <!-- Confirmation du mot de passe -->
+      <label for="confirmPassword">Confirmer le mot de passe</label>
+
+      <input
+        id="confirmPassword"
+        type="password"
+        name="confirmPassword"
+        [(ngModel)]="confirmPassword"
+        #confirmPasswordField="ngModel"
+        placeholder="Confirmez votre mot de passe"
+        required
+        autocomplete="new-password"
+      />
+
+      <div
+        class="field-error"
+        *ngIf="
+          confirmPasswordField.touched ||
+          submitted
+        "
+      >
+        <span *ngIf="confirmPasswordField.errors?.['required']">
+          La confirmation du mot de passe est obligatoire.
+        </span>
+
+        <span
+          *ngIf="
+            !confirmPasswordField.errors?.['required'] &&
+            passwordsDoNotMatch
+          "
+        >
+          Les mots de passe ne correspondent pas.
+        </span>
+      </div>
+
+      <!-- Type de compte -->
+      <label for="role">Type de compte</label>
+
+      <select
+        id="role"
+        name="role"
+        [(ngModel)]="role"
+        #roleField="ngModel"
+        required
+      >
         <option value="CONSULTANT">Consultant</option>
         <option value="COMPANY">Entreprise</option>
       </select>
 
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div
+        class="field-error"
+        *ngIf="roleField.invalid && (roleField.touched || submitted)"
+      >
+        Le type de compte est obligatoire.
+      </div>
 
-      <button type="submit" [disabled]="loading">
+      <!-- Erreur générale -->
+      <p class="error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="submit"
+        [disabled]="loading"
+      >
         {{ loading ? 'Création en cours...' : 'Créer mon compte' }}
       </button>
     </form>

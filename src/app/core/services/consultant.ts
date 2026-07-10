@@ -34,5 +34,18 @@ export class ConsultantService {
   getAllConsultants(): Observable<Consultant[]> {
   return this.http.get<Consultant[]>(`${this.apiUrl}`);
 }
+  analyzeMyCv(): Observable<string> {
+  return this.http.post(
+    `${this.apiUrl}/me/analyze-cv`,
+    {},
+    { responseType: 'text' }
+  );
+  }
+  previewCvAnalysis(): Observable<any> {
+  return this.http.post<any>(
+    `${this.apiUrl}/me/analyze-cv-preview`,
+    {}
+  );
+}
 
 }
