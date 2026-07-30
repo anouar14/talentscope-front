@@ -1,0 +1,279 @@
+<div class="detail-page">
+  <div class="detail-container">
+
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()"
+    >
+      ← Retour aux consultants
+    </button>
+
+    <div
+      class="loading-card"
+      *ngIf="loading"
+    >
+      Chargement du profil...
+    </div>
+
+    <div
+      class="error-card"
+      *ngIf="errorMessage"
+    >
+      <p>{{ errorMessage }}</p>
+
+      <a routerLink="/company/search-consultants">
+        Retour à la recherche
+      </a>
+    </div>
+
+    <ng-container
+      *ngIf="consultant && !loading"
+    >
+      <section class="profile-header">
+
+        <div class="identity">
+
+          <div class="avatar">
+            {{
+              consultant.firstName
+                ? consultant.firstName.charAt(0)
+                : 'C'
+            }}
+          </div>
+
+          <div>
+            <p class="eyebrow">
+              Profil consultant
+            </p>
+
+            <h1>
+              {{ consultant.firstName || 'Prénom' }}
+              {{ consultant.lastName || '' }}
+            </h1>
+
+            <p class="title">
+              {{
+                consultant.title ||
+                'Titre non renseigné'
+              }}
+            </p>
+          </div>
+
+        </div>
+
+        <div
+          class="availability"
+          [class.unavailable]="!consultant.available"
+        >
+          {{
+            consultant.available
+              ? 'Disponible'
+              : 'Non disponible'
+          }}
+        </div>
+
+      </section>
+
+      <section class="profile-grid">
+
+        <article class="information-card">
+          <h2>Informations professionnelles</h2>
+
+          <div class="information-list">
+
+            <div class="information-item">
+              <span>Localisation</span>
+
+              <strong>
+                {{
+                  consultant.location ||
+                  'Non renseignée'
+                }}
+              </strong>
+            </div>
+
+            <div class="information-item">
+              <span>Expérience</span>
+
+              <strong>
+                {{ consultant.experienceYears || 0 }}
+                an(s)
+              </strong>
+            </div>
+
+            <div class="information-item">
+  <span>CV</span>
+
+  <div class="cv-information">
+    <strong>
+      {{
+        consultant.cvAvailable
+          ? 'CV disponible'
+          : 'CV non disponible'
+      }}
+    </strong>
+
+    <button
+      *ngIf="consultant.cvAvailable"
+      type="button"
+      class="download-cv-button"
+      [disabled]="cvDownloadLoading"
+      (click)="downloadCv()"
+    >
+      {{
+        cvDownloadLoading
+          ? 'Téléchargement...'
+          : 'Télécharger le CV'
+      }}
+    </button>
+  </div>
+</div>
+
+<p
+  class="form-error"
+  *ngIf="cvDownloadErrorMessage"
+>
+  {{ cvDownloadErrorMessage }}
+</p>
+
+          </div>
+        </article>
+
+        <article class="skills-card">
+          <h2>Compétences</h2>
+
+          <div
+            class="empty-message"
+            *ngIf="consultant.skills.length === 0"
+          >
+            Aucune compétence renseignée.
+          </div>
+
+          <div class="skills">
+            <span
+              *ngFor="let skill of consultant.skills"
+            >
+              {{ skill }}
+            </span>
+          </div>
+        </article>
+
+      </section>
+
+      <section class="actions-card">
+        <div>
+          <h2>Ce profil vous intéresse ?</h2>
+
+          <p>
+            Consultez son CV ou envoyez-lui directement
+  une proposition de mission.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          [disabled]="!consultant.available"
+          (click)="openInvitationForm()"
+        > 
+        {{
+        consultant.available
+        ? 'Inviter ce consultant'
+        : 'Consultant indisponible'
+        }}
+        </button>
+      </section>
+      <p
+  class="success-message"
+  *ngIf="invitationSuccessMessage"
+>
+  {{ invitationSuccessMessage }}
+</p>
+
+<section
+  class="invitation-form-card"
+  *ngIf="showInvitationForm"
+>
+  <div class="form-header">
+    <div>
+      <p class="eyebrow">
+        Nouvelle invitation
+      </p>
+
+      <h2>
+        Inviter
+        {{ consultant.firstName }}
+        {{ consultant.lastName }}
+      </h2>
+    </div>
+
+    <button
+      type="button"
+      class="close-button"
+      [disabled]="invitationLoading"
+      (click)="closeInvitationForm()"
+    >
+      ×
+    </button>
+  </div>
+
+  <label for="invitationSubject">
+    Objet
+  </label>
+
+  <input
+    id="invitationSubject"
+    type="text"
+    name="invitationSubject"
+    [(ngModel)]="invitationSubject"
+    maxlength="150"
+    placeholder="Exemple : Proposition de mission Java"
+  />
+
+  <label for="invitationMessage">
+    Message
+  </label>
+
+  <textarea
+    id="invitationMessage"
+    name="invitationMessage"
+    [(ngModel)]="invitationMessage"
+    maxlength="2000"
+    placeholder="Présentez la mission, le contexte et les compétences recherchées..."
+  ></textarea>
+
+  <p
+    class="form-error"
+    *ngIf="invitationErrorMessage"
+  >
+    {{ invitationErrorMessage }}
+  </p>
+
+  <div class="form-actions">
+    <button
+      type="button"
+      class="cancel-button"
+      [disabled]="invitationLoading"
+      (click)="closeInvitationForm()"
+    >
+      Annuler
+    </button>
+
+    <button
+      type="button"
+      class="send-button"
+      [disabled]="invitationLoading"
+      (click)="sendInvitation()"
+    >
+      {{
+        invitationLoading
+          ? 'Envoi en cours...'
+          : 'Envoyer l’invitation'
+      }}
+    </button>
+  </div>
+</section>
+    </ng-container>
+
+  </div>
+</div>

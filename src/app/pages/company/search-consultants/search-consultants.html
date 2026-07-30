@@ -2,9 +2,300 @@
   <div class="search-container">
 
     <section class="search-header">
-      <p class="eyebrow">Espace entreprise</p>
-      <h1>Rechercher des consultants</h1>
-      <p>Trouvez des profils IT disponibles selon leurs compétences, localisation ou titre.</p>
+      <p class="eyebrow">
+        Espace entreprise
+      </p>
+
+      <h1>
+        Rechercher des consultants
+      </h1>
+
+      <p>
+        Recherchez manuellement des profils ou utilisez
+        le matching IA à partir d’une description de poste.
+      </p>
+    </section>
+
+    <!-- Matching IA -->
+    <section class="matching-section">
+
+      <div class="matching-header">
+        <div>
+          <span class="matching-badge">
+            Matching IA
+          </span>
+
+          <h2>
+            Trouver les profils les plus adaptés
+          </h2>
+
+          <p>
+            Décrivez le poste, les compétences recherchées,
+            l’expérience attendue et la localisation.
+          </p>
+        </div>
+      </div>
+
+      <label for="jobDescription">
+        Description du poste
+      </label>
+
+      <textarea
+        id="jobDescription"
+        name="jobDescription"
+        [(ngModel)]="jobDescription"
+        maxlength="5000"
+        placeholder="Exemple : Nous recherchons un développeur Java Spring Boot avec 3 ans d’expérience, maîtrisant Angular, MongoDB, Docker et les API REST..."
+      ></textarea>
+
+      <div class="description-footer">
+        <span>
+          {{ jobDescription.length }} / 5000 caractères
+        </span>
+
+        <span>
+          Minimum : 20 caractères
+        </span>
+      </div>
+
+      <p
+        class="error"
+        *ngIf="matchingErrorMessage"
+      >
+        {{ matchingErrorMessage }}
+      </p>
+
+      <div class="matching-actions">
+        <button
+          type="button"
+          class="matching-button"
+          [disabled]="matchingLoading"
+          (click)="launchMatching()"
+        >
+          {{
+            matchingLoading
+              ? 'Analyse des profils en cours...'
+              : 'Lancer le matching IA'
+          }}
+        </button>
+
+        <button
+          type="button"
+          class="reset-button"
+          *ngIf="jobDescription || matchingExecuted"
+          [disabled]="matchingLoading"
+          (click)="resetMatching()"
+        >
+          Réinitialiser
+        </button>
+      </div>
+
+      <div
+        class="matching-loader"
+        *ngIf="matchingLoading"
+      >
+        <div class="spinner"></div>
+
+        <div>
+          <strong>
+            Analyse IA en cours
+          </strong>
+
+          <p>
+            Ollama compare la description du poste avec
+            les profils disponibles.
+          </p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Résultats du matching -->
+    <section
+      class="matching-results"
+      *ngIf="matchingExecuted && !matchingLoading"
+    >
+      <div class="results-title">
+        <div>
+          <p class="eyebrow">
+            Résultats IA
+          </p>
+
+          <h2>
+            Classement des consultants
+          </h2>
+        </div>
+
+        <span class="results-count">
+          {{ analyzedConsultants }}
+          consultant(s) analysé(s)
+        </span>
+      </div>
+
+      <div
+        class="no-results"
+        *ngIf="matchingResults.length === 0"
+      >
+        Aucun consultant disponible n’a été trouvé.
+      </div>
+
+      <div class="matching-grid">
+        <article
+          class="match-card"
+          *ngFor="
+            let result of matchingResults;
+            let index = index
+          "
+        >
+          <div class="ranking">
+            #{{ index + 1 }}
+          </div>
+
+          <div class="match-card-header">
+
+            <div class="avatar">
+              {{
+                result.firstName
+                  ? result.firstName.charAt(0)
+                  : 'C'
+              }}
+            </div>
+
+            <div class="consultant-identity">
+              <h3>
+                {{ result.firstName || 'Prénom' }}
+                {{ result.lastName || '' }}
+              </h3>
+
+              <p>
+                {{ result.title || 'Titre non renseigné' }}
+              </p>
+            </div>
+
+            <div
+              class="score"
+              [ngClass]="getScoreClass(result.score)"
+            >
+              <strong>
+                {{ result.score }}%
+              </strong>
+
+              <span>
+                {{ getScoreLabel(result.score) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="meta">
+            <span>
+              📍
+              {{
+                result.location ||
+                'Localisation non renseignée'
+              }}
+            </span>
+
+            <span>
+              💼
+              {{ result.experienceYears || 0 }}
+              an(s)
+            </span>
+
+            <span>
+              {{
+                result.available
+                  ? '🟢 Disponible'
+                  : '⚪ Non disponible'
+              }}
+            </span>
+          </div>
+
+          <div class="analysis-block">
+            <h4>
+              Analyse du profil
+            </h4>
+
+            <p>
+              {{ result.explanation }}
+            </p>
+          </div>
+
+          <div class="skills-analysis">
+
+            <div class="skills-column">
+              <h4>
+                Compétences correspondantes
+              </h4>
+
+              <div
+                class="empty-skills"
+                *ngIf="
+                  !result.matchedSkills ||
+                  result.matchedSkills.length === 0
+                "
+              >
+                Aucune compétence correspondante détectée.
+              </div>
+
+              <div class="skills matched-skills">
+                <span
+                  *ngFor="
+                    let skill of result.matchedSkills
+                  "
+                >
+                  ✓ {{ skill }}
+                </span>
+              </div>
+            </div>
+
+            <div class="skills-column">
+              <h4>
+                Compétences manquantes
+              </h4>
+
+              <div
+                class="empty-skills"
+                *ngIf="
+                  !result.missingSkills ||
+                  result.missingSkills.length === 0
+                "
+              >
+                Aucune compétence importante manquante.
+              </div>
+
+              <div class="skills missing-skills">
+                <span
+                  *ngFor="
+                    let skill of result.missingSkills
+                  "
+                >
+                  {{ skill }}
+                </span>
+              </div>
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="profile-button"
+            (click)="viewConsultantProfile(result.consultantId)"
+          >
+            Voir le profil complet
+          </button>
+        </article>
+      </div>
+    </section>
+
+    <!-- Recherche manuelle -->
+    <section class="manual-search-title">
+      <p class="eyebrow">
+        Recherche classique
+      </p>
+
+      <h2>
+        Tous les consultants
+      </h2>
     </section>
 
     <section class="search-box">
@@ -17,19 +308,44 @@
       />
     </section>
 
-    <p class="loading" *ngIf="loading">Chargement des consultants...</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p
+      class="loading"
+      *ngIf="loading"
+    >
+      Chargement des consultants...
+    </p>
 
-    <section class="results-info" *ngIf="!loading">
-      {{ filteredConsultants.length }} consultant(s) trouvé(s)
+    <p
+      class="error"
+      *ngIf="errorMessage"
+    >
+      {{ errorMessage }}
+    </p>
+
+    <section
+      class="results-info"
+      *ngIf="!loading"
+    >
+      {{ filteredConsultants.length }}
+      consultant(s) trouvé(s)
     </section>
 
-    <section class="consultants-grid" *ngIf="!loading">
-      <div class="consultant-card" *ngFor="let consultant of filteredConsultants">
-
+    <section
+      class="consultants-grid"
+      *ngIf="!loading"
+    >
+      <div
+        class="consultant-card"
+        *ngFor="let consultant of filteredConsultants"
+      >
         <div class="card-header">
+
           <div class="avatar">
-            {{ consultant.firstName ? consultant.firstName.charAt(0) : 'C' }}
+            {{
+              consultant.firstName
+                ? consultant.firstName.charAt(0)
+                : 'C'
+            }}
           </div>
 
           <div>
@@ -37,23 +353,54 @@
               {{ consultant.firstName || 'Prénom' }}
               {{ consultant.lastName || '' }}
             </h3>
-            <p>{{ consultant.title || 'Titre non renseigné' }}</p>
+
+            <p>
+              {{
+                consultant.title ||
+                'Titre non renseigné'
+              }}
+            </p>
           </div>
+
         </div>
 
         <div class="meta">
-          <span>📍 {{ consultant.location || 'Localisation non renseignée' }}</span>
-          <span>💼 {{ consultant.experienceYears || 0 }} an(s)</span>
-          <span>{{ consultant.available ? '🟢 Disponible' : '⚪ Non disponible' }}</span>
+          <span>
+            📍
+            {{
+              consultant.location ||
+              'Localisation non renseignée'
+            }}
+          </span>
+
+          <span>
+            💼
+            {{ consultant.experienceYears || 0 }}
+            an(s)
+          </span>
+
+          <span>
+            {{
+              consultant.available
+                ? '🟢 Disponible'
+                : '⚪ Non disponible'
+            }}
+          </span>
         </div>
 
         <div class="skills">
-          <span *ngFor="let skill of consultant.skills">
+          <span
+            *ngFor="let skill of consultant.skills"
+          >
             {{ skill }}
           </span>
         </div>
 
-        <button disabled>Voir le profil</button>
+        <button type="button"
+          (click)="viewConsultantProfile(consultant.id)"
+          >
+          Voir le profil
+        </button>
       </div>
     </section>
 

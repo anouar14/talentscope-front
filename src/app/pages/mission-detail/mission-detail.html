@@ -1,0 +1,193 @@
+<div class="mission-detail-page">
+  <div class="mission-detail-container">
+    <a [routerLink]="backLink" class="back-link">
+      ← {{ backLabel }}
+    </a>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement de la mission...</p>
+    </section>
+
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h1>Mission indisponible</h1>
+      <p>{{ errorMessage }}</p>
+
+      <a [routerLink]="backLink">
+        {{ backLabel }}
+      </a>
+    </section>
+
+    <main *ngIf="!loading && !errorMessage && mission">
+      <div
+        class="feedback-message success-message"
+        *ngIf="actionSuccessMessage"
+      >
+        {{ actionSuccessMessage }}
+      </div>
+
+      <div
+        class="feedback-message error-message"
+        *ngIf="actionErrorMessage"
+      >
+        {{ actionErrorMessage }}
+      </div>
+
+      <header class="mission-header">
+        <div>
+          <p class="eyebrow">Détail de la mission</p>
+          <h1>{{ mission.title }}</h1>
+
+          <p class="mission-reference">
+            Référence : {{ mission.id }}
+          </p>
+        </div>
+
+        <span
+          class="status-badge"
+          [ngClass]="getStatusClass(mission.status)"
+        >
+          {{ getStatusLabel(mission.status) }}
+        </span>
+      </header>
+
+      <section class="mission-layout">
+        <article class="main-card">
+          <div class="section-header">
+            <h2>Description de la mission</h2>
+          </div>
+
+          <p class="mission-description">
+            {{ mission.description || 'Aucune description disponible.' }}
+          </p>
+
+          <div class="dates-grid">
+            <div class="information-item">
+              <span>Date de création</span>
+
+              <strong>
+                {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+              </strong>
+            </div>
+
+            <div class="information-item">
+              <span>Dernière mise à jour</span>
+
+              <strong>
+                {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="management-section" *ngIf="canManageMission">
+            <div>
+              <h2>Gestion de la mission</h2>
+
+              <p>
+                Vous pouvez terminer la mission lorsqu’elle est achevée ou
+                l’annuler si la collaboration ne doit pas continuer.
+              </p>
+            </div>
+
+            <div class="management-actions">
+              <button
+                type="button"
+                class="complete-button"
+                [disabled]="updating"
+                (click)="completeMission()"
+              >
+                {{ updating ? 'Modification...' : 'Marquer comme terminée' }}
+              </button>
+
+              <button
+                type="button"
+                class="cancel-button"
+                [disabled]="updating"
+                (click)="cancelMission()"
+              >
+                Annuler la mission
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <aside class="sidebar">
+          <article class="profile-card">
+            <p class="card-label">Entreprise</p>
+
+            <div class="profile-header">
+              <div class="avatar company-avatar">
+                {{ companyInitial }}
+              </div>
+
+              <div>
+                <h2>{{ mission.companyName }}</h2>
+                <p>Entreprise porteuse de la mission</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="profile-card">
+            <p class="card-label">Consultant</p>
+
+            <div class="profile-header">
+              <div class="avatar consultant-avatar">
+                {{ consultantInitial }}
+              </div>
+
+              <div>
+                <h2>{{ mission.consultantName }}</h2>
+
+                <p>
+                  {{ mission.consultantTitle || 'Titre non renseigné' }}
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="technical-card">
+            <h2>Informations techniques</h2>
+
+            <div class="technical-information">
+              <div>
+                <span>Identifiant de l’invitation</span>
+                <strong>{{ mission.invitationId }}</strong>
+              </div>
+
+              <div>
+                <span>Identifiant de l’entreprise</span>
+                <strong>{{ mission.companyId }}</strong>
+              </div>
+
+              <div>
+                <span>Identifiant du consultant</span>
+                <strong>{{ mission.consultantId }}</strong>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </section>
+
+      <section
+        class="mission-state-message active-message"
+        *ngIf="mission.status === 'ACTIVE'"
+      >
+        Cette mission est actuellement active.
+      </section>
+
+      <section
+        class="mission-state-message completed-message"
+        *ngIf="mission.status === 'COMPLETED'"
+      >
+        Cette mission a été terminée. Le consultant est de nouveau disponible.
+      </section>
+
+      <section
+        class="mission-state-message cancelled-message"
+        *ngIf="mission.status === 'CANCELLED'"
+      >
+        Cette mission a été annulée. Le consultant est de nouveau disponible.
+      </section>
+    </main>
+  </div>
+</div>

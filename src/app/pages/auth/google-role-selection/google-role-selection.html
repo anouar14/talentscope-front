@@ -1,0 +1,101 @@
+<div class="role-page">
+  <div class="role-card">
+
+    <h1>Choisissez votre type de compte</h1>
+
+    <p class="description">
+      Cette étape est nécessaire uniquement lors de votre
+      première connexion avec Google.
+    </p>
+
+    <div class="google-user">
+      <div class="user-avatar">
+        {{
+          googleUserName
+            ? googleUserName.charAt(0).toUpperCase()
+            : 'G'
+        }}
+      </div>
+
+      <div>
+        <strong>
+          {{ googleUserName || 'Utilisateur Google' }}
+        </strong>
+
+        <span>
+          {{ googleUserEmail }}
+        </span>
+      </div>
+    </div>
+
+    <div class="role-options">
+
+      <button
+        type="button"
+        class="role-option"
+        [class.selected]="selectedRole === 'CONSULTANT'"
+        (click)="selectRole('CONSULTANT')"
+      >
+        <span class="role-icon">👤</span>
+
+        <span class="role-content">
+          <strong>Consultant</strong>
+
+          <small>
+            Je souhaite présenter mon profil, déposer mon CV
+            et recevoir des opportunités.
+          </small>
+        </span>
+      </button>
+
+      <button
+        type="button"
+        class="role-option"
+        [class.selected]="selectedRole === 'COMPANY'"
+        (click)="selectRole('COMPANY')"
+      >
+        <span class="role-icon">🏢</span>
+
+        <span class="role-content">
+          <strong>Entreprise</strong>
+
+          <small>
+            Je souhaite rechercher des consultants et trouver
+            les meilleurs profils IT.
+          </small>
+        </span>
+      </button>
+
+    </div>
+
+    <p
+      class="error-message"
+      *ngIf="errorMessage"
+    >
+      {{ errorMessage }}
+    </p>
+
+    <button
+      type="button"
+      class="continue-button"
+      [disabled]="loading || !selectedRole"
+      (click)="completeRegistration()"
+    >
+      {{
+        loading
+          ? 'Création du compte...'
+          : 'Continuer'
+      }}
+    </button>
+
+    <button
+      type="button"
+      class="cancel-button"
+      [disabled]="loading"
+      (click)="cancel()"
+    >
+      Annuler
+    </button>
+
+  </div>
+</div>

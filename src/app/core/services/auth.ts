@@ -28,6 +28,19 @@ export interface MessageResponse {
 export interface TokenValidationResponse {
   valid: boolean;
 }
+export interface GoogleAuthResponse {
+  requiresRole: boolean;
+  token: string | null;
+  role: 'CONSULTANT' | 'COMPANY' | null;
+  email: string;
+  userId: string | null;
+  name: string;
+}
+
+export interface GoogleCompleteRegistrationRequest {
+  credential: string;
+  role: 'CONSULTANT' | 'COMPANY';
+}
 
 @Injectable({
   providedIn: 'root'
@@ -115,4 +128,39 @@ export class Auth {
     localStorage.removeItem('email');
     localStorage.removeItem('userId');
   }
+  googleLogin(
+  credential: string
+): Observable<GoogleAuthResponse> {
+  return this.http.post<GoogleAuthResponse>(
+    `${this.apiUrl}/google`,
+    { credential }
+  );
+}
+
+  completeGoogleRegistration(
+  request: GoogleCompleteRegistrationRequest
+): Observable<GoogleAuthResponse> {
+  return this.http.post<GoogleAuthResponse>(
+    `${this.apiUrl}/google/complete-registration`,
+    request
+  );
+}
+  saveGoogleAuth(response: GoogleAuthResponse): void {
+  if (
+    !response.token ||
+    !response.role ||
+    !response.userId
+  ) {
+    throw new Error(
+      'La réponse Google ne contient pas les données d’authentification.'
+    );
+  }
+
+  this.saveAuth({
+    token: response.token,
+    role: response.role,
+    email: response.email,
+    userId: response.userId
+  });
+}
 }

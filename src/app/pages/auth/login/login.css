@@ -92,3 +92,73 @@ button:disabled {
 .forgot-password-link a:hover {
   text-decoration: underline;
 }
+.separator {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.separator::before,
+.separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.separator span {
+  flex-shrink: 0;
+}
+
+.google-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.google-button {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+}
+
+.google-loading {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  text-align: center;
+}
+
+.forgot-password-link {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+.forgot-password-link a {
+  color: #071844;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 520px) {
+  .auth-page {
+    padding: 20px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  .auth-card h1 {
+    font-size: 30px;
+  }
+}

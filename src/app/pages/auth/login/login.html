@@ -1,5 +1,4 @@
 <div class="auth-page">
-
   <div class="auth-card">
 
     <h1>Connexion</h1>
@@ -10,51 +9,85 @@
 
     <form (ngSubmit)="onLogin()">
 
-      <label>Email</label>
+      <label for="email">
+        Email
+      </label>
 
       <input
+        id="email"
         type="email"
         name="email"
         [(ngModel)]="email"
-        placeholder="votre@email.com">
+        placeholder="exemple@email.com"
+        autocomplete="email"
+      >
 
-      <label>Mot de passe</label>
+      <label for="password">
+        Mot de passe
+      </label>
 
       <input
+        id="password"
         type="password"
         name="password"
         [(ngModel)]="password"
-        placeholder="Mot de passe">
+        placeholder="Mot de passe"
+        autocomplete="current-password"
+      >
 
-      <p class="error" *ngIf="errorMessage">
+      <div class="forgot-password-link">
+        <a routerLink="/forgot-password">
+          Mot de passe oublié ?
+        </a>
+      </div>
+
+      <p
+        class="error"
+        *ngIf="errorMessage"
+      >
         {{ errorMessage }}
       </p>
 
       <button
         type="submit"
-        [disabled]="loading">
-
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
-
+        [disabled]="loading || googleLoading"
+      >
+        {{
+          loading
+            ? 'Connexion...'
+            : 'Se connecter'
+        }}
       </button>
 
     </form>
 
-    <div class="auth-footer">
+    <div class="separator">
+      <span>ou</span>
+    </div>
 
+    <div class="google-section">
+
+      <div
+        #googleButton
+        class="google-button">
+      </div>
+
+      <p
+        class="google-loading"
+        *ngIf="googleLoading"
+      >
+        Connexion avec Google en cours...
+      </p>
+
+    </div>
+
+    <div class="auth-footer">
       Pas encore de compte ?
 
       <a routerLink="/register">
         Créer un compte
       </a>
-
-    </div>
-    <div class="forgot-password-link">
-      <a routerLink="/forgot-password">
-      Mot de passe oublié ?
-      </a>
     </div>
 
   </div>
-
 </div>

@@ -1,0 +1,242 @@
+<div class="missions-page">
+  <div class="missions-container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Espace entreprise</p>
+        <h1>Mes missions</h1>
+
+        <p class="page-description">
+          Consultez et gérez les collaborations créées après l’acceptation de vos invitations.
+        </p>
+      </div>
+
+      <a routerLink="/company/search-consultants" class="primary-link">
+        Rechercher un consultant
+      </a>
+    </header>
+
+    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+      <button
+        type="button"
+        class="summary-card"
+        (click)="filterByStatus('ALL')"
+      >
+        <span>Total des missions</span>
+        <strong>{{ missions.length }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        (click)="filterByStatus('ACTIVE')"
+      >
+        <span>Missions actives</span>
+        <strong>{{ activeMissionCount }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        (click)="filterByStatus('COMPLETED')"
+      >
+        <span>Missions terminées</span>
+        <strong>{{ completedMissionCount }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        (click)="filterByStatus('CANCELLED')"
+      >
+        <span>Missions annulées</span>
+        <strong>{{ cancelledMissionCount }}</strong>
+      </button>
+    </section>
+
+    <section *ngIf="!loading && !errorMessage && missions.length > 0">
+      <label for="mission-search">Rechercher une mission</label>
+
+      <input
+        id="mission-search"
+        type="search"
+        name="missionSearch"
+        [(ngModel)]="searchTerm"
+        placeholder="Titre, consultant ou description"
+      />
+
+      <label for="mission-status">Statut</label>
+
+      <select
+        id="mission-status"
+        name="missionStatus"
+        [(ngModel)]="selectedStatus"
+      >
+        <option value="ALL">Tous les statuts</option>
+        <option value="ACTIVE">Actives</option>
+        <option value="COMPLETED">Terminées</option>
+        <option value="CANCELLED">Annulées</option>
+      </select>
+
+      <button
+        type="button"
+        *ngIf="hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <div class="feedback-message success-message" *ngIf="actionSuccessMessage">
+      {{ actionSuccessMessage }}
+    </div>
+
+    <div class="feedback-message error-message" *ngIf="actionErrorMessage">
+      {{ actionErrorMessage }}
+    </div>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement de vos missions...</p>
+    </section>
+
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h2>Une erreur est survenue</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button" (click)="loadMissions()">
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="!loading && !errorMessage && missions.length === 0"
+    >
+      <h2>Aucune mission pour le moment</h2>
+
+      <p>
+        Une mission sera créée automatiquement lorsqu’un consultant acceptera votre invitation.
+      </p>
+
+      <a routerLink="/company/search-consultants">
+        Trouver un consultant
+      </a>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        missions.length > 0 &&
+        filteredMissions.length === 0
+      "
+    >
+      <h2>Aucun résultat</h2>
+      <p>Aucune mission ne correspond aux critères sélectionnés.</p>
+
+      <button type="button" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="missions-grid"
+      *ngIf="!loading && !errorMessage && filteredMissions.length > 0"
+    >
+      <article
+        class="mission-card"
+        *ngFor="let mission of filteredMissions; trackBy: trackMission"
+      >
+        <div class="mission-card-header">
+          <div>
+            <p class="mission-label">Mission</p>
+            <h2>{{ mission.title }}</h2>
+          </div>
+
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(mission.status)"
+          >
+            {{ getStatusLabel(mission.status) }}
+          </span>
+        </div>
+
+        <div class="consultant-block">
+          <div class="avatar">
+            {{ mission.consultantName ? mission.consultantName.charAt(0) : 'C' }}
+          </div>
+
+          <div>
+            <span>Consultant</span>
+            <strong>{{ mission.consultantName }}</strong>
+
+            <p>
+              {{ mission.consultantTitle || 'Titre non renseigné' }}
+            </p>
+          </div>
+        </div>
+
+        <p class="mission-description">
+          {{ mission.description || 'Aucune description disponible.' }}
+        </p>
+
+        <div class="mission-information">
+          <div>
+            <span>Date de création</span>
+            <strong>{{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+          </div>
+
+          <div>
+            <span>Dernière mise à jour</span>
+            <strong>{{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-action">
+          <a [routerLink]="['/company/missions', mission.id]">
+            Voir les détails
+          </a>
+        </div>
+
+        <div class="mission-actions" *ngIf="mission.status === 'ACTIVE'">
+          <button
+            type="button"
+            class="complete-button"
+            [disabled]="isMissionUpdating(mission.id)"
+            (click)="completeMission(mission)"
+          >
+            {{
+              isMissionUpdating(mission.id)
+                ? 'Modification...'
+                : 'Marquer comme terminée'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="cancel-button"
+            [disabled]="isMissionUpdating(mission.id)"
+            (click)="cancelMission(mission)"
+          >
+            Annuler la mission
+          </button>
+        </div>
+
+        <div
+          class="closed-mission-message"
+          *ngIf="mission.status === 'COMPLETED'"
+        >
+          Cette mission est terminée.
+        </div>
+
+        <div
+          class="closed-mission-message cancelled"
+          *ngIf="mission.status === 'CANCELLED'"
+        >
+          Cette mission a été annulée.
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

@@ -21,3 +21,14 @@ export interface Consultant {
   available: boolean;
 
 }
+export interface ConsultantProfile {
+  id: string;
+  firstName: string;
+  lastName: string;
+  title: string;
+  skills: string[];
+  experienceYears: number;
+  location: string;
+  available: boolean;
+  cvAvailable: boolean;
+}

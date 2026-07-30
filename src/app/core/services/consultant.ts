@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Consultant } from '../models/consultant';
+import { Consultant, ConsultantProfile } from '../models/consultant';
+
 
 @Injectable({
   providedIn: 'root'
@@ -45,6 +46,19 @@ export class ConsultantService {
   return this.http.post<any>(
     `${this.apiUrl}/me/analyze-cv-preview`,
     {}
+  );
+  }
+  getConsultantById(consultantId: string): Observable<ConsultantProfile> {
+  return this.http.get<ConsultantProfile>(
+    `${this.apiUrl}/${consultantId}`
+  );
+  }
+  downloadConsultantCv(consultantId: string): Observable<Blob> {
+  return this.http.get(
+    `${this.apiUrl}/${consultantId}/cv`,
+    {
+      responseType: 'blob'
+    }
   );
 }
 

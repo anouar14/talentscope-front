@@ -1,0 +1,180 @@
+<div class="missions-page">
+  <div class="missions-container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Espace consultant</p>
+        <h1>Mes missions</h1>
+
+        <p class="page-description">
+          Retrouvez les missions créées après l’acceptation de vos invitations.
+        </p>
+      </div>
+
+      <a routerLink="/consultant/invitations" class="primary-link">
+        Voir mes invitations
+      </a>
+    </header>
+
+    <section class="summary-card" *ngIf="!loading && !errorMessage">
+      <button type="button" (click)="filterByStatus('ALL')">
+        <span>Total des missions</span>
+        <strong>{{ missions.length }}</strong>
+      </button>
+
+      <button type="button" (click)="filterByStatus('ACTIVE')">
+        <span>Missions actives</span>
+        <strong>{{ activeMissionCount }}</strong>
+      </button>
+
+      <button type="button" (click)="filterByStatus('COMPLETED')">
+        <span>Missions terminées</span>
+        <strong>{{ completedMissionCount }}</strong>
+      </button>
+
+      <button type="button" (click)="filterByStatus('CANCELLED')">
+        <span>Missions annulées</span>
+        <strong>{{ cancelledMissionCount }}</strong>
+      </button>
+    </section>
+
+    <section *ngIf="!loading && !errorMessage && missions.length > 0">
+      <label for="consultant-mission-search">
+        Rechercher une mission
+      </label>
+
+      <input
+        id="consultant-mission-search"
+        type="search"
+        name="missionSearch"
+        [(ngModel)]="searchTerm"
+        placeholder="Titre, entreprise ou description"
+      />
+
+      <label for="consultant-mission-status">
+        Statut
+      </label>
+
+      <select
+        id="consultant-mission-status"
+        name="missionStatus"
+        [(ngModel)]="selectedStatus"
+      >
+        <option value="ALL">Tous les statuts</option>
+        <option value="ACTIVE">Actives</option>
+        <option value="COMPLETED">Terminées</option>
+        <option value="CANCELLED">Annulées</option>
+      </select>
+
+      <button
+        type="button"
+        *ngIf="hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement de vos missions...</p>
+    </section>
+
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h2>Une erreur est survenue</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button" (click)="loadMissions()">
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="!loading && !errorMessage && missions.length === 0"
+    >
+      <h2>Aucune mission pour le moment</h2>
+
+      <p>
+        Une mission apparaîtra ici lorsque vous accepterez une invitation d’entreprise.
+      </p>
+
+      <a routerLink="/consultant/invitations">
+        Consulter mes invitations
+      </a>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        missions.length > 0 &&
+        filteredMissions.length === 0
+      "
+    >
+      <h2>Aucun résultat</h2>
+      <p>Aucune mission ne correspond aux critères sélectionnés.</p>
+
+      <button type="button" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="missions-grid"
+      *ngIf="!loading && !errorMessage && filteredMissions.length > 0"
+    >
+      <article
+        class="mission-card"
+        *ngFor="let mission of filteredMissions; trackBy: trackMission"
+      >
+        <div class="mission-card-header">
+          <div>
+            <p class="mission-label">Mission</p>
+            <h2>{{ mission.title }}</h2>
+          </div>
+
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(mission.status)"
+          >
+            {{ getStatusLabel(mission.status) }}
+          </span>
+        </div>
+
+        <div class="company-block">
+          <div class="avatar">
+            {{ mission.companyName ? mission.companyName.charAt(0) : 'E' }}
+          </div>
+
+          <div>
+            <span>Entreprise</span>
+            <strong>{{ mission.companyName }}</strong>
+          </div>
+        </div>
+
+        <p class="mission-description">
+          {{ mission.description || 'Aucune description disponible.' }}
+        </p>
+
+        <div class="mission-information">
+          <div>
+            <span>Date de création</span>
+            <strong>{{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+          </div>
+
+          <div>
+            <span>Dernière mise à jour</span>
+            <strong>{{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-action">
+          <a [routerLink]="['/consultant/missions', mission.id]">
+            Voir les détails
+          </a>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

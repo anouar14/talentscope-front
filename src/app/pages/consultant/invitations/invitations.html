@@ -1,0 +1,263 @@
+<div class="invitations-page">
+  <div class="invitations-container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Espace consultant</p>
+        <h1>Mes invitations</h1>
+
+        <p class="page-description">
+          Consultez les propositions reçues et choisissez celles auxquelles vous souhaitez répondre.
+        </p>
+      </div>
+
+      <a routerLink="/consultant/missions" class="primary-link">
+        Voir mes missions
+      </a>
+    </header>
+
+    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
+        (click)="filterByStatus('ALL')"
+      >
+        <span>Total</span>
+        <strong>{{ invitations.length }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'PENDING'"
+        (click)="filterByStatus('PENDING')"
+      >
+        <span>En attente</span>
+        <strong>{{ pendingCount }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ACCEPTED'"
+        (click)="filterByStatus('ACCEPTED')"
+      >
+        <span>Acceptées</span>
+        <strong>{{ acceptedCount }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'REJECTED'"
+        (click)="filterByStatus('REJECTED')"
+      >
+        <span>Refusées</span>
+        <strong>{{ rejectedCount }}</strong>
+      </button>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && invitations.length > 0"
+    >
+      <div class="search-field">
+        <label for="invitation-search">Rechercher</label>
+
+        <input
+          id="invitation-search"
+          type="search"
+          name="invitationSearch"
+          [(ngModel)]="searchTerm"
+          placeholder="Entreprise, objet ou contenu"
+        />
+      </div>
+
+      <div class="status-field">
+        <label for="invitation-status">Statut</label>
+
+        <select
+          id="invitation-status"
+          name="invitationStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="PENDING">En attente</option>
+          <option value="ACCEPTED">Acceptées</option>
+          <option value="REJECTED">Refusées</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <div class="feedback-message success-message" *ngIf="actionSuccessMessage">
+      {{ actionSuccessMessage }}
+
+      <a routerLink="/consultant/missions">
+        Voir la mission
+      </a>
+    </div>
+
+    <div class="feedback-message error-message" *ngIf="actionErrorMessage">
+      {{ actionErrorMessage }}
+    </div>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement de vos invitations...</p>
+    </section>
+
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h2>Une erreur est survenue</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button" (click)="loadInvitations()">
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="!loading && !errorMessage && invitations.length === 0"
+    >
+      <h2>Aucune invitation</h2>
+
+      <p>
+        Les propositions envoyées par les entreprises apparaîtront ici.
+      </p>
+
+      <a routerLink="/consultant/profile">
+        Compléter mon profil
+      </a>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        invitations.length > 0 &&
+        filteredInvitations.length === 0
+      "
+    >
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucune invitation ne correspond aux critères sélectionnés.
+      </p>
+
+      <button type="button" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="invitations-grid"
+      *ngIf="!loading && !errorMessage && filteredInvitations.length > 0"
+    >
+      <article
+        class="invitation-card"
+        *ngFor="let invitation of filteredInvitations; trackBy: trackInvitation"
+      >
+        <div class="invitation-header">
+          <div class="company-information">
+            <div class="company-avatar">
+              {{ invitation.companyName.charAt(0).toUpperCase() }}
+            </div>
+
+            <div>
+              <p class="company-label">Entreprise</p>
+              <h2>{{ invitation.companyName }}</h2>
+            </div>
+          </div>
+
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(invitation.status)"
+          >
+            {{ getStatusLabel(invitation.status) }}
+          </span>
+        </div>
+
+        <div class="invitation-content">
+          <h3>{{ invitation.subject }}</h3>
+
+          <p>
+            {{ invitation.message }}
+          </p>
+        </div>
+
+        <div class="invitation-dates">
+          <div>
+            <span>Reçue le</span>
+
+            <strong>
+              {{ invitation.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
+          </div>
+
+          <div *ngIf="invitation.respondedAt">
+            <span>Réponse envoyée le</span>
+
+            <strong>
+              {{ invitation.respondedAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
+          </div>
+        </div>
+
+        <div
+          class="invitation-actions"
+          *ngIf="invitation.status === 'PENDING'"
+        >
+          <button
+            type="button"
+            class="accept-button"
+            [disabled]="isInvitationProcessing(invitation.id)"
+            (click)="acceptInvitation(invitation)"
+          >
+            {{
+              isInvitationProcessing(invitation.id)
+                ? 'Traitement...'
+                : 'Accepter'
+            }}
+          </button>
+
+          <button
+            type="button"
+            class="reject-button"
+            [disabled]="isInvitationProcessing(invitation.id)"
+            (click)="rejectInvitation(invitation)"
+          >
+            Refuser
+          </button>
+        </div>
+
+        <div
+          class="closed-message accepted-message"
+          *ngIf="invitation.status === 'ACCEPTED'"
+        >
+          Cette invitation a été acceptée et une mission a été créée.
+
+          <a routerLink="/consultant/missions">
+            Consulter mes missions
+          </a>
+        </div>
+
+        <div
+          class="closed-message rejected-message"
+          *ngIf="invitation.status === 'REJECTED'"
+        >
+          Cette invitation a été refusée.
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
