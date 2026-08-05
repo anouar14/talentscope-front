@@ -53,39 +53,137 @@
 
       <section class="mission-layout">
         <article class="main-card">
-          <div class="section-header">
-            <h2>Description de la mission</h2>
-          </div>
-
-          <p class="mission-description">
-            {{ mission.description || 'Aucune description disponible.' }}
-          </p>
-
-          <div class="dates-grid">
-            <div class="information-item">
-              <span>Date de création</span>
-
-              <strong>
-                {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
-              </strong>
+          <section class="content-section">
+            <div class="section-header">
+              <h2>Description de la mission</h2>
             </div>
 
-            <div class="information-item">
-              <span>Dernière mise à jour</span>
+            <p class="mission-description">
+              {{ mission.description || 'Aucune description disponible.' }}
+            </p>
+          </section>
 
-              <strong>
-                {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
-              </strong>
+          <section class="content-section">
+            <div class="section-header">
+              <h2>Conditions de la mission</h2>
             </div>
-          </div>
 
-          <div class="management-section" *ngIf="canManageMission">
+            <div class="conditions-grid">
+              <div class="information-item">
+                <span>Date de début</span>
+
+                <strong>
+                  {{
+                    mission.startDate
+                      ? (mission.startDate | date: 'dd/MM/yyyy')
+                      : 'Non renseignée'
+                  }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Date de fin</span>
+
+                <strong>
+                  {{
+                    mission.endDate
+                      ? (mission.endDate | date: 'dd/MM/yyyy')
+                      : 'Non définie'
+                  }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Type de contrat</span>
+
+                <strong>
+                  {{ getContractTypeLabel(mission.contractType) }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Mode de travail</span>
+
+                <strong>
+                  {{ getWorkModeLabel(mission.workMode) }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Localisation</span>
+
+                <strong>
+                  {{ mission.location || 'Non renseignée' }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Rémunération</span>
+
+                <strong>
+                  {{ getSalaryLabel(mission.salary) }}
+                </strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-section">
+            <div class="section-header">
+              <h2>Technologies</h2>
+            </div>
+
+            <div class="empty-technologies" *ngIf="!hasTechnologies">
+              Aucune technologie renseignée.
+            </div>
+
+            <div class="technologies-list" *ngIf="hasTechnologies">
+              <span *ngFor="let technology of mission.technologies">
+                {{ technology }}
+              </span>
+            </div>
+          </section>
+
+          <section class="content-section" *ngIf="mission.notes">
+            <div class="section-header">
+              <h2>Notes complémentaires</h2>
+            </div>
+
+            <p class="notes-content">
+              {{ mission.notes }}
+            </p>
+          </section>
+
+          <section class="content-section">
+            <div class="section-header">
+              <h2>Suivi de la mission</h2>
+            </div>
+
+            <div class="dates-grid">
+              <div class="information-item">
+                <span>Date de création</span>
+
+                <strong>
+                  {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+                </strong>
+              </div>
+
+              <div class="information-item">
+                <span>Dernière mise à jour</span>
+
+                <strong>
+                  {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
+                </strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="management-section" *ngIf="canManageMission">
             <div>
               <h2>Gestion de la mission</h2>
 
               <p>
-                Vous pouvez terminer la mission lorsqu’elle est achevée ou
-                l’annuler si la collaboration ne doit pas continuer.
+                Terminez la mission lorsqu’elle est achevée ou annulez-la si
+                la collaboration doit prendre fin.
               </p>
             </div>
 
@@ -108,7 +206,7 @@
                 Annuler la mission
               </button>
             </div>
-          </div>
+          </section>
         </article>
 
         <aside class="sidebar">
@@ -179,7 +277,7 @@
         class="mission-state-message completed-message"
         *ngIf="mission.status === 'COMPLETED'"
       >
-        Cette mission a été terminée. Le consultant est de nouveau disponible.
+        Cette mission est terminée. Le consultant est de nouveau disponible.
       </section>
 
       <section

@@ -1,25 +1,14 @@
 <div class="detail-page">
   <div class="detail-container">
-
-    <button
-      type="button"
-      class="back-button"
-      (click)="goBack()"
-    >
+    <button type="button" class="back-button" (click)="goBack()">
       ← Retour aux consultants
     </button>
 
-    <div
-      class="loading-card"
-      *ngIf="loading"
-    >
+    <div class="loading-card" *ngIf="loading">
       Chargement du profil...
     </div>
 
-    <div
-      class="error-card"
-      *ngIf="errorMessage"
-    >
+    <div class="error-card" *ngIf="errorMessage">
       <p>{{ errorMessage }}</p>
 
       <a routerLink="/company/search-consultants">
@@ -27,13 +16,9 @@
       </a>
     </div>
 
-    <ng-container
-      *ngIf="consultant && !loading"
-    >
+    <ng-container *ngIf="consultant && !loading">
       <section class="profile-header">
-
         <div class="identity">
-
           <div class="avatar">
             {{
               consultant.firstName
@@ -43,9 +28,7 @@
           </div>
 
           <div>
-            <p class="eyebrow">
-              Profil consultant
-            </p>
+            <p class="eyebrow">Profil consultant</p>
 
             <h1>
               {{ consultant.firstName || 'Prénom' }}
@@ -53,13 +36,9 @@
             </h1>
 
             <p class="title">
-              {{
-                consultant.title ||
-                'Titre non renseigné'
-              }}
+              {{ consultant.title || 'Titre non renseigné' }}
             </p>
           </div>
-
         </div>
 
         <div
@@ -72,24 +51,18 @@
               : 'Non disponible'
           }}
         </div>
-
       </section>
 
       <section class="profile-grid">
-
         <article class="information-card">
           <h2>Informations professionnelles</h2>
 
           <div class="information-list">
-
             <div class="information-item">
               <span>Localisation</span>
 
               <strong>
-                {{
-                  consultant.location ||
-                  'Non renseignée'
-                }}
+                {{ consultant.location || 'Non renseignée' }}
               </strong>
             </div>
 
@@ -97,46 +70,41 @@
               <span>Expérience</span>
 
               <strong>
-                {{ consultant.experienceYears || 0 }}
-                an(s)
+                {{ consultant.experienceYears || 0 }} an(s)
               </strong>
             </div>
 
             <div class="information-item">
-  <span>CV</span>
+              <span>CV</span>
 
-  <div class="cv-information">
-    <strong>
-      {{
-        consultant.cvAvailable
-          ? 'CV disponible'
-          : 'CV non disponible'
-      }}
-    </strong>
+              <div class="cv-information">
+                <strong>
+                  {{
+                    consultant.cvAvailable
+                      ? 'CV disponible'
+                      : 'CV non disponible'
+                  }}
+                </strong>
 
-    <button
-      *ngIf="consultant.cvAvailable"
-      type="button"
-      class="download-cv-button"
-      [disabled]="cvDownloadLoading"
-      (click)="downloadCv()"
-    >
-      {{
-        cvDownloadLoading
-          ? 'Téléchargement...'
-          : 'Télécharger le CV'
-      }}
-    </button>
-  </div>
-</div>
+                <button
+                  *ngIf="consultant.cvAvailable"
+                  type="button"
+                  class="download-cv-button"
+                  [disabled]="cvDownloadLoading"
+                  (click)="downloadCv()"
+                >
+                  {{
+                    cvDownloadLoading
+                      ? 'Téléchargement...'
+                      : 'Télécharger le CV'
+                  }}
+                </button>
+              </div>
+            </div>
 
-<p
-  class="form-error"
-  *ngIf="cvDownloadErrorMessage"
->
-  {{ cvDownloadErrorMessage }}
-</p>
-
+            <p class="form-error" *ngIf="cvDownloadErrorMessage">
+              {{ cvDownloadErrorMessage }}
+            </p>
           </div>
         </article>
 
@@ -151,14 +119,11 @@
           </div>
 
           <div class="skills">
-            <span
-              *ngFor="let skill of consultant.skills"
-            >
+            <span *ngFor="let skill of consultant.skills">
               {{ skill }}
             </span>
           </div>
         </article>
-
       </section>
 
       <section class="actions-card">
@@ -166,8 +131,8 @@
           <h2>Ce profil vous intéresse ?</h2>
 
           <p>
-            Consultez son CV ou envoyez-lui directement
-  une proposition de mission.
+            Consultez son CV ou envoyez-lui une proposition de mission
+            détaillée.
           </p>
         </div>
 
@@ -175,105 +140,237 @@
           type="button"
           [disabled]="!consultant.available"
           (click)="openInvitationForm()"
-        > 
-        {{
-        consultant.available
-        ? 'Inviter ce consultant'
-        : 'Consultant indisponible'
-        }}
+        >
+          {{
+            consultant.available
+              ? 'Proposer une mission'
+              : 'Consultant indisponible'
+          }}
         </button>
       </section>
-      <p
-  class="success-message"
-  *ngIf="invitationSuccessMessage"
->
-  {{ invitationSuccessMessage }}
-</p>
 
-<section
-  class="invitation-form-card"
-  *ngIf="showInvitationForm"
->
-  <div class="form-header">
-    <div>
-      <p class="eyebrow">
-        Nouvelle invitation
+      <p class="success-message" *ngIf="invitationSuccessMessage">
+        {{ invitationSuccessMessage }}
       </p>
 
-      <h2>
-        Inviter
-        {{ consultant.firstName }}
-        {{ consultant.lastName }}
-      </h2>
-    </div>
+      <section
+        class="invitation-form-card"
+        *ngIf="showInvitationForm"
+      >
+        <div class="form-header">
+          <div>
+            <p class="eyebrow">Nouvelle proposition</p>
 
-    <button
-      type="button"
-      class="close-button"
-      [disabled]="invitationLoading"
-      (click)="closeInvitationForm()"
-    >
-      ×
-    </button>
-  </div>
+            <h2>
+              Proposition de mission pour
+              {{ consultant.firstName }}
+              {{ consultant.lastName }}
+            </h2>
+          </div>
 
-  <label for="invitationSubject">
-    Objet
-  </label>
+          <button
+            type="button"
+            class="close-button"
+            [disabled]="invitationLoading"
+            (click)="closeInvitationForm()"
+          >
+            ×
+          </button>
+        </div>
 
-  <input
-    id="invitationSubject"
-    type="text"
-    name="invitationSubject"
-    [(ngModel)]="invitationSubject"
-    maxlength="150"
-    placeholder="Exemple : Proposition de mission Java"
-  />
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label for="invitationSubject">
+              Titre de la mission *
+            </label>
 
-  <label for="invitationMessage">
-    Message
-  </label>
+            <input
+              id="invitationSubject"
+              type="text"
+              name="invitationSubject"
+              [(ngModel)]="invitationSubject"
+              maxlength="150"
+              placeholder="Exemple : Développeur Java Spring Boot"
+            />
+          </div>
 
-  <textarea
-    id="invitationMessage"
-    name="invitationMessage"
-    [(ngModel)]="invitationMessage"
-    maxlength="2000"
-    placeholder="Présentez la mission, le contexte et les compétences recherchées..."
-  ></textarea>
+          <div class="form-field full-width">
+            <label for="invitationMessage">
+              Description de la mission *
+            </label>
 
-  <p
-    class="form-error"
-    *ngIf="invitationErrorMessage"
-  >
-    {{ invitationErrorMessage }}
-  </p>
+            <textarea
+              id="invitationMessage"
+              name="invitationMessage"
+              [(ngModel)]="invitationMessage"
+              maxlength="3000"
+              placeholder="Présentez le contexte, les responsabilités et les objectifs..."
+            ></textarea>
+          </div>
 
-  <div class="form-actions">
-    <button
-      type="button"
-      class="cancel-button"
-      [disabled]="invitationLoading"
-      (click)="closeInvitationForm()"
-    >
-      Annuler
-    </button>
+          <div class="form-field">
+            <label for="invitationStartDate">
+              Date de début *
+            </label>
 
-    <button
-      type="button"
-      class="send-button"
-      [disabled]="invitationLoading"
-      (click)="sendInvitation()"
-    >
-      {{
-        invitationLoading
-          ? 'Envoi en cours...'
-          : 'Envoyer l’invitation'
-      }}
-    </button>
-  </div>
-</section>
+            <input
+              id="invitationStartDate"
+              type="date"
+              name="invitationStartDate"
+              [(ngModel)]="invitationStartDate"
+              [min]="minimumStartDate"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="invitationEndDate">
+              Date de fin
+            </label>
+
+            <input
+              id="invitationEndDate"
+              type="date"
+              name="invitationEndDate"
+              [(ngModel)]="invitationEndDate"
+              [min]="minimumEndDate"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="invitationContractType">
+              Type de contrat *
+            </label>
+
+            <select
+              id="invitationContractType"
+              name="invitationContractType"
+              [(ngModel)]="invitationContractType"
+            >
+              <option value="">Sélectionner</option>
+
+              <option
+                *ngFor="let contractType of contractTypes"
+                [value]="contractType.value"
+              >
+                {{ contractType.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="invitationWorkMode">
+              Mode de travail *
+            </label>
+
+            <select
+              id="invitationWorkMode"
+              name="invitationWorkMode"
+              [(ngModel)]="invitationWorkMode"
+            >
+              <option value="">Sélectionner</option>
+
+              <option
+                *ngFor="let workMode of workModes"
+                [value]="workMode.value"
+              >
+                {{ workMode.label }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="invitationLocation">
+              Localisation *
+            </label>
+
+            <input
+              id="invitationLocation"
+              type="text"
+              name="invitationLocation"
+              [(ngModel)]="invitationLocation"
+              maxlength="150"
+              placeholder="Exemple : Tunis"
+            />
+          </div>
+
+          <div class="form-field">
+            <label for="invitationSalary">
+              Rémunération
+            </label>
+
+            <input
+              id="invitationSalary"
+              type="number"
+              name="invitationSalary"
+              [(ngModel)]="invitationSalary"
+              min="0.01"
+              step="0.01"
+              placeholder="Exemple : 3500"
+            />
+          </div>
+
+          <div class="form-field full-width">
+            <label for="invitationTechnologies">
+              Technologies *
+            </label>
+
+            <input
+              id="invitationTechnologies"
+              type="text"
+              name="invitationTechnologies"
+              [(ngModel)]="invitationTechnologies"
+              placeholder="Java, Spring Boot, Angular, MongoDB"
+            />
+
+            <small>
+              Séparez les technologies par des virgules.
+            </small>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="invitationNotes">
+              Notes complémentaires
+            </label>
+
+            <textarea
+              id="invitationNotes"
+              name="invitationNotes"
+              [(ngModel)]="invitationNotes"
+              maxlength="2000"
+              class="notes-textarea"
+              placeholder="Conditions particulières, rythme de présence, avantages..."
+            ></textarea>
+          </div>
+        </div>
+
+        <p class="form-error" *ngIf="invitationErrorMessage">
+          {{ invitationErrorMessage }}
+        </p>
+
+        <div class="form-actions">
+          <button
+            type="button"
+            class="cancel-button"
+            [disabled]="invitationLoading"
+            (click)="closeInvitationForm()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="button"
+            class="send-button"
+            [disabled]="invitationLoading"
+            (click)="sendInvitation()"
+          >
+            {{
+              invitationLoading
+                ? 'Envoi en cours...'
+                : 'Envoyer la proposition'
+            }}
+          </button>
+        </div>
+      </section>
     </ng-container>
-
   </div>
 </div>

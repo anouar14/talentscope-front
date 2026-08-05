@@ -1,0 +1,237 @@
+<div class="notifications-page">
+  <div class="notifications-container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Centre de notifications</p>
+        <h1>Mes notifications</h1>
+
+        <p class="page-description">
+          Suivez les nouvelles propositions, les réponses et les changements
+          liés à vos missions.
+        </p>
+      </div>
+
+      <a [routerLink]="dashboardLink" class="dashboard-link">
+        Retour au tableau de bord
+      </a>
+    </header>
+
+    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedFilter === 'ALL'"
+        (click)="filterNotifications('ALL')"
+      >
+        <span>Total</span>
+        <strong>{{ notifications.length }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedFilter === 'UNREAD'"
+        (click)="filterNotifications('UNREAD')"
+      >
+        <span>Non lues</span>
+        <strong>{{ unreadCount }}</strong>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedFilter === 'READ'"
+        (click)="filterNotifications('READ')"
+      >
+        <span>Lues</span>
+        <strong>{{ readCount }}</strong>
+      </button>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && notifications.length > 0"
+    >
+      <div class="search-field">
+        <label for="notification-search">
+          Rechercher
+        </label>
+
+        <input
+          id="notification-search"
+          type="search"
+          name="notificationSearch"
+          [(ngModel)]="searchTerm"
+          placeholder="Titre ou contenu de la notification..."
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="notification-filter">
+          État
+        </label>
+
+        <select
+          id="notification-filter"
+          name="notificationFilter"
+          [(ngModel)]="selectedFilter"
+        >
+          <option value="ALL">Toutes</option>
+          <option value="UNREAD">Non lues</option>
+          <option value="READ">Lues</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+
+      <button
+        type="button"
+        class="read-all-button"
+        [disabled]="unreadCount === 0 || markAllLoading"
+        (click)="markAllAsRead()"
+      >
+        {{
+          markAllLoading
+            ? 'Traitement...'
+            : 'Tout marquer comme lu'
+        }}
+      </button>
+    </section>
+
+    <div class="feedback-message success-message" *ngIf="actionSuccessMessage">
+      {{ actionSuccessMessage }}
+    </div>
+
+    <div class="feedback-message error-message" *ngIf="actionErrorMessage">
+      {{ actionErrorMessage }}
+    </div>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement de vos notifications...</p>
+    </section>
+
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h2>Une erreur est survenue</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button type="button" (click)="loadNotifications()">
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="!loading && !errorMessage && notifications.length === 0"
+    >
+      <h2>Aucune notification</h2>
+
+      <p>
+        Les événements liés à vos propositions et à vos missions
+        apparaîtront ici.
+      </p>
+
+      <a [routerLink]="dashboardLink">
+        Retour au tableau de bord
+      </a>
+    </section>
+
+    <section
+      class="state-card empty-state"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        notifications.length > 0 &&
+        filteredNotifications.length === 0
+      "
+    >
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucune notification ne correspond aux critères sélectionnés.
+      </p>
+
+      <button type="button" (click)="resetFilters()">
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="notifications-list"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredNotifications.length > 0
+      "
+    >
+      <article
+        class="notification-card"
+        [class.unread]="!notification.read"
+        *ngFor="
+          let notification of filteredNotifications;
+          trackBy: trackNotification
+        "
+        (click)="openNotification(notification)"
+      >
+        <div
+          class="notification-icon"
+          [ngClass]="getTypeClass(notification.type)"
+        >
+          {{ getNotificationIcon(notification.type) }}
+        </div>
+
+        <div class="notification-content">
+          <div class="notification-header">
+            <div>
+              <span class="notification-type">
+                {{ getTypeLabel(notification.type) }}
+              </span>
+
+              <h2>{{ notification.title }}</h2>
+            </div>
+
+            <span class="unread-indicator" *ngIf="!notification.read"></span>
+          </div>
+
+          <p>{{ notification.message }}</p>
+
+          <div class="notification-footer">
+            <span>
+              {{ notification.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </span>
+
+            <span *ngIf="notification.read && notification.readAt">
+              Lue le
+              {{ notification.readAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="read-button"
+          *ngIf="!notification.read"
+          [disabled]="isProcessing(notification.id)"
+          (click)="markAsRead(notification, $event)"
+        >
+          {{
+            isProcessing(notification.id)
+              ? 'Traitement...'
+              : 'Marquer comme lue'
+          }}
+        </button>
+
+        <span class="open-indicator" *ngIf="notification.read">
+          →
+        </span>
+      </article>
+    </section>
+  </div>
+</div>

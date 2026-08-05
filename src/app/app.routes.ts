@@ -1,86 +1,5 @@
-// import { Routes } from '@angular/router';
-// import { Welcome } from './pages/welcome/welcome';
-// import { Register } from './pages/auth/register/register';
-// import { Login } from './pages/auth/login/login';
-// import { ConsultantDashboard } from './pages/consultant/dashboard/dashboard';
-// import { CompanyDashboard } from './pages/company/dashboard/dashboard';
-// import { consultantGuard } from './core/guards/consultant-guard';
-// import { companyGuard } from './core/guards/company-guard';
-// import { ConsultantProfile } from './pages/consultant/profile/profile';
-// import { UploadCv } from './pages/consultant/upload-cv/upload-cv';
-// import { CompanyProfile } from './pages/company/profile/profile';
-// import { SearchConsultants } from './pages/company/search-consultants/search-consultants';
-// import { ResetPassword } from './pages/auth/reset-password/reset-password';
-// import { ForgotPassword } from './pages/auth/forgot-password/forgot-password';
-// import {GoogleRoleSelection} from './pages/auth/google-role-selection/google-role-selection';
-// import { ConsultantDetail } from './pages/company/consultant-detail/consultant-detail';
-// import { Invitations } from './pages/consultant/invitations/invitations';
-// import {CompanyInvitations} from './pages/company/invitations/company-invitations';
-// export const routes: Routes = [
-//   { path: '', component: Welcome },
-//   { path: 'register', component: Register },
-//   { path: 'login', component: Login },
-
-//   {
-//     path: 'consultant/dashboard',
-//     component: ConsultantDashboard,
-//     canActivate: [consultantGuard]
-//   },
-//   {
-//     path: 'company/dashboard',
-//     component: CompanyDashboard,
-//     canActivate: [companyGuard]
-//   },
-//   {
-//   path: 'consultant/upload-cv',
-//   component: UploadCv,
-//   canActivate: [consultantGuard]
-// },
-//   {
-//     path:'consultant/profile',
-//     component: ConsultantProfile,
-//     canActivate:[consultantGuard]
-//   },
-//   {
-//     path: 'company/profile',
-//     component: CompanyProfile,
-//     canActivate: [companyGuard]
-//   },
-//   {
-//   path: 'company/search-consultants',
-//   component: SearchConsultants,
-//   canActivate: [companyGuard]
-//   },
-//   {
-//   path: 'forgot-password',
-//   component: ForgotPassword
-// },
-// {
-//   path: 'reset-password',
-//   component: ResetPassword
-// },
-// {
-//   path: 'google-role-selection',
-//   component: GoogleRoleSelection
-// },
-// {
-//   path: 'company/consultants/:id',
-//   component: ConsultantDetail,
-//   canActivate: [companyGuard]
-// },
-// {
-//   path: 'consultant/invitations',
-//   component: Invitations,
-//   canActivate: [consultantGuard]
-// },
-// {
-//   path: 'company/invitations',
-//   component: CompanyInvitations,
-//   canActivate: [companyGuard]
-// },
-//   { path: '**', redirectTo: '' }
-// ];
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 import { companyGuard } from './core/guards/company-guard';
 import { consultantGuard } from './core/guards/consultant-guard';
 import { ForgotPassword } from './pages/auth/forgot-password/forgot-password';
@@ -100,6 +19,7 @@ import { ConsultantMissions } from './pages/consultant/missions/missions';
 import { ConsultantProfile } from './pages/consultant/profile/profile';
 import { UploadCv } from './pages/consultant/upload-cv/upload-cv';
 import { MissionDetail } from './pages/mission-detail/mission-detail';
+import { Notifications } from './pages/notifications/notifications';
 import { Welcome } from './pages/welcome/welcome';
 
 export const routes: Routes = [
@@ -126,6 +46,11 @@ export const routes: Routes = [
   {
     path: 'google-role-selection',
     component: GoogleRoleSelection
+  },
+  {
+    path: 'notifications',
+    component: Notifications,
+    canActivate: [authGuard]
   },
   {
     path: 'consultant/dashboard',

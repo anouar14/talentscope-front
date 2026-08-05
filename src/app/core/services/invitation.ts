@@ -27,7 +27,10 @@ export class InvitationService {
     return this.http.get<Invitation[]>(`${this.apiUrl}/consultant`);
   }
 
-  respondToInvitation(invitationId: string, accepted: boolean): Observable<Invitation> {
+  respondToInvitation(
+    invitationId: string,
+    accepted: boolean
+  ): Observable<Invitation> {
     const request: InvitationResponseRequest = { accepted };
 
     return this.http.put<Invitation>(

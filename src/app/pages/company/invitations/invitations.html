@@ -4,26 +4,20 @@
       <div>
         <p class="eyebrow">Espace entreprise</p>
 
-        <h1>Invitations envoyées</h1>
+        <h1>Propositions envoyées</h1>
 
         <p class="page-description">
-          Suivez les propositions envoyées aux consultants et consultez leur
-          statut.
+          Consultez les propositions de mission envoyées aux consultants et
+          suivez leur statut.
         </p>
       </div>
 
-      <a
-        routerLink="/company/search-consultants"
-        class="primary-link"
-      >
+      <a routerLink="/company/search-consultants" class="primary-link">
         Rechercher un consultant
       </a>
     </header>
 
-    <section
-      class="summary-grid"
-      *ngIf="!loading && !errorMessage"
-    >
+    <section class="summary-grid" *ngIf="!loading && !errorMessage">
       <button
         type="button"
         class="summary-card"
@@ -79,7 +73,7 @@
           type="search"
           name="companyInvitationSearch"
           [(ngModel)]="searchTerm"
-          placeholder="Consultant, titre ou objet"
+          placeholder="Consultant, mission, technologie, localisation..."
         />
       </div>
 
@@ -110,25 +104,16 @@
       </button>
     </section>
 
-    <section
-      class="state-card"
-      *ngIf="loading"
-    >
+    <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement des invitations...</p>
+      <p>Chargement des propositions...</p>
     </section>
 
-    <section
-      class="state-card error-state"
-      *ngIf="!loading && errorMessage"
-    >
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
       <h2>Une erreur est survenue</h2>
       <p>{{ errorMessage }}</p>
 
-      <button
-        type="button"
-        (click)="loadInvitations()"
-      >
+      <button type="button" (click)="loadInvitations()">
         Réessayer
       </button>
     </section>
@@ -137,11 +122,11 @@
       class="state-card empty-state"
       *ngIf="!loading && !errorMessage && invitations.length === 0"
     >
-      <h2>Aucune invitation envoyée</h2>
+      <h2>Aucune proposition envoyée</h2>
 
       <p>
-        Recherchez un consultant et envoyez-lui une proposition pour démarrer
-        une collaboration.
+        Recherchez un consultant et envoyez-lui une proposition de mission
+        complète.
       </p>
 
       <a routerLink="/company/search-consultants">
@@ -161,31 +146,21 @@
       <h2>Aucun résultat</h2>
 
       <p>
-        Aucune invitation ne correspond aux critères sélectionnés.
+        Aucune proposition ne correspond aux critères sélectionnés.
       </p>
 
-      <button
-        type="button"
-        (click)="resetFilters()"
-      >
+      <button type="button" (click)="resetFilters()">
         Réinitialiser les filtres
       </button>
     </section>
 
     <section
       class="invitations-grid"
-      *ngIf="
-        !loading &&
-        !errorMessage &&
-        filteredInvitations.length > 0
-      "
+      *ngIf="!loading && !errorMessage && filteredInvitations.length > 0"
     >
       <article
         class="invitation-card"
-        *ngFor="
-          let invitation of filteredInvitations;
-          trackBy: trackInvitation
-        "
+        *ngFor="let invitation of filteredInvitations; trackBy: trackInvitation"
       >
         <div class="invitation-header">
           <div class="consultant-information">
@@ -194,9 +169,7 @@
             </div>
 
             <div>
-              <p class="consultant-label">
-                Consultant
-              </p>
+              <p class="consultant-label">Consultant</p>
 
               <h2>{{ invitation.consultantName }}</h2>
 
@@ -217,17 +190,101 @@
           </span>
         </div>
 
-        <div class="invitation-content">
-          <p class="content-label">
-            Objet de l’invitation
-          </p>
+        <section class="invitation-content">
+          <p class="content-label">Proposition de mission</p>
 
           <h3>{{ invitation.subject }}</h3>
 
           <p class="invitation-message">
             {{ invitation.message }}
           </p>
-        </div>
+        </section>
+
+        <section class="mission-details-grid">
+          <div class="detail-item">
+            <span>Date de début</span>
+
+            <strong>
+              {{
+                invitation.startDate
+                  ? (invitation.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseignée'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Date de fin</span>
+
+            <strong>
+              {{
+                invitation.endDate
+                  ? (invitation.endDate | date: 'dd/MM/yyyy')
+                  : 'Non définie'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Type de contrat</span>
+
+            <strong>
+              {{ getContractTypeLabel(invitation.contractType) }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Mode de travail</span>
+
+            <strong>
+              {{ getWorkModeLabel(invitation.workMode) }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Localisation</span>
+
+            <strong>
+              {{ invitation.location || 'Non renseignée' }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Rémunération</span>
+
+            <strong>
+              {{ getSalaryLabel(invitation.salary) }}
+            </strong>
+          </div>
+        </section>
+
+        <section class="technologies-section">
+          <h3>Technologies</h3>
+
+          <div
+            class="empty-technologies"
+            *ngIf="invitation.technologies.length === 0"
+          >
+            Aucune technologie renseignée.
+          </div>
+
+          <div
+            class="technologies-list"
+            *ngIf="invitation.technologies.length > 0"
+          >
+            <span *ngFor="let technology of invitation.technologies">
+              {{ technology }}
+            </span>
+          </div>
+        </section>
+
+        <section class="notes-section" *ngIf="invitation.notes">
+          <h3>Notes complémentaires</h3>
+
+          <p>
+            {{ invitation.notes }}
+          </p>
+        </section>
 
         <div class="invitation-dates">
           <div>
@@ -276,21 +333,21 @@
           class="invitation-state pending-state"
           *ngIf="invitation.status === 'PENDING'"
         >
-          Le consultant n’a pas encore répondu à cette invitation.
+          Le consultant n’a pas encore répondu à cette proposition.
         </div>
 
         <div
           class="invitation-state accepted-state"
           *ngIf="invitation.status === 'ACCEPTED'"
         >
-          Cette invitation a été acceptée. Une mission active a été créée.
+          Cette proposition a été acceptée. Une mission active a été créée.
         </div>
 
         <div
           class="invitation-state rejected-state"
           *ngIf="invitation.status === 'REJECTED'"
         >
-          Cette invitation a été refusée ou clôturée automatiquement.
+          Cette proposition a été refusée ou clôturée automatiquement.
         </div>
       </article>
     </section>

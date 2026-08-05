@@ -3,10 +3,11 @@
     <header class="page-header">
       <div>
         <p class="eyebrow">Espace consultant</p>
-        <h1>Mes invitations</h1>
+        <h1>Mes propositions de mission</h1>
 
         <p class="page-description">
-          Consultez les propositions reçues et choisissez celles auxquelles vous souhaitez répondre.
+          Consultez toutes les conditions proposées avant d’accepter ou de
+          refuser une mission.
         </p>
       </div>
 
@@ -69,7 +70,7 @@
           type="search"
           name="invitationSearch"
           [(ngModel)]="searchTerm"
-          placeholder="Entreprise, objet ou contenu"
+          placeholder="Entreprise, mission, technologie, localisation..."
         />
       </div>
 
@@ -102,7 +103,7 @@
       {{ actionSuccessMessage }}
 
       <a routerLink="/consultant/missions">
-        Voir la mission
+        Voir mes missions
       </a>
     </div>
 
@@ -112,7 +113,7 @@
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement de vos invitations...</p>
+      <p>Chargement de vos propositions...</p>
     </section>
 
     <section class="state-card error-state" *ngIf="!loading && errorMessage">
@@ -128,10 +129,11 @@
       class="state-card empty-state"
       *ngIf="!loading && !errorMessage && invitations.length === 0"
     >
-      <h2>Aucune invitation</h2>
+      <h2>Aucune proposition</h2>
 
       <p>
-        Les propositions envoyées par les entreprises apparaîtront ici.
+        Les propositions de mission envoyées par les entreprises apparaîtront
+        ici.
       </p>
 
       <a routerLink="/consultant/profile">
@@ -151,7 +153,7 @@
       <h2>Aucun résultat</h2>
 
       <p>
-        Aucune invitation ne correspond aux critères sélectionnés.
+        Aucune proposition ne correspond aux critères sélectionnés.
       </p>
 
       <button type="button" (click)="resetFilters()">
@@ -170,12 +172,17 @@
         <div class="invitation-header">
           <div class="company-information">
             <div class="company-avatar">
-              {{ invitation.companyName.charAt(0).toUpperCase() }}
+              {{
+                invitation.companyName
+                  ? invitation.companyName.charAt(0).toUpperCase()
+                  : 'E'
+              }}
             </div>
 
             <div>
               <p class="company-label">Entreprise</p>
               <h2>{{ invitation.companyName }}</h2>
+              <p class="mission-title">{{ invitation.subject }}</p>
             </div>
           </div>
 
@@ -187,17 +194,100 @@
           </span>
         </div>
 
-        <div class="invitation-content">
-          <h3>{{ invitation.subject }}</h3>
+        <section class="description-card">
+          <h3>Description de la mission</h3>
 
           <p>
             {{ invitation.message }}
           </p>
-        </div>
+        </section>
+
+        <section class="mission-details-grid">
+          <div class="detail-item">
+            <span>Date de début</span>
+
+            <strong>
+              {{
+                invitation.startDate
+                  ? (invitation.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseignée'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Date de fin</span>
+
+            <strong>
+              {{
+                invitation.endDate
+                  ? (invitation.endDate | date: 'dd/MM/yyyy')
+                  : 'Non définie'
+              }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Type de contrat</span>
+
+            <strong>
+              {{ getContractTypeLabel(invitation.contractType) }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Mode de travail</span>
+
+            <strong>
+              {{ getWorkModeLabel(invitation.workMode) }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Localisation</span>
+
+            <strong>
+              {{ invitation.location || 'Non renseignée' }}
+            </strong>
+          </div>
+
+          <div class="detail-item">
+            <span>Rémunération</span>
+
+            <strong>
+              {{ getSalaryLabel(invitation.salary) }}
+            </strong>
+          </div>
+        </section>
+
+        <section class="technologies-section">
+          <h3>Technologies recherchées</h3>
+
+          <div
+            class="empty-technologies"
+            *ngIf="invitation.technologies.length === 0"
+          >
+            Aucune technologie renseignée.
+          </div>
+
+          <div
+            class="technologies-list"
+            *ngIf="invitation.technologies.length > 0"
+          >
+            <span *ngFor="let technology of invitation.technologies">
+              {{ technology }}
+            </span>
+          </div>
+        </section>
+
+        <section class="notes-section" *ngIf="invitation.notes">
+          <h3>Notes complémentaires</h3>
+          <p>{{ invitation.notes }}</p>
+        </section>
 
         <div class="invitation-dates">
           <div>
-            <span>Reçue le</span>
+            <span>Proposition reçue le</span>
 
             <strong>
               {{ invitation.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
@@ -214,6 +304,14 @@
         </div>
 
         <div
+          class="decision-notice"
+          *ngIf="invitation.status === 'PENDING'"
+        >
+          Vérifiez attentivement toutes les conditions avant de répondre.
+          L’acceptation créera immédiatement une mission active.
+        </div>
+
+        <div
           class="invitation-actions"
           *ngIf="invitation.status === 'PENDING'"
         >
@@ -226,7 +324,7 @@
             {{
               isInvitationProcessing(invitation.id)
                 ? 'Traitement...'
-                : 'Accepter'
+                : 'Accepter la proposition'
             }}
           </button>
 
@@ -236,7 +334,7 @@
             [disabled]="isInvitationProcessing(invitation.id)"
             (click)="rejectInvitation(invitation)"
           >
-            Refuser
+            Refuser la proposition
           </button>
         </div>
 
@@ -244,7 +342,7 @@
           class="closed-message accepted-message"
           *ngIf="invitation.status === 'ACCEPTED'"
         >
-          Cette invitation a été acceptée et une mission a été créée.
+          Cette proposition a été acceptée et une mission active a été créée.
 
           <a routerLink="/consultant/missions">
             Consulter mes missions
@@ -255,7 +353,7 @@
           class="closed-message rejected-message"
           *ngIf="invitation.status === 'REJECTED'"
         >
-          Cette invitation a été refusée.
+          Cette proposition a été refusée ou clôturée automatiquement.
         </div>
       </article>
     </section>

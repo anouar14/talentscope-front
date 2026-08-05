@@ -6,71 +6,100 @@
         <h1>Mes missions</h1>
 
         <p class="page-description">
-          Retrouvez les missions créées après l’acceptation de vos invitations.
+          Retrouvez les missions créées après l’acceptation de vos
+          propositions.
         </p>
       </div>
 
       <a routerLink="/consultant/invitations" class="primary-link">
-        Voir mes invitations
+        Voir mes propositions
       </a>
     </header>
 
-    <section class="summary-card" *ngIf="!loading && !errorMessage">
-      <button type="button" (click)="filterByStatus('ALL')">
+    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
+        (click)="filterByStatus('ALL')"
+      >
         <span>Total des missions</span>
         <strong>{{ missions.length }}</strong>
       </button>
 
-      <button type="button" (click)="filterByStatus('ACTIVE')">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ACTIVE'"
+        (click)="filterByStatus('ACTIVE')"
+      >
         <span>Missions actives</span>
         <strong>{{ activeMissionCount }}</strong>
       </button>
 
-      <button type="button" (click)="filterByStatus('COMPLETED')">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'COMPLETED'"
+        (click)="filterByStatus('COMPLETED')"
+      >
         <span>Missions terminées</span>
         <strong>{{ completedMissionCount }}</strong>
       </button>
 
-      <button type="button" (click)="filterByStatus('CANCELLED')">
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'CANCELLED'"
+        (click)="filterByStatus('CANCELLED')"
+      >
         <span>Missions annulées</span>
         <strong>{{ cancelledMissionCount }}</strong>
       </button>
     </section>
 
-    <section *ngIf="!loading && !errorMessage && missions.length > 0">
-      <label for="consultant-mission-search">
-        Rechercher une mission
-      </label>
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && missions.length > 0"
+    >
+      <div class="filter-field">
+        <label for="consultant-mission-search">
+          Rechercher une mission
+        </label>
 
-      <input
-        id="consultant-mission-search"
-        type="search"
-        name="missionSearch"
-        [(ngModel)]="searchTerm"
-        placeholder="Titre, entreprise ou description"
-      />
+        <input
+          id="consultant-mission-search"
+          type="search"
+          name="missionSearch"
+          [(ngModel)]="searchTerm"
+          placeholder="Entreprise, mission, technologie, localisation..."
+        />
+      </div>
 
-      <label for="consultant-mission-status">
-        Statut
-      </label>
+      <div class="filter-field">
+        <label for="consultant-mission-status">
+          Statut
+        </label>
 
-      <select
-        id="consultant-mission-status"
-        name="missionStatus"
-        [(ngModel)]="selectedStatus"
-      >
-        <option value="ALL">Tous les statuts</option>
-        <option value="ACTIVE">Actives</option>
-        <option value="COMPLETED">Terminées</option>
-        <option value="CANCELLED">Annulées</option>
-      </select>
+        <select
+          id="consultant-mission-status"
+          name="missionStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="ACTIVE">Actives</option>
+          <option value="COMPLETED">Terminées</option>
+          <option value="CANCELLED">Annulées</option>
+        </select>
+      </div>
 
       <button
         type="button"
-        *ngIf="hasActiveFilters"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
         (click)="resetFilters()"
       >
-        Réinitialiser les filtres
+        Réinitialiser
       </button>
     </section>
 
@@ -95,11 +124,12 @@
       <h2>Aucune mission pour le moment</h2>
 
       <p>
-        Une mission apparaîtra ici lorsque vous accepterez une invitation d’entreprise.
+        Une mission apparaîtra ici lorsque vous accepterez une proposition
+        d’entreprise.
       </p>
 
       <a routerLink="/consultant/invitations">
-        Consulter mes invitations
+        Consulter mes propositions
       </a>
     </section>
 
@@ -157,21 +187,82 @@
           {{ mission.description || 'Aucune description disponible.' }}
         </p>
 
+        <div class="conditions-grid">
+          <div>
+            <span>Début</span>
+
+            <strong>
+              {{
+                mission.startDate
+                  ? (mission.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseigné'
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Fin</span>
+
+            <strong>
+              {{
+                mission.endDate
+                  ? (mission.endDate | date: 'dd/MM/yyyy')
+                  : 'Non définie'
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Contrat</span>
+            <strong>{{ getContractTypeLabel(mission.contractType) }}</strong>
+          </div>
+
+          <div>
+            <span>Mode</span>
+            <strong>{{ getWorkModeLabel(mission.workMode) }}</strong>
+          </div>
+
+          <div>
+            <span>Localisation</span>
+            <strong>{{ mission.location || 'Non renseignée' }}</strong>
+          </div>
+
+          <div>
+            <span>Rémunération</span>
+            <strong>{{ getSalaryLabel(mission.salary) }}</strong>
+          </div>
+        </div>
+
+        <div
+          class="technologies-list"
+          *ngIf="mission.technologies.length > 0"
+        >
+          <span *ngFor="let technology of mission.technologies">
+            {{ technology }}
+          </span>
+        </div>
+
         <div class="mission-information">
           <div>
             <span>Date de création</span>
-            <strong>{{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+
+            <strong>
+              {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
           </div>
 
           <div>
             <span>Dernière mise à jour</span>
-            <strong>{{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+
+            <strong>
+              {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
           </div>
         </div>
 
         <div class="detail-action">
           <a [routerLink]="['/consultant/missions', mission.id]">
-            Voir les détails
+            Voir tous les détails
           </a>
         </div>
       </article>

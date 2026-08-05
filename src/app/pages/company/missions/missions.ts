@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
 import { MissionService } from '../../../core/services/mission';
 
@@ -35,21 +36,29 @@ export class CompanyMissions implements OnInit {
   }
 
   get filteredMissions(): Mission[] {
-    const normalizedSearch = this.searchTerm.trim().toLowerCase();
+    const search = this.searchTerm.trim().toLowerCase();
 
     return this.missions.filter(mission => {
       const matchesStatus =
         this.selectedStatus === 'ALL' ||
         mission.status === this.selectedStatus;
 
-      const matchesSearch =
-        !normalizedSearch ||
-        mission.title.toLowerCase().includes(normalizedSearch) ||
-        mission.description?.toLowerCase().includes(normalizedSearch) ||
-        mission.consultantName.toLowerCase().includes(normalizedSearch) ||
-        mission.consultantTitle?.toLowerCase().includes(normalizedSearch);
+      const searchableContent = [
+        mission.title,
+        mission.description,
+        mission.consultantName,
+        mission.consultantTitle,
+        mission.location,
+        mission.notes,
+        mission.contractType,
+        mission.workMode,
+        ...(mission.technologies ?? [])
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
-      return matchesStatus && matchesSearch;
+      return matchesStatus && (!search || searchableContent.includes(search));
     });
   }
 
@@ -76,7 +85,11 @@ export class CompanyMissions implements OnInit {
 
     this.missionService.getCompanyMissions().subscribe({
       next: missions => {
-        this.missions = missions ?? [];
+        this.missions = (missions ?? []).map(mission => ({
+          ...mission,
+          technologies: mission.technologies ?? []
+        }));
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -85,7 +98,8 @@ export class CompanyMissions implements OnInit {
         this.loading = false;
 
         if (error.status === 403) {
-          this.errorMessage = 'Vous n’êtes pas autorisé à consulter ces missions.';
+          this.errorMessage =
+            'Vous n’êtes pas autorisé à consulter ces missions.';
           return;
         }
 
@@ -109,7 +123,7 @@ export class CompanyMissions implements OnInit {
   }
 
   completeMission(mission: Mission): void {
-    if (mission.status !== 'ACTIVE') {
+    if (mission.status !== 'ACTIVE' || this.isMissionUpdating(mission.id)) {
       return;
     }
 
@@ -123,7 +137,7 @@ export class CompanyMissions implements OnInit {
   }
 
   cancelMission(mission: Mission): void {
-    if (mission.status !== 'ACTIVE') {
+    if (mission.status !== 'ACTIVE' || this.isMissionUpdating(mission.id)) {
       return;
     }
 
@@ -166,6 +180,44 @@ export class CompanyMissions implements OnInit {
     }
   }
 
+  getContractTypeLabel(contractType: ContractType | null): string {
+    switch (contractType) {
+      case 'CDI':
+        return 'CDI';
+      case 'CDD':
+        return 'CDD';
+      case 'FREELANCE':
+        return 'Freelance';
+      case 'INTERNSHIP':
+        return 'Stage';
+      case 'OTHER':
+        return 'Autre';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getWorkModeLabel(workMode: WorkMode | null): string {
+    switch (workMode) {
+      case 'ONSITE':
+        return 'Sur site';
+      case 'REMOTE':
+        return 'À distance';
+      case 'HYBRID':
+        return 'Hybride';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getSalaryLabel(salary: number | null): string {
+    if (salary === null || salary === undefined) {
+      return 'Non renseignée';
+    }
+
+    return `${salary.toLocaleString('fr-FR')} DT`;
+  }
+
   trackMission(index: number, mission: Mission): string {
     return mission.id;
   }
@@ -180,7 +232,11 @@ export class CompanyMissions implements OnInit {
 
     this.missionService.updateMissionStatus(mission.id, status).subscribe({
       next: updatedMission => {
-        this.replaceMission(updatedMission);
+        this.replaceMission({
+          ...updatedMission,
+          technologies: updatedMission.technologies ?? []
+        });
+
         this.updatingMissionId = null;
 
         this.actionSuccessMessage =
@@ -202,7 +258,8 @@ export class CompanyMissions implements OnInit {
         }
 
         if (error.status === 403) {
-          this.actionErrorMessage = 'Vous n’êtes pas autorisé à modifier cette mission.';
+          this.actionErrorMessage =
+            'Vous n’êtes pas autorisé à modifier cette mission.';
           return;
         }
 
@@ -221,7 +278,8 @@ export class CompanyMissions implements OnInit {
           return;
         }
 
-        this.actionErrorMessage = 'Impossible de modifier le statut de la mission.';
+        this.actionErrorMessage =
+          'Impossible de modifier le statut de la mission.';
       }
     });
   }

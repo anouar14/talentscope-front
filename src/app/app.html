@@ -1,1 +1,121 @@
-<router-outlet />
+<header class="app-header" *ngIf="isAuthenticated">
+  <div class="navigation-container">
+    <a
+      class="brand"
+      [routerLink]="dashboardLink"
+      (click)="closeMobileMenu()"
+    >
+      <span class="brand-mark">T</span>
+
+      <span class="brand-content">
+        <strong>TalentScope</strong>
+        <small>
+          {{ isCompany ? 'Espace entreprise' : 'Espace consultant' }}
+        </small>
+      </span>
+    </a>
+
+    <button
+      type="button"
+      class="mobile-menu-button"
+      [attr.aria-expanded]="mobileMenuOpen"
+      aria-label="Ouvrir le menu de navigation"
+      (click)="toggleMobileMenu()"
+    >
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav
+      class="navigation"
+      [class.open]="mobileMenuOpen"
+      aria-label="Navigation principale"
+    >
+      <a
+        [routerLink]="dashboardLink"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Tableau de bord
+      </a>
+
+      <a
+        *ngIf="isCompany"
+        routerLink="/company/search-consultants"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Consultants
+      </a>
+
+      <a
+        [routerLink]="invitationsLink"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Propositions
+      </a>
+
+      <a
+        [routerLink]="missionsLink"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Missions
+      </a>
+
+      <a
+        *ngIf="isConsultant"
+        routerLink="/consultant/upload-cv"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Mon CV
+      </a>
+
+      <a
+        routerLink="/notifications"
+        routerLinkActive="active"
+        class="notification-link"
+        (click)="closeMobileMenu()"
+      >
+        Notifications
+
+        <span
+          class="notification-badge"
+          *ngIf="unreadNotificationCount > 0"
+        >
+          {{
+            unreadNotificationCount > 99
+              ? '99+'
+              : unreadNotificationCount
+          }}
+        </span>
+      </a>
+
+      <a
+        [routerLink]="profileLink"
+        routerLinkActive="active"
+        (click)="closeMobileMenu()"
+      >
+        Profil
+      </a>
+
+      <button
+        type="button"
+        class="logout-button"
+        (click)="logout()"
+      >
+        Déconnexion
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main
+  class="application-content"
+  [class.authenticated-content]="isAuthenticated"
+>
+  <router-outlet />
+</main>

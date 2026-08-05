@@ -4,8 +4,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
+  ContractType,
   Invitation,
-  InvitationStatus
+  InvitationStatus,
+  WorkMode
 } from '../../../core/models/invitation';
 import { InvitationService } from '../../../core/services/invitation';
 
@@ -45,11 +47,20 @@ export class Invitations implements OnInit {
         this.selectedStatus === 'ALL' ||
         invitation.status === this.selectedStatus;
 
+      const searchableContent = [
+        invitation.companyName,
+        invitation.subject,
+        invitation.message,
+        invitation.location,
+        invitation.notes,
+        ...(invitation.technologies ?? [])
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
       const matchesSearch =
-        !search ||
-        invitation.companyName.toLowerCase().includes(search) ||
-        invitation.subject.toLowerCase().includes(search) ||
-        invitation.message.toLowerCase().includes(search);
+        !search || searchableContent.includes(search);
 
       return matchesStatus && matchesSearch;
     });
@@ -78,7 +89,11 @@ export class Invitations implements OnInit {
 
     this.invitationService.getConsultantInvitations().subscribe({
       next: invitations => {
-        this.invitations = invitations ?? [];
+        this.invitations = (invitations ?? []).map(invitation => ({
+          ...invitation,
+          technologies: invitation.technologies ?? []
+        }));
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -87,7 +102,8 @@ export class Invitations implements OnInit {
         this.loading = false;
 
         if (error.status === 403) {
-          this.errorMessage = 'Vous n’êtes pas autorisé à consulter ces invitations.';
+          this.errorMessage =
+            'Vous n’êtes pas autorisé à consulter ces invitations.';
           return;
         }
 
@@ -102,12 +118,15 @@ export class Invitations implements OnInit {
   }
 
   acceptInvitation(invitation: Invitation): void {
-    if (invitation.status !== 'PENDING' || this.isInvitationProcessing(invitation.id)) {
+    if (
+      invitation.status !== 'PENDING' ||
+      this.isInvitationProcessing(invitation.id)
+    ) {
       return;
     }
 
     const confirmed = window.confirm(
-      `Voulez-vous accepter l’invitation de « ${invitation.companyName} » ?`
+      `Voulez-vous accepter la proposition « ${invitation.subject} » de ${invitation.companyName} ?`
     );
 
     if (confirmed) {
@@ -116,12 +135,15 @@ export class Invitations implements OnInit {
   }
 
   rejectInvitation(invitation: Invitation): void {
-    if (invitation.status !== 'PENDING' || this.isInvitationProcessing(invitation.id)) {
+    if (
+      invitation.status !== 'PENDING' ||
+      this.isInvitationProcessing(invitation.id)
+    ) {
       return;
     }
 
     const confirmed = window.confirm(
-      `Voulez-vous refuser l’invitation de « ${invitation.companyName} » ?`
+      `Voulez-vous refuser la proposition « ${invitation.subject} » de ${invitation.companyName} ?`
     );
 
     if (confirmed) {
@@ -168,44 +190,98 @@ export class Invitations implements OnInit {
     }
   }
 
+  getContractTypeLabel(contractType: ContractType | null): string {
+    switch (contractType) {
+      case 'CDI':
+        return 'CDI';
+      case 'CDD':
+        return 'CDD';
+      case 'FREELANCE':
+        return 'Freelance';
+      case 'INTERNSHIP':
+        return 'Stage';
+      case 'OTHER':
+        return 'Autre';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getWorkModeLabel(workMode: WorkMode | null): string {
+    switch (workMode) {
+      case 'ONSITE':
+        return 'Sur site';
+      case 'REMOTE':
+        return 'À distance';
+      case 'HYBRID':
+        return 'Hybride';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getSalaryLabel(salary: number | null): string {
+    if (salary === null || salary === undefined) {
+      return 'Non renseignée';
+    }
+
+    return `${salary.toLocaleString('fr-FR')} DT`;
+  }
+
   trackInvitation(index: number, invitation: Invitation): string {
     return invitation.id;
   }
 
-  private respondToInvitation(invitation: Invitation, accepted: boolean): void {
+  private respondToInvitation(
+    invitation: Invitation,
+    accepted: boolean
+  ): void {
     this.actionInvitationId = invitation.id;
     this.clearActionMessages();
 
-    this.invitationService.respondToInvitation(invitation.id, accepted).subscribe({
-      next: updatedInvitation => {
-        this.replaceInvitation(updatedInvitation);
-        this.actionInvitationId = null;
+    this.invitationService
+      .respondToInvitation(invitation.id, accepted)
+      .subscribe({
+        next: updatedInvitation => {
+          this.replaceInvitation({
+            ...updatedInvitation,
+            technologies: updatedInvitation.technologies ?? []
+          });
 
-        this.actionSuccessMessage = accepted
-          ? 'Invitation acceptée. Une mission active a été créée.'
-          : 'Invitation refusée.';
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors de la réponse à l’invitation :', error);
+          this.actionInvitationId = null;
 
-        this.actionInvitationId = null;
-        this.actionErrorMessage = this.getActionErrorMessage(error);
+          this.actionSuccessMessage = accepted
+            ? 'Proposition acceptée. Une mission active a été créée.'
+            : 'Proposition refusée.';
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la réponse à l’invitation :',
+            error
+          );
 
-        if (error.status === 409) {
-          this.loadInvitations();
+          this.actionInvitationId = null;
+          this.actionErrorMessage = this.getActionErrorMessage(error);
+
+          if (error.status === 409) {
+            this.loadInvitations();
+          }
         }
-      }
-    });
+      });
   }
 
   private replaceInvitation(updatedInvitation: Invitation): void {
     this.invitations = this.invitations.map(invitation =>
-      invitation.id === updatedInvitation.id ? updatedInvitation : invitation
+      invitation.id === updatedInvitation.id
+        ? updatedInvitation
+        : invitation
     );
   }
 
   private countByStatus(status: InvitationStatus): number {
-    return this.invitations.filter(invitation => invitation.status === status).length;
+    return this.invitations.filter(
+      invitation => invitation.status === status
+    ).length;
   }
 
   private getActionErrorMessage(error: HttpErrorResponse): string {
@@ -217,17 +293,17 @@ export class Invitations implements OnInit {
     }
 
     if (error.status === 403) {
-      return 'Vous n’êtes pas autorisé à répondre à cette invitation.';
+      return 'Vous n’êtes pas autorisé à répondre à cette proposition.';
     }
 
     if (error.status === 404) {
-      return 'Cette invitation est introuvable.';
+      return 'Cette proposition est introuvable.';
     }
 
     if (error.status === 409) {
       return this.extractBackendMessage(
         error,
-        'Cette invitation ne peut plus être acceptée.'
+        'Cette proposition ne peut plus être acceptée.'
       );
     }
 

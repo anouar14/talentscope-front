@@ -6,7 +6,8 @@
         <h1>Mes missions</h1>
 
         <p class="page-description">
-          Consultez et gérez les collaborations créées après l’acceptation de vos invitations.
+          Consultez et gérez les collaborations créées après l’acceptation de
+          vos propositions.
         </p>
       </div>
 
@@ -19,6 +20,7 @@
       <button
         type="button"
         class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
         (click)="filterByStatus('ALL')"
       >
         <span>Total des missions</span>
@@ -28,6 +30,7 @@
       <button
         type="button"
         class="summary-card"
+        [class.active]="selectedStatus === 'ACTIVE'"
         (click)="filterByStatus('ACTIVE')"
       >
         <span>Missions actives</span>
@@ -37,6 +40,7 @@
       <button
         type="button"
         class="summary-card"
+        [class.active]="selectedStatus === 'COMPLETED'"
         (click)="filterByStatus('COMPLETED')"
       >
         <span>Missions terminées</span>
@@ -46,6 +50,7 @@
       <button
         type="button"
         class="summary-card"
+        [class.active]="selectedStatus === 'CANCELLED'"
         (click)="filterByStatus('CANCELLED')"
       >
         <span>Missions annulées</span>
@@ -53,36 +58,44 @@
       </button>
     </section>
 
-    <section *ngIf="!loading && !errorMessage && missions.length > 0">
-      <label for="mission-search">Rechercher une mission</label>
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && missions.length > 0"
+    >
+      <div class="filter-field">
+        <label for="mission-search">Rechercher une mission</label>
 
-      <input
-        id="mission-search"
-        type="search"
-        name="missionSearch"
-        [(ngModel)]="searchTerm"
-        placeholder="Titre, consultant ou description"
-      />
+        <input
+          id="mission-search"
+          type="search"
+          name="missionSearch"
+          [(ngModel)]="searchTerm"
+          placeholder="Mission, consultant, technologie, localisation..."
+        />
+      </div>
 
-      <label for="mission-status">Statut</label>
+      <div class="filter-field">
+        <label for="mission-status">Statut</label>
 
-      <select
-        id="mission-status"
-        name="missionStatus"
-        [(ngModel)]="selectedStatus"
-      >
-        <option value="ALL">Tous les statuts</option>
-        <option value="ACTIVE">Actives</option>
-        <option value="COMPLETED">Terminées</option>
-        <option value="CANCELLED">Annulées</option>
-      </select>
+        <select
+          id="mission-status"
+          name="missionStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="ACTIVE">Actives</option>
+          <option value="COMPLETED">Terminées</option>
+          <option value="CANCELLED">Annulées</option>
+        </select>
+      </div>
 
       <button
         type="button"
-        *ngIf="hasActiveFilters"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
         (click)="resetFilters()"
       >
-        Réinitialiser les filtres
+        Réinitialiser
       </button>
     </section>
 
@@ -115,7 +128,8 @@
       <h2>Aucune mission pour le moment</h2>
 
       <p>
-        Une mission sera créée automatiquement lorsqu’un consultant acceptera votre invitation.
+        Une mission sera créée automatiquement lorsqu’un consultant acceptera
+        votre proposition.
       </p>
 
       <a routerLink="/company/search-consultants">
@@ -164,7 +178,11 @@
 
         <div class="consultant-block">
           <div class="avatar">
-            {{ mission.consultantName ? mission.consultantName.charAt(0) : 'C' }}
+            {{
+              mission.consultantName
+                ? mission.consultantName.charAt(0)
+                : 'C'
+            }}
           </div>
 
           <div>
@@ -181,21 +199,82 @@
           {{ mission.description || 'Aucune description disponible.' }}
         </p>
 
+        <div class="conditions-grid">
+          <div>
+            <span>Début</span>
+
+            <strong>
+              {{
+                mission.startDate
+                  ? (mission.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseigné'
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Fin</span>
+
+            <strong>
+              {{
+                mission.endDate
+                  ? (mission.endDate | date: 'dd/MM/yyyy')
+                  : 'Non définie'
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Contrat</span>
+            <strong>{{ getContractTypeLabel(mission.contractType) }}</strong>
+          </div>
+
+          <div>
+            <span>Mode</span>
+            <strong>{{ getWorkModeLabel(mission.workMode) }}</strong>
+          </div>
+
+          <div>
+            <span>Localisation</span>
+            <strong>{{ mission.location || 'Non renseignée' }}</strong>
+          </div>
+
+          <div>
+            <span>Rémunération</span>
+            <strong>{{ getSalaryLabel(mission.salary) }}</strong>
+          </div>
+        </div>
+
+        <div
+          class="technologies-list"
+          *ngIf="mission.technologies.length > 0"
+        >
+          <span *ngFor="let technology of mission.technologies">
+            {{ technology }}
+          </span>
+        </div>
+
         <div class="mission-information">
           <div>
             <span>Date de création</span>
-            <strong>{{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+
+            <strong>
+              {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
           </div>
 
           <div>
             <span>Dernière mise à jour</span>
-            <strong>{{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}</strong>
+
+            <strong>
+              {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
           </div>
         </div>
 
         <div class="detail-action">
           <a [routerLink]="['/company/missions', mission.id]">
-            Voir les détails
+            Voir tous les détails
           </a>
         </div>
 

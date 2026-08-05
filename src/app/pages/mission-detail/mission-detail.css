@@ -124,10 +124,14 @@
   padding: 28px;
 }
 
+.content-section + .content-section {
+  margin-top: 30px;
+  padding-top: 26px;
+  border-top: 1px solid #e5e7eb;
+}
+
 .section-header {
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 18px;
 }
 
 .section-header h2,
@@ -138,21 +142,19 @@
   font-size: 20px;
 }
 
-.mission-description {
-  min-height: 180px;
+.mission-description,
+.notes-content {
   margin: 0;
   color: #4b5563;
   line-height: 1.75;
   white-space: pre-line;
 }
 
+.conditions-grid,
 .dates-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  margin-top: 28px;
-  padding-top: 22px;
-  border-top: 1px solid #e5e7eb;
 }
 
 .information-item {
@@ -171,11 +173,31 @@
 .information-item strong {
   color: #111827;
   font-size: 14px;
+  line-height: 1.4;
+}
+
+.technologies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.technologies-list span {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.empty-technologies {
+  color: #9ca3af;
 }
 
 .management-section {
-  margin-top: 28px;
-  padding-top: 24px;
+  margin-top: 30px;
+  padding-top: 26px;
   border-top: 1px solid #e5e7eb;
 }
 
@@ -410,6 +432,7 @@
     font-size: 27px;
   }
 
+  .conditions-grid,
   .dates-grid {
     grid-template-columns: 1fr;
   }

@@ -3,6 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
 import { MissionService } from '../../../core/services/mission';
 
@@ -31,20 +32,28 @@ export class ConsultantMissions implements OnInit {
   }
 
   get filteredMissions(): Mission[] {
-    const normalizedSearch = this.searchTerm.trim().toLowerCase();
+    const search = this.searchTerm.trim().toLowerCase();
 
     return this.missions.filter(mission => {
       const matchesStatus =
         this.selectedStatus === 'ALL' ||
         mission.status === this.selectedStatus;
 
-      const matchesSearch =
-        !normalizedSearch ||
-        mission.title.toLowerCase().includes(normalizedSearch) ||
-        mission.description?.toLowerCase().includes(normalizedSearch) ||
-        mission.companyName.toLowerCase().includes(normalizedSearch);
+      const searchableContent = [
+        mission.title,
+        mission.description,
+        mission.companyName,
+        mission.location,
+        mission.notes,
+        mission.contractType,
+        mission.workMode,
+        ...(mission.technologies ?? [])
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
-      return matchesStatus && matchesSearch;
+      return matchesStatus && (!search || searchableContent.includes(search));
     });
   }
 
@@ -70,7 +79,11 @@ export class ConsultantMissions implements OnInit {
 
     this.missionService.getConsultantMissions().subscribe({
       next: missions => {
-        this.missions = missions ?? [];
+        this.missions = (missions ?? []).map(mission => ({
+          ...mission,
+          technologies: mission.technologies ?? []
+        }));
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -79,7 +92,8 @@ export class ConsultantMissions implements OnInit {
         this.loading = false;
 
         if (error.status === 403) {
-          this.errorMessage = 'Vous n’êtes pas autorisé à consulter ces missions.';
+          this.errorMessage =
+            'Vous n’êtes pas autorisé à consulter ces missions.';
           return;
         }
 
@@ -126,6 +140,44 @@ export class ConsultantMissions implements OnInit {
       default:
         return '';
     }
+  }
+
+  getContractTypeLabel(contractType: ContractType | null): string {
+    switch (contractType) {
+      case 'CDI':
+        return 'CDI';
+      case 'CDD':
+        return 'CDD';
+      case 'FREELANCE':
+        return 'Freelance';
+      case 'INTERNSHIP':
+        return 'Stage';
+      case 'OTHER':
+        return 'Autre';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getWorkModeLabel(workMode: WorkMode | null): string {
+    switch (workMode) {
+      case 'ONSITE':
+        return 'Sur site';
+      case 'REMOTE':
+        return 'À distance';
+      case 'HYBRID':
+        return 'Hybride';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getSalaryLabel(salary: number | null): string {
+    if (salary === null || salary === undefined) {
+      return 'Non renseignée';
+    }
+
+    return `${salary.toLocaleString('fr-FR')} DT`;
   }
 
   trackMission(index: number, mission: Mission): string {

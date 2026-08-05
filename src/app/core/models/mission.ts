@@ -1,7 +1,6 @@
-export type MissionStatus =
-  | 'ACTIVE'
-  | 'COMPLETED'
-  | 'CANCELLED';
+import { ContractType, WorkMode } from './invitation';
+
+export type MissionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
 export interface Mission {
   id: string;
@@ -16,6 +15,18 @@ export interface Mission {
 
   title: string;
   description: string;
+
+  startDate: string | null;
+  endDate: string | null;
+
+  contractType: ContractType | null;
+  workMode: WorkMode | null;
+
+  location: string | null;
+  salary: number | null;
+
+  technologies: string[];
+  notes: string | null;
 
   status: MissionStatus;
 

@@ -4,8 +4,10 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import {
+  ContractType,
   Invitation,
-  InvitationStatus
+  InvitationStatus,
+  WorkMode
 } from '../../../core/models/invitation';
 import { InvitationService } from '../../../core/services/invitation';
 
@@ -41,12 +43,21 @@ export class CompanyInvitations implements OnInit {
         this.selectedStatus === 'ALL' ||
         invitation.status === this.selectedStatus;
 
+      const searchableContent = [
+        invitation.consultantName,
+        invitation.consultantTitle,
+        invitation.subject,
+        invitation.message,
+        invitation.location,
+        invitation.notes,
+        ...(invitation.technologies ?? [])
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
       const matchesSearch =
-        !search ||
-        invitation.consultantName.toLowerCase().includes(search) ||
-        invitation.consultantTitle?.toLowerCase().includes(search) ||
-        invitation.subject.toLowerCase().includes(search) ||
-        invitation.message.toLowerCase().includes(search);
+        !search || searchableContent.includes(search);
 
       return matchesStatus && matchesSearch;
     });
@@ -74,7 +85,11 @@ export class CompanyInvitations implements OnInit {
 
     this.invitationService.getCompanyInvitations().subscribe({
       next: invitations => {
-        this.invitations = invitations ?? [];
+        this.invitations = (invitations ?? []).map(invitation => ({
+          ...invitation,
+          technologies: invitation.technologies ?? []
+        }));
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -87,7 +102,7 @@ export class CompanyInvitations implements OnInit {
 
         if (error.status === 403) {
           this.errorMessage =
-            'Vous n’êtes pas autorisé à consulter ces invitations.';
+            'Vous n’êtes pas autorisé à consulter ces propositions.';
           return;
         }
 
@@ -96,7 +111,7 @@ export class CompanyInvitations implements OnInit {
           return;
         }
 
-        this.errorMessage = 'Impossible de charger vos invitations.';
+        this.errorMessage = 'Impossible de charger vos propositions.';
       }
     });
   }
@@ -136,6 +151,44 @@ export class CompanyInvitations implements OnInit {
     }
   }
 
+  getContractTypeLabel(contractType: ContractType | null): string {
+    switch (contractType) {
+      case 'CDI':
+        return 'CDI';
+      case 'CDD':
+        return 'CDD';
+      case 'FREELANCE':
+        return 'Freelance';
+      case 'INTERNSHIP':
+        return 'Stage';
+      case 'OTHER':
+        return 'Autre';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getWorkModeLabel(workMode: WorkMode | null): string {
+    switch (workMode) {
+      case 'ONSITE':
+        return 'Sur site';
+      case 'REMOTE':
+        return 'À distance';
+      case 'HYBRID':
+        return 'Hybride';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getSalaryLabel(salary: number | null): string {
+    if (salary === null || salary === undefined) {
+      return 'Non renseignée';
+    }
+
+    return `${salary.toLocaleString('fr-FR')} DT`;
+  }
+
   getConsultantInitial(invitation: Invitation): string {
     return invitation.consultantName?.charAt(0).toUpperCase() || 'C';
   }
@@ -145,7 +198,8 @@ export class CompanyInvitations implements OnInit {
   }
 
   private countByStatus(status: InvitationStatus): number {
-    return this.invitations.filter(invitation => invitation.status === status)
-      .length;
+    return this.invitations.filter(
+      invitation => invitation.status === status
+    ).length;
   }
 }

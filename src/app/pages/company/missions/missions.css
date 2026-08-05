@@ -39,7 +39,7 @@
 }
 
 .page-description {
-  max-width: 650px;
+  max-width: 680px;
   margin: 10px 0 0;
   color: #6b7280;
   line-height: 1.6;
@@ -65,8 +65,7 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 24px;
 }
@@ -77,6 +76,14 @@
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 8px 25px rgb(15 23 42 / 5%);
+  text-align: left;
+  cursor: pointer;
+}
+
+.summary-card:hover,
+.summary-card.active {
+  border-color: #a5b4fc;
+  box-shadow: 0 10px 28px rgb(79 70 229 / 11%);
 }
 
 .summary-card span {
@@ -89,6 +96,64 @@
 .summary-card strong {
   color: #111827;
   font-size: 28px;
+}
+
+.filters-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.filter-field {
+  display: grid;
+  gap: 7px;
+}
+
+.filters-card label {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.filters-card input,
+.filters-card select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  outline: none;
+}
+
+.filters-card input:focus,
+.filters-card select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 12%);
+}
+
+.reset-button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .feedback-message {
@@ -110,68 +175,9 @@
   color: #b91c1c;
 }
 
-.state-card {
-  display: flex;
-  min-height: 260px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  background: #ffffff;
-  text-align: center;
-}
-
-.state-card h2 {
-  margin: 0 0 10px;
-  color: #111827;
-}
-
-.state-card p {
-  max-width: 540px;
-  margin: 0;
-  color: #6b7280;
-  line-height: 1.6;
-}
-
-.state-card button,
-.state-card a {
-  margin-top: 18px;
-  padding: 11px 18px;
-  border: none;
-  border-radius: 9px;
-  background: #4f46e5;
-  color: #ffffff;
-  font-weight: 700;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.state-card button:hover,
-.state-card a:hover {
-  background: #4338ca;
-}
-
-.error-state {
-  border-color: #fecaca;
-  background: #fff7f7;
-}
-
-.loader {
-  width: 38px;
-  height: 38px;
-  margin-bottom: 18px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #4f46e5;
-  border-radius: 50%;
-  animation: rotate 0.8s linear infinite;
-}
-
 .missions-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 22px;
 }
 
@@ -266,23 +272,62 @@
 }
 
 .mission-description {
-  flex: 1;
-  margin: 0 0 22px;
+  margin: 0 0 20px;
   color: #4b5563;
   line-height: 1.65;
   white-space: pre-line;
 }
 
+.conditions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.conditions-grid div {
+  padding: 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.conditions-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.conditions-grid strong {
+  color: #111827;
+  font-size: 13px;
+}
+
+.technologies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.technologies-list span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .mission-information {
   display: grid;
   gap: 12px;
+  margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid #e5e7eb;
 }
 
 .mission-information div {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 14px;
 }
@@ -298,117 +343,6 @@
   text-align: right;
 }
 
-.mission-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 22px;
-  padding-top: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.mission-actions button {
-  min-height: 42px;
-  flex: 1;
-  padding: 10px 14px;
-  border-radius: 9px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.complete-button {
-  border: 1px solid #15803d;
-  background: #15803d;
-  color: #ffffff;
-}
-
-.complete-button:hover:not(:disabled) {
-  background: #166534;
-}
-
-.cancel-button {
-  border: 1px solid #fecaca;
-  background: #ffffff;
-  color: #b91c1c;
-}
-
-.cancel-button:hover:not(:disabled) {
-  background: #fef2f2;
-}
-
-.mission-actions button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.closed-mission-message {
-  margin-top: 22px;
-  padding: 13px;
-  border: 1px solid #bfdbfe;
-  border-radius: 9px;
-  background: #eff6ff;
-  color: #1d4ed8;
-  font-weight: 600;
-  text-align: center;
-}
-
-.closed-mission-message.cancelled {
-  border-color: #fecaca;
-  background: #fef2f2;
-  color: #b91c1c;
-}
-
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 1000px) {
-  .summary-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 700px) {
-  .missions-page {
-    padding: 24px 14px;
-  }
-
-  .page-header {
-    flex-direction: column;
-  }
-
-  .primary-link {
-    width: 100%;
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .missions-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .mission-card-header {
-    flex-direction: column;
-  }
-
-  .mission-information div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .mission-information strong {
-    text-align: left;
-  }
-
-  .mission-actions {
-    flex-direction: column;
-  }
-}
 .detail-action {
   margin-top: 20px;
 }
@@ -427,7 +361,150 @@
   text-decoration: none;
 }
 
-.detail-action a:hover {
-  border-color: #a5b4fc;
-  background: #e0e7ff;
+.mission-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.mission-actions button {
+  min-height: 42px;
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.complete-button {
+  border: 1px solid #15803d;
+  background: #15803d;
+  color: #ffffff;
+}
+
+.cancel-button {
+  border: 1px solid #fecaca;
+  background: #ffffff;
+  color: #b91c1c;
+}
+
+.mission-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.closed-mission-message {
+  margin-top: 20px;
+  padding: 13px;
+  border: 1px solid #bfdbfe;
+  border-radius: 9px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+  text-align: center;
+}
+
+.closed-mission-message.cancelled {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.state-card {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.state-card h2 {
+  margin: 0 0 10px;
+  color: #111827;
+}
+
+.state-card p {
+  max-width: 540px;
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.state-card button,
+.state-card a {
+  margin-top: 18px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #4f46e5;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.error-state {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.loader {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 18px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #4f46e5;
+  border-radius: 50%;
+  animation: rotate 0.8s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1000px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 750px) {
+  .missions-page {
+    padding: 24px 14px;
+  }
+
+  .page-header,
+  .mission-card-header {
+    flex-direction: column;
+  }
+
+  .primary-link {
+    width: 100%;
+  }
+
+  .summary-grid,
+  .conditions-grid,
+  .filters-card {
+    grid-template-columns: 1fr;
+  }
+
+  .missions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-information div,
+  .mission-actions {
+    flex-direction: column;
+  }
+
+  .mission-information strong {
+    text-align: left;
+  }
 }

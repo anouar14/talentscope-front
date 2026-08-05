@@ -21,7 +21,15 @@ describe('CompanyInvitations', () => {
     consultantName: 'Anouar Hichri',
     consultantTitle: 'Développeur Java',
     subject: 'Mission Spring Boot',
-    message: 'Nous souhaitons vous proposer une mission.',
+    message: 'Développement et maintenance d’une plateforme métier.',
+    startDate: '2026-09-01',
+    endDate: '2027-02-28',
+    contractType: 'FREELANCE',
+    workMode: 'HYBRID',
+    location: 'Tunis',
+    salary: 3500,
+    technologies: ['Java', 'Spring Boot', 'Angular'],
+    notes: 'Présence sur site deux jours par semaine.',
     status: 'PENDING',
     createdAt: '2026-07-30T10:00:00',
     respondedAt: null
@@ -63,6 +71,7 @@ describe('CompanyInvitations', () => {
 
     expect(component.invitations.length).toBe(1);
     expect(component.invitations[0].consultantName).toBe('Anouar Hichri');
+    expect(component.invitations[0].technologies.length).toBe(3);
     expect(component.loading).toBeFalse();
   });
 
@@ -84,11 +93,22 @@ describe('CompanyInvitations', () => {
 
   it('should search invitations by consultant name', () => {
     component.invitations = [invitation];
-    component.searchTerm = 'mahdi';
+    component.searchTerm = 'anouar';
 
     expect(component.filteredInvitations.length).toBe(1);
 
-    component.searchTerm = 'angular';
+    component.searchTerm = 'mahdi';
+
+    expect(component.filteredInvitations.length).toBe(0);
+  });
+
+  it('should search invitations by technology', () => {
+    component.invitations = [invitation];
+    component.searchTerm = 'spring boot';
+
+    expect(component.filteredInvitations.length).toBe(1);
+
+    component.searchTerm = 'python';
 
     expect(component.filteredInvitations.length).toBe(0);
   });
@@ -111,5 +131,15 @@ describe('CompanyInvitations', () => {
     expect(component.pendingCount).toBe(1);
     expect(component.acceptedCount).toBe(1);
     expect(component.rejectedCount).toBe(1);
+  });
+
+  it('should format contract type and work mode labels', () => {
+    expect(component.getContractTypeLabel('FREELANCE')).toBe('Freelance');
+    expect(component.getWorkModeLabel('HYBRID')).toBe('Hybride');
+  });
+
+  it('should format salary', () => {
+    expect(component.getSalaryLabel(3500)).toContain('3');
+    expect(component.getSalaryLabel(null)).toBe('Non renseignée');
   });
 });

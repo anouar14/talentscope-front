@@ -1,42 +1,190 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { Company } from '../../../core/models/company';
+import { Invitation } from '../../../core/models/invitation';
+import { Mission } from '../../../core/models/mission';
 import { Auth } from '../../../core/services/auth';
 import { CompanyService } from '../../../core/services/company';
-import { Company } from '../../../core/models/company';
+import { InvitationService } from '../../../core/services/invitation';
+import { MissionService } from '../../../core/services/mission';
 
 @Component({
   selector: 'app-company-dashboard',
+  standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css']
+  styleUrl: './dashboard.css'
 })
 export class CompanyDashboard implements OnInit {
   company: Company | null = null;
+  invitations: Invitation[] = [];
+  missions: Mission[] = [];
+
   loading = false;
+  errorMessage = '';
 
   constructor(
-    private authService: Auth,
-    private companyService: CompanyService,
-    private router: Router
+    private readonly authService: Auth,
+    private readonly companyService: CompanyService,
+    private readonly invitationService: InvitationService,
+    private readonly missionService: MissionService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadCompany();
+    this.loadDashboard();
   }
 
-  loadCompany(): void {
-    this.loading = true;
+  get totalInvitations(): number {
+    return this.invitations.length;
+  }
 
-    this.companyService.getProfile().subscribe({
-      next: (data) => {
-        this.company = data;
+  get pendingInvitations(): number {
+    return this.invitations.filter(
+      invitation => invitation.status === 'PENDING'
+    ).length;
+  }
+
+  get acceptedInvitations(): number {
+    return this.invitations.filter(
+      invitation => invitation.status === 'ACCEPTED'
+    ).length;
+  }
+
+  get rejectedInvitations(): number {
+    return this.invitations.filter(
+      invitation => invitation.status === 'REJECTED'
+    ).length;
+  }
+
+  get activeMissions(): number {
+    return this.missions.filter(
+      mission => mission.status === 'ACTIVE'
+    ).length;
+  }
+
+  get completedMissions(): number {
+    return this.missions.filter(
+      mission => mission.status === 'COMPLETED'
+    ).length;
+  }
+
+  get cancelledMissions(): number {
+    return this.missions.filter(
+      mission => mission.status === 'CANCELLED'
+    ).length;
+  }
+
+  get recentInvitations(): Invitation[] {
+    return this.invitations.slice(0, 3);
+  }
+
+  get recentMissions(): Mission[] {
+    return this.missions.slice(0, 3);
+  }
+
+  loadDashboard(): void {
+    this.loading = true;
+    this.errorMessage = '';
+
+    forkJoin({
+      company: this.companyService.getProfile(),
+      invitations: this.invitationService.getCompanyInvitations(),
+      missions: this.missionService.getCompanyMissions()
+    }).subscribe({
+      next: data => {
+        this.company = data.company;
+        this.invitations = data.invitations ?? [];
+        this.missions = data.missions ?? [];
         this.loading = false;
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
+        console.error(
+          'Erreur lors du chargement du dashboard entreprise :',
+          error
+        );
+
         this.loading = false;
+
+        if (error.status === 403) {
+          this.errorMessage =
+            'Vous n’êtes pas autorisé à consulter ce tableau de bord.';
+          return;
+        }
+
+        if (error.status === 404) {
+          this.errorMessage =
+            'Votre profil entreprise est introuvable.';
+          return;
+        }
+
+        this.errorMessage =
+          'Impossible de charger le tableau de bord.';
       }
     });
+  }
+
+  getInvitationStatusLabel(status: Invitation['status']): string {
+    switch (status) {
+      case 'PENDING':
+        return 'En attente';
+      case 'ACCEPTED':
+        return 'Acceptée';
+      case 'REJECTED':
+        return 'Refusée';
+      default:
+        return status;
+    }
+  }
+
+  getInvitationStatusClass(status: Invitation['status']): string {
+    switch (status) {
+      case 'PENDING':
+        return 'status-pending';
+      case 'ACCEPTED':
+        return 'status-accepted';
+      case 'REJECTED':
+        return 'status-rejected';
+      default:
+        return '';
+    }
+  }
+
+  getMissionStatusLabel(status: Mission['status']): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'Active';
+      case 'COMPLETED':
+        return 'Terminée';
+      case 'CANCELLED':
+        return 'Annulée';
+      default:
+        return status;
+    }
+  }
+
+  getMissionStatusClass(status: Mission['status']): string {
+    switch (status) {
+      case 'ACTIVE':
+        return 'status-active';
+      case 'COMPLETED':
+        return 'status-completed';
+      case 'CANCELLED':
+        return 'status-cancelled';
+      default:
+        return '';
+    }
+  }
+
+  trackInvitation(index: number, invitation: Invitation): string {
+    return invitation.id;
+  }
+
+  trackMission(index: number, mission: Mission): string {
+    return mission.id;
   }
 
   logout(): void {

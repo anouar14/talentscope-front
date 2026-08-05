@@ -39,7 +39,7 @@
 }
 
 .page-description {
-  max-width: 650px;
+  max-width: 680px;
   margin: 10px 0 0;
   color: #6b7280;
   line-height: 1.6;
@@ -47,9 +47,9 @@
 
 .primary-link {
   display: inline-flex;
+  min-height: 44px;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
   padding: 0 18px;
   border-radius: 10px;
   background: #0f766e;
@@ -63,19 +63,27 @@
   background: #115e59;
 }
 
-.summary-card {
+.summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 24px;
 }
 
-.summary-card > div {
+.summary-card {
   padding: 22px;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 8px 25px rgb(15 23 42 / 5%);
+  text-align: left;
+  cursor: pointer;
+}
+
+.summary-card:hover,
+.summary-card.active {
+  border-color: #5eead4;
+  box-shadow: 0 10px 28px rgb(15 118 110 / 11%);
 }
 
 .summary-card span {
@@ -90,63 +98,67 @@
   font-size: 28px;
 }
 
-.state-card {
-  display: flex;
-  min-height: 260px;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 32px;
+.filters-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px auto;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 24px;
+  padding: 20px;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
+  border-radius: 14px;
   background: #ffffff;
-  text-align: center;
 }
 
-.state-card h2 {
-  margin: 0 0 10px;
-  color: #111827;
+.filter-field {
+  display: grid;
+  gap: 7px;
 }
 
-.state-card p {
-  max-width: 540px;
-  margin: 0;
-  color: #6b7280;
-  line-height: 1.6;
-}
-
-.state-card button,
-.state-card a {
-  margin-top: 18px;
-  padding: 11px 18px;
-  border: none;
-  border-radius: 9px;
-  background: #0f766e;
-  color: #ffffff;
+.filters-card label {
+  color: #374151;
+  font-size: 14px;
   font-weight: 700;
-  text-decoration: none;
+}
+
+.filters-card input,
+.filters-card select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  outline: none;
+}
+
+.filters-card input:focus,
+.filters-card select:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgb(20 184 166 / 12%);
+}
+
+.reset-button {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 700;
   cursor: pointer;
 }
 
-.error-state {
-  border-color: #fecaca;
-  background: #fff7f7;
-}
-
-.loader {
-  width: 38px;
-  height: 38px;
-  margin-bottom: 18px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #0f766e;
-  border-radius: 50%;
-  animation: rotate 0.8s linear infinite;
+.reset-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .missions-grid {
   display: grid;
-  grid-template-columns:
-    repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
   gap: 22px;
 }
 
@@ -233,22 +245,62 @@
 }
 
 .mission-description {
-  margin: 0 0 22px;
+  margin: 0 0 20px;
   color: #4b5563;
   line-height: 1.65;
   white-space: pre-line;
 }
 
+.conditions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.conditions-grid div {
+  padding: 13px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.conditions-grid span {
+  display: block;
+  margin-bottom: 5px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.conditions-grid strong {
+  color: #111827;
+  font-size: 13px;
+}
+
+.technologies-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.technologies-list span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #f0fdfa;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .mission-information {
   display: grid;
   gap: 12px;
+  margin-top: 20px;
   padding-top: 18px;
   border-top: 1px solid #e5e7eb;
 }
 
 .mission-information div {
   display: flex;
-  align-items: center;
   justify-content: space-between;
   gap: 14px;
 }
@@ -264,43 +316,6 @@
   text-align: right;
 }
 
-@keyframes rotate {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (max-width: 700px) {
-  .missions-page {
-    padding: 24px 14px;
-  }
-
-  .page-header {
-    flex-direction: column;
-  }
-
-  .primary-link {
-    width: 100%;
-  }
-
-  .summary-card {
-    grid-template-columns: 1fr;
-  }
-
-  .mission-card-header {
-    flex-direction: column;
-  }
-
-  .mission-information div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .mission-information strong {
-    text-align: left;
-  }
-}
 .detail-action {
   margin-top: 20px;
 }
@@ -322,4 +337,102 @@
 .detail-action a:hover {
   border-color: #5eead4;
   background: #ccfbf1;
+}
+
+.state-card {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.state-card h2 {
+  margin: 0 0 10px;
+  color: #111827;
+}
+
+.state-card p {
+  max-width: 540px;
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.state-card button,
+.state-card a {
+  margin-top: 18px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 9px;
+  background: #0f766e;
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.error-state {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.loader {
+  width: 38px;
+  height: 38px;
+  margin-bottom: 18px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #0f766e;
+  border-radius: 50%;
+  animation: rotate 0.8s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1000px) {
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 750px) {
+  .missions-page {
+    padding: 24px 14px;
+  }
+
+  .page-header,
+  .mission-card-header {
+    flex-direction: column;
+  }
+
+  .primary-link {
+    width: 100%;
+  }
+
+  .summary-grid,
+  .conditions-grid,
+  .filters-card {
+    grid-template-columns: 1fr;
+  }
+
+  .missions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-information div {
+    flex-direction: column;
+  }
+
+  .mission-information strong {
+    text-align: left;
+  }
 }

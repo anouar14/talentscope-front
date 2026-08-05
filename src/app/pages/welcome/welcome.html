@@ -1,69 +1,903 @@
-<header class="navbar">
-  <div class="logo">
-    <span class="logo-icon">T</span>
-    <span>TalentScope</span>
-  </div>
+<div class="landing-page">
+  <header class="navbar">
+    <div class="navbar-container">
+      <a class="brand" href="#accueil" aria-label="Accueil TalentScope">
+        <span class="brand-mark">T</span>
 
-  <nav class="nav-links">
-    <a href="#">Freelance</a>
-    <a href="#">ESN & Cabinet</a>
-    <a class="active" href="#">Entreprise</a>
-  </nav>
+        <span class="brand-text">
+          <strong>TalentScope</strong>
+          <small>Recrutement intelligent</small>
+        </span>
+      </a>
 
-  <div class="nav-actions">
-    <button class="login-btn" routerLink="/login">Connexion</button>
-<button class="signup-btn" routerLink="/register">S’inscrire</button>
-  </div>
-</header>
+      <nav class="nav-links" aria-label="Navigation principale">
+        <a href="#fonctionnalites">Fonctionnalités</a>
+        <a href="#fonctionnement">Comment ça marche ?</a>
+        <a href="#profils">Pour qui ?</a>
+        <a href="#intelligence-artificielle">Intelligence artificielle</a>
+      </nav>
 
-<section class="hero">
-  <h1>
-    Optimisez votre recrutement <br />
-    et trouvez les meilleurs
-    <span>talents</span>
-  </h1>
+      <div class="nav-actions">
+        <a class="login-link" routerLink="/login">
+          Connexion
+        </a>
 
-  <p>
-    Analysez automatiquement les CV, extrayez les compétences
-    et connectez les consultants IT aux meilleures opportunités.
-  </p>
-
-  <div class="search-box">
-    <div class="search-field">
-      <span>🔍</span>
-      <input type="text" placeholder="Poste recherché..." />
+        <a class="register-link" routerLink="/register">
+          Créer un compte
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </div>
+  </header>
 
-    <div class="divider"></div>
+  <main>
+    <section id="accueil" class="hero">
+      <div class="hero-background hero-background-one"></div>
+      <div class="hero-background hero-background-two"></div>
 
-    <div class="search-field">
-      <span>📍</span>
-      <input type="text" placeholder="Localisation" />
+      <div class="hero-container">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="badge-icon">✦</span>
+            Plateforme de recrutement assistée par l’IA
+          </div>
+
+          <h1>
+            Le talent idéal,
+            <span>identifié intelligemment.</span>
+          </h1>
+
+          <p class="hero-description">
+            TalentScope connecte les entreprises aux meilleurs consultants IT
+            grâce à l’analyse automatisée des CV, au matching intelligent et à
+            une gestion centralisée des invitations et des missions.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-action" routerLink="/register">
+              Commencer gratuitement
+              <span aria-hidden="true">→</span>
+            </a>
+
+            <a class="secondary-action" href="#fonctionnement">
+              <span class="play-icon" aria-hidden="true">▶</span>
+              Découvrir le fonctionnement
+            </a>
+          </div>
+
+          <div class="hero-benefits">
+            <span>
+              <i>✓</i>
+              Analyse IA des CV
+            </span>
+
+            <span>
+              <i>✓</i>
+              Matching explicable
+            </span>
+
+            <span>
+              <i>✓</i>
+              Gestion des missions
+            </span>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="matching-card">
+            <div class="matching-card-header">
+              <div>
+                <span class="section-label">MATCHING IA</span>
+                <h2>Meilleurs profils</h2>
+              </div>
+
+              <span class="live-badge">
+                <i></i>
+                Analyse terminée
+              </span>
+            </div>
+
+            <div class="job-summary">
+              <div class="job-icon">&lt;/&gt;</div>
+
+              <div>
+                <span>Mission recherchée</span>
+                <strong>Développeur Java / Angular</strong>
+              </div>
+            </div>
+
+            <div class="candidate-list">
+              <article class="candidate candidate-featured">
+                <div class="candidate-rank">1</div>
+
+                <div class="candidate-avatar avatar-one">AM</div>
+
+                <div class="candidate-details">
+                  <strong>Amine Mansour</strong>
+                  <span>Senior Full Stack Developer</span>
+
+                  <div class="candidate-skills">
+                    <small>Java</small>
+                    <small>Spring Boot</small>
+                    <small>Angular</small>
+                  </div>
+                </div>
+
+                <div class="candidate-score">
+                  <strong>94%</strong>
+                  <span>Excellent</span>
+                </div>
+              </article>
+
+              <article class="candidate">
+                <div class="candidate-rank">2</div>
+
+                <div class="candidate-avatar avatar-two">SB</div>
+
+                <div class="candidate-details">
+                  <strong>Sarah Ben Ali</strong>
+                  <span>Software Engineer</span>
+
+                  <div class="candidate-skills">
+                    <small>Java</small>
+                    <small>Angular</small>
+                    <small>Docker</small>
+                  </div>
+                </div>
+
+                <div class="candidate-score">
+                  <strong>87%</strong>
+                  <span>Recommandé</span>
+                </div>
+              </article>
+
+              <article class="candidate">
+                <div class="candidate-rank">3</div>
+
+                <div class="candidate-avatar avatar-three">YK</div>
+
+                <div class="candidate-details">
+                  <strong>Youssef Khalil</strong>
+                  <span>Backend Developer</span>
+
+                  <div class="candidate-skills">
+                    <small>Spring</small>
+                    <small>MongoDB</small>
+                    <small>REST</small>
+                  </div>
+                </div>
+
+                <div class="candidate-score">
+                  <strong>78%</strong>
+                  <span>Compatible</span>
+                </div>
+              </article>
+            </div>
+
+            <div class="matching-card-footer">
+              <span>
+                <i>✦</i>
+                Classement généré par TalentScope AI
+              </span>
+
+              <span>12 profils analysés</span>
+            </div>
+          </div>
+
+          <div class="floating-card floating-card-score">
+            <span class="floating-icon">↗</span>
+
+            <div>
+              <strong>+76%</strong>
+              <small>de pertinence</small>
+            </div>
+          </div>
+
+          <div class="floating-card floating-card-time">
+            <span class="floating-icon">⌁</span>
+
+            <div>
+              <strong>Quelques secondes</strong>
+              <small>pour identifier les profils</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="trusted-section">
+        <span>Une expérience complète pour</span>
+
+        <div class="trusted-items">
+          <div>
+            <i>01</i>
+            Consultants IT
+          </div>
+
+          <div>
+            <i>02</i>
+            Entreprises
+          </div>
+
+          <div>
+            <i>03</i>
+            Cabinets de recrutement
+          </div>
+
+          <div>
+            <i>04</i>
+            Équipes techniques
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fonctionnalites" class="features-section">
+      <div class="section-container">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">UNE PLATEFORME COMPLÈTE</span>
+
+            <h2>
+              Tout le processus de recrutement
+              <span>réuni au même endroit.</span>
+            </h2>
+          </div>
+
+          <p>
+            TalentScope simplifie chaque étape, de la création du profil
+            jusqu’au suivi de la mission, tout en offrant une expérience claire
+            aux consultants et aux entreprises.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card feature-card-large">
+            <div class="feature-icon feature-icon-purple">⌁</div>
+
+            <div class="feature-content">
+              <span class="feature-number">01</span>
+
+              <h3>Analyse intelligente des CV</h3>
+
+              <p>
+                Le consultant dépose son CV. TalentScope extrait
+                automatiquement ses compétences, son expérience et les
+                informations utiles à son profil.
+              </p>
+
+              <div class="analysis-preview">
+                <div class="document-preview">
+                  <div class="document-header">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+
+                  <div class="document-line long"></div>
+                  <div class="document-line medium"></div>
+                  <div class="document-line short"></div>
+
+                  <div class="document-highlight">
+                    <span>Java</span>
+                    <span>Spring Boot</span>
+                    <span>Angular</span>
+                  </div>
+                </div>
+
+                <div class="analysis-status">
+                  <div class="status-icon">✓</div>
+
+                  <div>
+                    <strong>CV analysé</strong>
+                    <span>Profil enrichi avec succès</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon feature-icon-blue">◎</div>
+
+            <span class="feature-number">02</span>
+
+            <h3>Matching hybride et explicable</h3>
+
+            <p>
+              Les profils sont classés en combinant un calcul objectif et une
+              analyse IA. Chaque recommandation est accompagnée d’un score
+              détaillé.
+            </p>
+
+            <div class="score-preview">
+              <div class="score-circle">
+                <strong>91</strong>
+                <span>/ 100</span>
+              </div>
+
+              <div class="score-lines">
+                <div>
+                  <span>Compétences</span>
+                  <i><b style="width: 94%"></b></i>
+                </div>
+
+                <div>
+                  <span>Expérience</span>
+                  <i><b style="width: 86%"></b></i>
+                </div>
+
+                <div>
+                  <span>Localisation</span>
+                  <i><b style="width: 78%"></b></i>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon feature-icon-green">✉</div>
+
+            <span class="feature-number">03</span>
+
+            <h3>Invitations de collaboration</h3>
+
+            <p>
+              Une entreprise peut contacter directement un consultant, lui
+              présenter une opportunité et suivre sa réponse depuis son espace.
+            </p>
+
+            <div class="invitation-preview">
+              <div class="invitation-avatar">TS</div>
+
+              <div>
+                <span>Nouvelle proposition</span>
+                <strong>Mission Cloud Engineer</strong>
+                <small>Focus Digital · Il y a quelques minutes</small>
+              </div>
+
+              <div class="invitation-check">✓</div>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card-wide">
+            <div class="feature-icon feature-icon-orange">▣</div>
+
+            <div class="feature-wide-content">
+              <div>
+                <span class="feature-number">04</span>
+
+                <h3>Gestion et suivi des missions</h3>
+
+                <p>
+                  Après l’acceptation d’une invitation, la mission est créée
+                  automatiquement. Les deux parties suivent ensuite son statut
+                  et consultent toutes les informations depuis un espace
+                  commun.
+                </p>
+              </div>
+
+              <div class="mission-preview">
+                <div class="mission-header">
+                  <span>Mission en cours</span>
+                  <i></i>
+                </div>
+
+                <strong>Consultant DevOps Senior</strong>
+
+                <div class="mission-meta">
+                  <span>
+                    <i>◷</i>
+                    En cours
+                  </span>
+
+                  <span>
+                    <i>⌖</i>
+                    Hybride
+                  </span>
+                </div>
+
+                <div class="mission-progress">
+                  <div>
+                    <span>Progression</span>
+                    <strong>65%</strong>
+                  </div>
+
+                  <i>
+                    <b></b>
+                  </i>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="fonctionnement" class="workflow-section">
+      <div class="section-container">
+        <div class="workflow-heading">
+          <span class="eyebrow">SIMPLE ET RAPIDE</span>
+
+          <h2>
+            Du besoin à la mission
+            <span>en quatre étapes.</span>
+          </h2>
+
+          <p>
+            TalentScope automatise les tâches répétitives sans remplacer la
+            décision humaine.
+          </p>
+        </div>
+
+        <div class="workflow-grid">
+          <article class="workflow-step">
+            <div class="step-top">
+              <span class="step-number">01</span>
+              <div class="step-icon">⌨</div>
+            </div>
+
+            <h3>Créez votre espace</h3>
+
+            <p>
+              Inscrivez-vous comme consultant ou entreprise et complétez votre
+              profil professionnel.
+            </p>
+          </article>
+
+          <div class="step-connector">
+            <span>→</span>
+          </div>
+
+          <article class="workflow-step">
+            <div class="step-top">
+              <span class="step-number">02</span>
+              <div class="step-icon">✦</div>
+            </div>
+
+            <h3>Laissez l’IA analyser</h3>
+
+            <p>
+              Le CV ou la description de mission est analysé afin d’extraire
+              les informations importantes.
+            </p>
+          </article>
+
+          <div class="step-connector">
+            <span>→</span>
+          </div>
+
+          <article class="workflow-step">
+            <div class="step-top">
+              <span class="step-number">03</span>
+              <div class="step-icon">◎</div>
+            </div>
+
+            <h3>Découvrez les meilleurs profils</h3>
+
+            <p>
+              Le moteur hybride calcule les scores et explique les forces et
+              les écarts de chaque candidat.
+            </p>
+          </article>
+
+          <div class="step-connector">
+            <span>→</span>
+          </div>
+
+          <article class="workflow-step">
+            <div class="step-top">
+              <span class="step-number">04</span>
+              <div class="step-icon">✓</div>
+            </div>
+
+            <h3>Lancez la collaboration</h3>
+
+            <p>
+              Envoyez une invitation, acceptez la proposition et suivez la
+              mission directement sur TalentScope.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="profils" class="profiles-section">
+      <div class="section-container">
+        <div class="profiles-heading">
+          <span class="eyebrow">DEUX ESPACES, UNE MÊME VISION</span>
+
+          <h2>
+            Une expérience adaptée
+            <span>à chaque utilisateur.</span>
+          </h2>
+        </div>
+
+        <div class="profiles-grid">
+          <article class="profile-card consultant-card">
+            <div class="profile-card-content">
+              <span class="profile-label">ESPACE CONSULTANT</span>
+
+              <h3>
+                Valorisez vos compétences et accédez aux bonnes missions.
+              </h3>
+
+              <p>
+                Construisez un profil professionnel complet et laissez
+                TalentScope vous connecter aux entreprises qui recherchent
+                réellement votre expertise.
+              </p>
+
+              <ul>
+                <li>
+                  <span>✓</span>
+                  Création et mise à jour du profil
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Dépôt et analyse intelligente du CV
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Réception et gestion des invitations
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Consultation et suivi des missions
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Notifications centralisées
+                </li>
+              </ul>
+
+              <a routerLink="/register">
+                Créer mon profil consultant
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div class="profile-decoration">
+              <div class="profile-person">
+                <div class="profile-photo">MB</div>
+
+                <div>
+                  <strong>Mohamed Ben Salem</strong>
+                  <span>Cloud & DevOps Consultant</span>
+                </div>
+              </div>
+
+              <div class="profile-completion">
+                <div>
+                  <span>Profil complété</span>
+                  <strong>92%</strong>
+                </div>
+
+                <i>
+                  <b></b>
+                </i>
+              </div>
+
+              <div class="profile-statistics">
+                <div>
+                  <strong>8</strong>
+                  <span>Compétences</span>
+                </div>
+
+                <div>
+                  <strong>5</strong>
+                  <span>Invitations</span>
+                </div>
+
+                <div>
+                  <strong>2</strong>
+                  <span>Missions</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="profile-card company-card">
+            <div class="profile-card-content">
+              <span class="profile-label">ESPACE ENTREPRISE</span>
+
+              <h3>
+                Identifiez rapidement les profils qui correspondent à vos
+                besoins.
+              </h3>
+
+              <p>
+                Décrivez votre mission, comparez les consultants disponibles et
+                prenez une décision basée sur des critères objectifs et
+                compréhensibles.
+              </p>
+
+              <ul>
+                <li>
+                  <span>✓</span>
+                  Recherche avancée de consultants
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Matching IA à partir d’une description libre
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Scores et recommandations détaillés
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Envoi et suivi des propositions
+                </li>
+
+                <li>
+                  <span>✓</span>
+                  Gestion centralisée des missions
+                </li>
+              </ul>
+
+              <a routerLink="/register">
+                Créer mon espace entreprise
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+
+            <div class="profile-decoration company-decoration">
+              <div class="company-search">
+                <span>Recherche intelligente</span>
+
+                <div>
+                  <i>⌕</i>
+                  Consultant Java Spring Boot...
+                </div>
+              </div>
+
+              <div class="company-result">
+                <div class="result-header">
+                  <span>Profil recommandé</span>
+                  <strong>96%</strong>
+                </div>
+
+                <div class="result-person">
+                  <div>NK</div>
+
+                  <span>
+                    <strong>Nour Khelifi</strong>
+                    <small>Senior Java Developer</small>
+                  </span>
+                </div>
+
+                <div class="result-tags">
+                  <span>Java</span>
+                  <span>Spring</span>
+                  <span>Angular</span>
+                </div>
+              </div>
+
+              <div class="company-result secondary-result">
+                <div class="result-header">
+                  <span>Profil recommandé</span>
+                  <strong>88%</strong>
+                </div>
+
+                <div class="result-person">
+                  <div>YA</div>
+
+                  <span>
+                    <strong>Yassine Ayadi</strong>
+                    <small>Full Stack Engineer</small>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="intelligence-artificielle" class="ai-section">
+      <div class="section-container ai-container">
+        <div class="ai-visual">
+          <div class="ai-orbit orbit-one"></div>
+          <div class="ai-orbit orbit-two"></div>
+          <div class="ai-orbit orbit-three"></div>
+
+          <div class="ai-core">
+            <span>✦</span>
+            <strong>TalentScope</strong>
+            <small>Hybrid AI Engine</small>
+          </div>
+
+          <div class="ai-node node-skills">
+            <span>01</span>
+            Compétences
+          </div>
+
+          <div class="ai-node node-experience">
+            <span>02</span>
+            Expérience
+          </div>
+
+          <div class="ai-node node-location">
+            <span>03</span>
+            Localisation
+          </div>
+
+          <div class="ai-node node-title">
+            <span>04</span>
+            Titre
+          </div>
+        </div>
+
+        <div class="ai-content">
+          <span class="eyebrow eyebrow-light">UNE IA RESPONSABLE</span>
+
+          <h2>
+            L’intelligence artificielle,
+            <span>sans perdre le contrôle.</span>
+          </h2>
+
+          <p>
+            TalentScope ne confie jamais toute la décision à l’IA. Le moteur de
+            matching associe un calcul Java déterministe à l’analyse d’Ollama
+            pour produire des recommandations plus fiables.
+          </p>
+
+          <div class="ai-points">
+            <article>
+              <span>70%</span>
+
+              <div>
+                <strong>Calcul objectif</strong>
+                <p>
+                  Compétences, expérience, titre et localisation sont évalués
+                  par le backend.
+                </p>
+              </div>
+            </article>
+
+            <article>
+              <span>30%</span>
+
+              <div>
+                <strong>Analyse intelligente</strong>
+                <p>
+                  L’IA explique les forces, les points faibles et la pertinence
+                  globale du profil.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <div class="ai-guarantees">
+            <span>
+              <i>✓</i>
+              Explicable
+            </span>
+
+            <span>
+              <i>✓</i>
+              Robuste
+            </span>
+
+            <span>
+              <i>✓</i>
+              Fonctionne même sans IA
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta-section">
+      <div class="section-container">
+        <div class="final-cta">
+          <div class="cta-decoration cta-decoration-one"></div>
+          <div class="cta-decoration cta-decoration-two"></div>
+
+          <div class="cta-content">
+            <span class="eyebrow">PRÊT À COMMENCER ?</span>
+
+            <h2>
+              Transformez votre façon de trouver
+              <span>les bons talents.</span>
+            </h2>
+
+            <p>
+              Rejoignez TalentScope et profitez d’un recrutement plus rapide,
+              plus clair et mieux adapté aux besoins du secteur IT.
+            </p>
+
+            <div class="cta-actions">
+              <a class="primary-action" routerLink="/register">
+                Créer mon compte
+                <span aria-hidden="true">→</span>
+              </a>
+
+              <a class="cta-login" routerLink="/login">
+                J’ai déjà un compte
+              </a>
+            </div>
+          </div>
+
+          <div class="cta-stats">
+            <div>
+              <strong>100%</strong>
+              <span>Matching explicable</span>
+            </div>
+
+            <div>
+              <strong>2</strong>
+              <span>Espaces personnalisés</span>
+            </div>
+
+            <div>
+              <strong>1</strong>
+              <span>Plateforme centralisée</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="section-container">
+      <div class="footer-main">
+        <div class="footer-brand">
+          <a class="brand" href="#accueil">
+            <span class="brand-mark">T</span>
+
+            <span class="brand-text">
+              <strong>TalentScope</strong>
+              <small>Recrutement intelligent</small>
+            </span>
+          </a>
+
+          <p>
+            La plateforme qui rapproche les consultants IT et les entreprises
+            grâce à une technologie de matching intelligente et explicable.
+          </p>
+        </div>
+
+        <div class="footer-links">
+          <div>
+            <strong>Plateforme</strong>
+            <a href="#fonctionnalites">Fonctionnalités</a>
+            <a href="#fonctionnement">Fonctionnement</a>
+            <a href="#intelligence-artificielle">Matching IA</a>
+          </div>
+
+          <div>
+            <strong>Espaces</strong>
+            <a routerLink="/register">Consultant</a>
+            <a routerLink="/register">Entreprise</a>
+            <a routerLink="/login">Connexion</a>
+          </div>
+
+          <div>
+            <strong>TalentScope</strong>
+            <a href="#accueil">Accueil</a>
+            <a href="#profils">À qui s’adresse TalentScope ?</a>
+            <a routerLink="/register">Créer un compte</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <span>© 2026 TalentScope. Tous droits réservés.</span>
+
+        <span>
+          Conçu pour simplifier le recrutement IT
+          <i>✦</i>
+        </span>
+      </div>
     </div>
-
-    <div class="divider"></div>
-
-    <select>
-      <option>Recherche profil</option>
-      <option>Consultant</option>
-      <option>Entreprise</option>
-    </select>
-
-    <button>
-      Lancer la recherche ✨
-    </button>
-  </div>
-
-  <div class="social-proof">
-    <div class="avatars">
-      <span>A</span>
-      <span>M</span>
-      <span>S</span>
-      <span>Y</span>
-    </div>
-
-    <h3>Rejoignez les consultants et entreprises</h3>
-    <p>qui utilisent TalentScope pour accélérer leur matching</p>
-    <div class="stars">★★★★★</div>
-  </div>
-</section>
+  </footer>
+</div>

@@ -1,93 +1,292 @@
 <div class="dashboard-page">
   <div class="dashboard-container">
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <p>Chargement du tableau de bord...</p>
+    </section>
 
-    <div *ngIf="loading" class="loading">
-      Chargement du dashboard...
-    </div>
+    <section class="state-card error-state" *ngIf="!loading && errorMessage">
+      <h2>Une erreur est survenue</h2>
+      <p>{{ errorMessage }}</p>
 
-    <ng-container *ngIf="!loading && company">
+      <button type="button" (click)="loadDashboard()">
+        Réessayer
+      </button>
+    </section>
 
+    <ng-container *ngIf="!loading && !errorMessage && company">
       <section class="hero-card">
         <div>
           <p class="eyebrow">Espace entreprise</p>
-          <h1>Bonjour {{ company.companyName || 'Entreprise' }} 👋</h1>
+
+          <h1>
+            Bonjour {{ company.companyName || 'Entreprise' }} 👋
+          </h1>
+
           <p>
-            Recherchez des consultants IT, gérez vos besoins et suivez vos futurs matchings.
+            Suivez vos invitations, vos missions et vos collaborations
+            depuis un espace centralisé.
           </p>
         </div>
 
-        <button class="logout-btn" (click)="logout()">
+        <button type="button" class="logout-btn" (click)="logout()">
           Déconnexion
         </button>
       </section>
 
       <section class="stats-grid">
-        <div class="stat-card">
-          <span>🔎</span>
-          <h3>Recherche</h3>
-          <p>Consultants disponibles</p>
-        </div>
+        <a routerLink="/company/invitations" class="stat-card">
+          <span class="stat-icon">📩</span>
 
-        <div class="stat-card">
-          <span>⭐</span>
-          <h3>Matching</h3>
-          <p>0 profil recommandé</p>
-        </div>
+          <div>
+            <h3>{{ totalInvitations }}</h3>
+            <p>Invitations envoyées</p>
+          </div>
+        </a>
 
-        <div class="stat-card">
-          <span>📩</span>
-          <h3>Invitations</h3>
-          <p>0 invitation envoyée</p>
-        </div>
+        <a routerLink="/company/invitations" class="stat-card">
+          <span class="stat-icon">⏳</span>
 
-        <div class="stat-card">
-          <span>🏢</span>
-          <h3>Profil</h3>
-          <p>{{ company.sector || 'À compléter' }}</p>
-        </div>
+          <div>
+            <h3>{{ pendingInvitations }}</h3>
+            <p>Invitations en attente</p>
+          </div>
+        </a>
+
+        <a routerLink="/company/missions" class="stat-card">
+          <span class="stat-icon">💼</span>
+
+          <div>
+            <h3>{{ activeMissions }}</h3>
+            <p>Missions actives</p>
+          </div>
+        </a>
+
+        <a routerLink="/company/missions" class="stat-card">
+          <span class="stat-icon">✅</span>
+
+          <div>
+            <h3>{{ completedMissions }}</h3>
+            <p>Missions terminées</p>
+          </div>
+        </a>
+      </section>
+
+      <section class="secondary-stats">
+        <article>
+          <span>Invitations acceptées</span>
+          <strong>{{ acceptedInvitations }}</strong>
+        </article>
+
+        <article>
+          <span>Invitations refusées</span>
+          <strong>{{ rejectedInvitations }}</strong>
+        </article>
+
+        <article>
+          <span>Missions annulées</span>
+          <strong>{{ cancelledMissions }}</strong>
+        </article>
+
+        <article>
+          <span>Secteur</span>
+          <strong>{{ company.sector || 'À compléter' }}</strong>
+        </article>
       </section>
 
       <section class="content-grid">
-        <div class="panel">
-          <h2>Actions rapides</h2>
+        <article class="panel actions-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Navigation</p>
+              <h2>Actions rapides</h2>
+            </div>
+          </div>
 
           <div class="actions">
-            <a routerLink="/company/profile">Modifier le profil entreprise</a>
-            <a routerLink="/company/search-consultants">Rechercher des consultants</a>
-            <button disabled>Lancer le matching IA</button>
+            <a routerLink="/company/search-consultants">
+              Rechercher des consultants
+            </a>
+
+            <a routerLink="/company/search-consultants">
+              Lancer le matching IA
+            </a>
+
+            <a routerLink="/company/invitations">
+              Voir les invitations
+            </a>
+
+            <a routerLink="/company/missions">
+              Voir les missions
+            </a>
+
+            <a routerLink="/company/profile">
+              Modifier le profil entreprise
+            </a>
           </div>
-        </div>
+        </article>
 
-        <div class="panel">
-          <h2>Informations entreprise</h2>
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Profil</p>
+              <h2>Informations entreprise</h2>
+            </div>
+          </div>
 
-          <ul>
-            <li><strong>Secteur :</strong> {{ company.sector || 'Non renseigné' }}</li>
-            <li><strong>Localisation :</strong> {{ company.location || 'Non renseignée' }}</li>
-            <li><strong>Site web :</strong> {{ company.website || 'Non renseigné' }}</li>
-          </ul>
-        </div>
+          <div class="company-information">
+            <div>
+              <span>Nom</span>
+              <strong>
+                {{ company.companyName || 'Non renseigné' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Secteur</span>
+              <strong>
+                {{ company.sector || 'Non renseigné' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Localisation</span>
+              <strong>
+                {{ company.location || 'Non renseignée' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Site web</span>
+
+              <strong>
+                {{ company.website || 'Non renseigné' }}
+              </strong>
+            </div>
+          </div>
+        </article>
       </section>
 
+      <section class="activity-grid">
+        <article class="panel activity-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Activité récente</p>
+              <h2>Dernières invitations</h2>
+            </div>
+
+            <a routerLink="/company/invitations">
+              Tout voir
+            </a>
+          </div>
+
+          <div class="empty-message" *ngIf="recentInvitations.length === 0">
+            Aucune invitation envoyée pour le moment.
+          </div>
+
+          <div
+            class="activity-list"
+            *ngIf="recentInvitations.length > 0"
+          >
+            <a
+              class="activity-item"
+              *ngFor="
+                let invitation of recentInvitations;
+                trackBy: trackInvitation
+              "
+              [routerLink]="[
+                '/company/consultants',
+                invitation.consultantId
+              ]"
+            >
+              <div class="activity-avatar">
+                {{
+                  invitation.consultantName
+                    ? invitation.consultantName.charAt(0)
+                    : 'C'
+                }}
+              </div>
+
+              <div class="activity-content">
+                <strong>{{ invitation.consultantName }}</strong>
+                <p>{{ invitation.subject }}</p>
+
+                <span>
+                  {{
+                    invitation.createdAt
+                      | date: 'dd/MM/yyyy à HH:mm'
+                  }}
+                </span>
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="getInvitationStatusClass(invitation.status)"
+              >
+                {{ getInvitationStatusLabel(invitation.status) }}
+              </span>
+            </a>
+          </div>
+        </article>
+
+        <article class="panel activity-panel">
+          <div class="panel-header">
+            <div>
+              <p class="panel-eyebrow">Collaborations</p>
+              <h2>Dernières missions</h2>
+            </div>
+
+            <a routerLink="/company/missions">
+              Tout voir
+            </a>
+          </div>
+
+          <div class="empty-message" *ngIf="recentMissions.length === 0">
+            Aucune mission créée pour le moment.
+          </div>
+
+          <div class="activity-list" *ngIf="recentMissions.length > 0">
+            <a
+              class="activity-item"
+              *ngFor="
+                let mission of recentMissions;
+                trackBy: trackMission
+              "
+              [routerLink]="[
+                '/company/missions',
+                mission.id
+              ]"
+            >
+              <div class="activity-avatar mission-avatar">
+                {{
+                  mission.consultantName
+                    ? mission.consultantName.charAt(0)
+                    : 'M'
+                }}
+              </div>
+
+              <div class="activity-content">
+                <strong>{{ mission.title }}</strong>
+                <p>{{ mission.consultantName }}</p>
+
+                <span>
+                  {{
+                    mission.createdAt
+                      | date: 'dd/MM/yyyy à HH:mm'
+                  }}
+                </span>
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="getMissionStatusClass(mission.status)"
+              >
+                {{ getMissionStatusLabel(mission.status) }}
+              </span>
+            </a>
+          </div>
+        </article>
+      </section>
     </ng-container>
-    <article
-  class="dashboard-card clickable-card"
-  routerLink="/company/invitations"
->
-  <div class="card-icon">
-    ✉
-  </div>
-
-  <div>
-    <h3>
-      Invitations envoyées
-    </h3>
-
-    <p>
-      Suivre les propositions envoyées
-      aux consultants.
-    </p>
-  </div>
-</article>ng 
   </div>
 </div>

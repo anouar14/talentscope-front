@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ContractType, WorkMode } from '../../core/models/invitation';
 import { Mission, MissionStatus } from '../../core/models/mission';
 import { MissionService } from '../../core/services/mission';
 
@@ -58,6 +59,10 @@ export class MissionDetail implements OnInit {
     return this.isCompanyView && this.mission?.status === 'ACTIVE';
   }
 
+  get hasTechnologies(): boolean {
+    return (this.mission?.technologies?.length ?? 0) > 0;
+  }
+
   loadMission(missionId: string): void {
     this.loading = true;
     this.errorMessage = '';
@@ -65,7 +70,11 @@ export class MissionDetail implements OnInit {
 
     this.missionService.getMissionById(missionId).subscribe({
       next: mission => {
-        this.mission = mission;
+        this.mission = {
+          ...mission,
+          technologies: mission.technologies ?? []
+        };
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -131,6 +140,44 @@ export class MissionDetail implements OnInit {
     }
   }
 
+  getContractTypeLabel(contractType: ContractType | null): string {
+    switch (contractType) {
+      case 'CDI':
+        return 'CDI';
+      case 'CDD':
+        return 'CDD';
+      case 'FREELANCE':
+        return 'Freelance';
+      case 'INTERNSHIP':
+        return 'Stage';
+      case 'OTHER':
+        return 'Autre';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getWorkModeLabel(workMode: WorkMode | null): string {
+    switch (workMode) {
+      case 'ONSITE':
+        return 'Sur site';
+      case 'REMOTE':
+        return 'À distance';
+      case 'HYBRID':
+        return 'Hybride';
+      default:
+        return 'Non renseigné';
+    }
+  }
+
+  getSalaryLabel(salary: number | null): string {
+    if (salary === null || salary === undefined) {
+      return 'Non renseignée';
+    }
+
+    return `${salary.toLocaleString('fr-FR')} DT`;
+  }
+
   private updateStatus(status: MissionStatus): void {
     if (!this.mission) {
       return;
@@ -141,7 +188,11 @@ export class MissionDetail implements OnInit {
 
     this.missionService.updateMissionStatus(this.mission.id, status).subscribe({
       next: updatedMission => {
-        this.mission = updatedMission;
+        this.mission = {
+          ...updatedMission,
+          technologies: updatedMission.technologies ?? []
+        };
+
         this.updating = false;
 
         this.actionSuccessMessage =
