@@ -1,199 +1,443 @@
-<div class="auth-page">
-  <div class="auth-card">
-    <h1>Créer un compte</h1>
+<div class="register-page">
+  <div class="page-decoration decoration-left"></div>
+  <div class="page-decoration decoration-right"></div>
 
-    <p>
-      Rejoignez TalentScope et trouvez les meilleures opportunités IT.
-    </p>
+  <a
+    class="auth-brand"
+    routerLink="/"
+    aria-label="Retour à l'accueil TalentScope"
+  >
+    <span class="brand-mark">T</span>
 
-    <form
-      #registerForm="ngForm"
-      (ngSubmit)="onRegister(registerForm)"
-      novalidate
-    >
-      <!-- Nom complet -->
-      <label for="name">Nom complet</label>
+    <span class="brand-content">
+      <strong>TalentScope</strong>
+      <small>Recrutement intelligent</small>
+    </span>
+  </a>
 
-      <input
-        id="name"
-        type="text"
-        name="name"
-        [(ngModel)]="name"
-        #nameField="ngModel"
-        placeholder="Ex : Hichri Anouar"
-        required
-        minlength="3"
-        maxlength="100"
-        pattern="^[A-Za-zÀ-ÿ' -]+$"
-        autocomplete="name"
-      />
-
-      <div
-        class="field-error"
-        *ngIf="nameField.invalid && (nameField.touched || submitted)"
-      >
-        <span *ngIf="nameField.errors?.['required']">
-          Le nom complet est obligatoire.
-        </span>
-
-        <span *ngIf="nameField.errors?.['minlength']">
-          Le nom doit contenir au moins 3 caractères.
-        </span>
-
-        <span *ngIf="nameField.errors?.['pattern']">
-          Le nom contient des caractères non autorisés.
-        </span>
+  <div class="register-layout">
+    <section class="register-introduction">
+      <div class="introduction-badge">
+        <span>✦</span>
+        Rejoindre TalentScope
       </div>
 
-      <!-- Email -->
-      <label for="email">Email</label>
+      <h1>
+        Créez votre espace et
+        <span>accélérez vos opportunités.</span>
+      </h1>
 
-      <input
-        id="email"
-        type="email"
-        name="email"
-        [(ngModel)]="email"
-        #emailField="ngModel"
-        placeholder="exemple@email.com"
-        required
-        email
-        maxlength="150"
-        autocomplete="email"
-      />
-
-      <div
-        class="field-error"
-        *ngIf="emailField.invalid && (emailField.touched || submitted)"
-      >
-        <span *ngIf="emailField.errors?.['required']">
-          L’adresse email est obligatoire.
-        </span>
-
-        <span *ngIf="emailField.errors?.['email']">
-          Le format de l’adresse email est invalide.
-        </span>
-      </div>
-
-      <!-- Mot de passe -->
-      <label for="password">Mot de passe</label>
-
-      <input
-        id="password"
-        type="password"
-        name="password"
-        [(ngModel)]="password"
-        #passwordField="ngModel"
-        placeholder="Votre mot de passe"
-        required
-        minlength="8"
-        maxlength="64"
-        pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&._#-])[A-Za-z0-9@$!%*?&._#-]{8,64}$"
-        autocomplete="new-password"
-      />
-
-      <div
-        class="field-error"
-        *ngIf="
-          passwordField.invalid &&
-          (passwordField.touched || submitted)
-        "
-      >
-        <span *ngIf="passwordField.errors?.['required']">
-          Le mot de passe est obligatoire.
-        </span>
-
-        <span *ngIf="passwordField.errors?.['minlength']">
-          Le mot de passe doit contenir au moins 8 caractères.
-        </span>
-
-        <span
-          *ngIf="
-            passwordField.errors?.['pattern'] &&
-            !passwordField.errors?.['minlength']
-          "
-        >
-          Le mot de passe doit contenir une majuscule, une minuscule,
-          un chiffre et un caractère spécial.
-        </span>
-      </div>
-
-      <div class="password-rules">
-        Le mot de passe doit contenir au moins 8 caractères, une majuscule,
-        une minuscule, un chiffre et un caractère spécial.
-      </div>
-
-      <!-- Confirmation du mot de passe -->
-      <label for="confirmPassword">Confirmer le mot de passe</label>
-
-      <input
-        id="confirmPassword"
-        type="password"
-        name="confirmPassword"
-        [(ngModel)]="confirmPassword"
-        #confirmPasswordField="ngModel"
-        placeholder="Confirmez votre mot de passe"
-        required
-        autocomplete="new-password"
-      />
-
-      <div
-        class="field-error"
-        *ngIf="
-          confirmPasswordField.touched ||
-          submitted
-        "
-      >
-        <span *ngIf="confirmPasswordField.errors?.['required']">
-          La confirmation du mot de passe est obligatoire.
-        </span>
-
-        <span
-          *ngIf="
-            !confirmPasswordField.errors?.['required'] &&
-            passwordsDoNotMatch
-          "
-        >
-          Les mots de passe ne correspondent pas.
-        </span>
-      </div>
-
-      <!-- Type de compte -->
-      <label for="role">Type de compte</label>
-
-      <select
-        id="role"
-        name="role"
-        [(ngModel)]="role"
-        #roleField="ngModel"
-        required
-      >
-        <option value="CONSULTANT">Consultant</option>
-        <option value="COMPANY">Entreprise</option>
-      </select>
-
-      <div
-        class="field-error"
-        *ngIf="roleField.invalid && (roleField.touched || submitted)"
-      >
-        Le type de compte est obligatoire.
-      </div>
-
-      <!-- Erreur générale -->
-      <p class="error" *ngIf="errorMessage">
-        {{ errorMessage }}
+      <p>
+        Un seul compte pour accéder à une expérience adaptée
+        à votre activité, que vous soyez consultant IT ou entreprise.
       </p>
 
-      <button
-        type="submit"
-        [disabled]="loading"
-      >
-        {{ loading ? 'Création en cours...' : 'Créer mon compte' }}
-      </button>
-    </form>
+      <div class="journey">
+        <div class="journey-item">
+          <span class="journey-number">01</span>
 
-    <div class="auth-footer">
-      Vous avez déjà un compte ?
-      <a routerLink="/login">Se connecter</a>
-    </div>
+          <div>
+            <strong>Créez votre compte</strong>
+            <p>
+              Choisissez votre espace Consultant ou Entreprise.
+            </p>
+          </div>
+        </div>
+
+        <div class="journey-line"></div>
+
+        <div class="journey-item">
+          <span class="journey-number">02</span>
+
+          <div>
+            <strong>Complétez votre profil</strong>
+            <p>
+              Ajoutez vos informations ou analysez votre CV.
+            </p>
+          </div>
+        </div>
+
+        <div class="journey-line"></div>
+
+        <div class="journey-item">
+          <span class="journey-number">03</span>
+
+          <div>
+            <strong>Trouvez les bonnes opportunités</strong>
+            <p>
+              Profitez du matching intelligent TalentScope.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-highlight">
+        <div class="ai-icon">✦</div>
+
+        <div>
+          <span>TALENTSCOPE AI</span>
+
+          <strong>
+            Un matching hybride, robuste et explicable.
+          </strong>
+
+          <p>
+            Le score combine calcul déterministe et analyse IA
+            pour fournir une recommandation compréhensible.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="register-card-container">
+      <div class="register-card">
+        <div class="register-heading">
+          <span class="register-eyebrow">
+            CRÉATION DU COMPTE
+          </span>
+
+          <h2>Commencer avec TalentScope</h2>
+
+          <p>
+            Renseignez vos informations pour créer votre espace.
+          </p>
+        </div>
+
+        <form
+          #registerForm="ngForm"
+          (ngSubmit)="onRegister(registerForm)"
+          novalidate
+        >
+          <div class="form-field">
+            <label>
+              Je suis
+            </label>
+
+            <div class="role-selector">
+              <label
+                class="role-option"
+                [class.selected]="role === 'CONSULTANT'"
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value="CONSULTANT"
+                  [(ngModel)]="role"
+                  required
+                >
+
+                <span class="role-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 10c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6Zm-6.8 6c.55-2.13 3.34-4 6.8-4s6.25 1.87 6.8 4H5.2Z"
+                    />
+                  </svg>
+                </span>
+
+                <span class="role-content">
+                  <strong>Consultant</strong>
+                  <small>
+                    Je recherche des missions
+                  </small>
+                </span>
+
+                <span class="role-check">✓</span>
+              </label>
+
+              <label
+                class="role-option"
+                [class.selected]="role === 'COMPANY'"
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value="COMPANY"
+                  [(ngModel)]="role"
+                  required
+                >
+
+                <span class="role-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M4 22V2h10v5h6v15H4Zm2-2h6V4H6v16Zm8 0h4V9h-4v11ZM8 7h2v2H8V7Zm0 4h2v2H8v-2Zm0 4h2v2H8v-2Zm7-3h2v2h-2v-2Zm0 4h2v2h-2v-2Z"
+                    />
+                  </svg>
+                </span>
+
+                <span class="role-content">
+                  <strong>Entreprise</strong>
+                  <small>
+                    Je recherche des talents
+                  </small>
+                </span>
+
+                <span class="role-check">✓</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="name">
+              Nom complet
+            </label>
+
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 10c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6Zm-6.8 6c.55-2.13 3.34-4 6.8-4s6.25 1.87 6.8 4H5.2Z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                id="name"
+                type="text"
+                name="name"
+                [(ngModel)]="name"
+                #nameField="ngModel"
+                placeholder="Ex : Hichri Anouar"
+                required
+                minlength="3"
+                maxlength="100"
+                pattern="^[A-Za-zÀ-ÿ' -]+$"
+                autocomplete="name"
+              >
+            </div>
+
+            <div
+              class="field-error"
+              *ngIf="
+                nameField.invalid &&
+                (nameField.touched || submitted)
+              "
+            >
+              <span *ngIf="nameField.errors?.['required']">
+                Le nom complet est obligatoire.
+              </span>
+
+              <span *ngIf="nameField.errors?.['minlength']">
+                Le nom doit contenir au moins 3 caractères.
+              </span>
+
+              <span *ngIf="nameField.errors?.['pattern']">
+                Le nom contient des caractères non autorisés.
+              </span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="email">
+              Adresse email
+            </label>
+
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v.4l8 5 8-5V7H4Zm16 10V9.75l-8 5-8-5V17h16Z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="email"
+                #emailField="ngModel"
+                placeholder="exemple@email.com"
+                required
+                email
+                maxlength="150"
+                autocomplete="email"
+              >
+            </div>
+
+            <div
+              class="field-error"
+              *ngIf="
+                emailField.invalid &&
+                (emailField.touched || submitted)
+              "
+            >
+              <span *ngIf="emailField.errors?.['required']">
+                L’adresse email est obligatoire.
+              </span>
+
+              <span *ngIf="emailField.errors?.['email']">
+                Le format de l’adresse email est invalide.
+              </span>
+            </div>
+          </div>
+
+          <div class="password-grid">
+            <div class="form-field">
+              <label for="password">
+                Mot de passe
+              </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10h14V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 12H7v-8h10v8Z"
+                    />
+                  </svg>
+                </span>
+
+                <input
+                  id="password"
+                  type="password"
+                  name="password"
+                  [(ngModel)]="password"
+                  #passwordField="ngModel"
+                  placeholder="Mot de passe"
+                  required
+                  minlength="8"
+                  maxlength="64"
+                  pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&._#-])[A-Za-z0-9@$!%*?&._#-]{8,64}$"
+                  autocomplete="new-password"
+                >
+              </div>
+
+              <div
+                class="field-error"
+                *ngIf="
+                  passwordField.invalid &&
+                  (passwordField.touched || submitted)
+                "
+              >
+                <span *ngIf="passwordField.errors?.['required']">
+                  Le mot de passe est obligatoire.
+                </span>
+
+                <span *ngIf="passwordField.errors?.['minlength']">
+                  Au moins 8 caractères sont nécessaires.
+                </span>
+
+                <span
+                  *ngIf="
+                    passwordField.errors?.['pattern'] &&
+                    !passwordField.errors?.['minlength']
+                  "
+                >
+                  Le format du mot de passe est invalide.
+                </span>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="confirmPassword">
+                Confirmation
+              </label>
+
+              <div class="input-wrapper">
+                <span class="input-icon">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10h14V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 12H7v-8h10v8Z"
+                    />
+                  </svg>
+                </span>
+
+                <input
+                  id="confirmPassword"
+                  type="password"
+                  name="confirmPassword"
+                  [(ngModel)]="confirmPassword"
+                  #confirmPasswordField="ngModel"
+                  placeholder="Confirmer"
+                  required
+                  autocomplete="new-password"
+                >
+              </div>
+
+              <div
+                class="field-error"
+                *ngIf="
+                  confirmPasswordField.touched ||
+                  submitted
+                "
+              >
+                <span
+                  *ngIf="
+                    confirmPasswordField.errors?.['required']
+                  "
+                >
+                  La confirmation est obligatoire.
+                </span>
+
+                <span
+                  *ngIf="
+                    !confirmPasswordField.errors?.['required'] &&
+                    passwordsDoNotMatch
+                  "
+                >
+                  Les mots de passe ne correspondent pas.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="password-rules">
+            <span class="rules-icon">i</span>
+
+            <span>
+              8 caractères minimum avec une majuscule, une
+              minuscule, un chiffre et un caractère spécial.
+            </span>
+          </div>
+
+          <div
+            class="error-message"
+            *ngIf="errorMessage"
+          >
+            <span class="error-icon">!</span>
+
+            <span>
+              {{ errorMessage }}
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="loading"
+          >
+            <span>
+              {{
+                loading
+                  ? 'Création en cours...'
+                  : 'Créer mon compte'
+              }}
+            </span>
+
+            <span
+              class="button-arrow"
+              *ngIf="!loading"
+            >
+              →
+            </span>
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <span>Vous avez déjà un compte ?</span>
+
+          <a routerLink="/login">
+            Se connecter
+          </a>
+        </div>
+      </div>
+
+      <a
+        routerLink="/"
+        class="back-home"
+      >
+        <span>←</span>
+        Retour à l'accueil
+      </a>
+    </section>
   </div>
 </div>

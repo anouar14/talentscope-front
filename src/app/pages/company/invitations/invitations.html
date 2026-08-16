@@ -1,31 +1,51 @@
-<div class="invitations-page">
-  <div class="invitations-container">
-    <header class="page-header">
+<div class="page-shell">
+  <div class="page-container">
+    <section class="page-hero">
       <div>
-        <p class="eyebrow">Espace entreprise</p>
+        <span class="eyebrow">PROPOSITIONS</span>
 
-        <h1>Propositions envoyées</h1>
+        <h1>
+          Suivez vos
+          <span>invitations envoyées.</span>
+        </h1>
 
-        <p class="page-description">
-          Consultez les propositions de mission envoyées aux consultants et
-          suivez leur statut.
+        <p>
+          Retrouvez toutes les propositions adressées aux consultants,
+          consultez leur statut et accédez rapidement aux profils concernés.
         </p>
       </div>
 
-      <a routerLink="/company/search-consultants" class="primary-link">
-        Rechercher un consultant
-      </a>
-    </header>
+      <a
+        routerLink="/company/search-consultants"
+        class="primary-action"
+      >
+        <span class="action-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M10.5 4a6.5 6.5 0 1 0 3.98 11.64L19.84 21 21 19.84l-5.36-5.36A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+          </svg>
+        </span>
 
-    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+        Rechercher un consultant
+        <span>→</span>
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
       <button
         type="button"
         class="summary-card"
         [class.active]="selectedStatus === 'ALL'"
         (click)="filterByStatus('ALL')"
       >
-        <span>Total</span>
-        <strong>{{ invitations.length }}</strong>
+        <span class="summary-icon summary-purple">◎</span>
+
+        <div>
+          <span>Toutes les propositions</span>
+          <strong>{{ invitations.length }}</strong>
+        </div>
       </button>
 
       <button
@@ -34,8 +54,12 @@
         [class.active]="selectedStatus === 'PENDING'"
         (click)="filterByStatus('PENDING')"
       >
-        <span>En attente</span>
-        <strong>{{ pendingCount }}</strong>
+        <span class="summary-icon summary-orange">◷</span>
+
+        <div>
+          <span>En attente</span>
+          <strong>{{ pendingCount }}</strong>
+        </div>
       </button>
 
       <button
@@ -44,8 +68,12 @@
         [class.active]="selectedStatus === 'ACCEPTED'"
         (click)="filterByStatus('ACCEPTED')"
       >
-        <span>Acceptées</span>
-        <strong>{{ acceptedCount }}</strong>
+        <span class="summary-icon summary-green">✓</span>
+
+        <div>
+          <span>Acceptées</span>
+          <strong>{{ acceptedCount }}</strong>
+        </div>
       </button>
 
       <button
@@ -54,8 +82,12 @@
         [class.active]="selectedStatus === 'REJECTED'"
         (click)="filterByStatus('REJECTED')"
       >
-        <span>Refusées</span>
-        <strong>{{ rejectedCount }}</strong>
+        <span class="summary-icon summary-red">×</span>
+
+        <div>
+          <span>Refusées</span>
+          <strong>{{ rejectedCount }}</strong>
+        </div>
       </button>
     </section>
 
@@ -63,21 +95,29 @@
       class="filters-card"
       *ngIf="!loading && !errorMessage && invitations.length > 0"
     >
-      <div class="search-field">
+      <div class="filter-field search-field">
         <label for="company-invitation-search">
-          Rechercher
+          Rechercher une proposition
         </label>
 
-        <input
-          id="company-invitation-search"
-          type="search"
-          name="companyInvitationSearch"
-          [(ngModel)]="searchTerm"
-          placeholder="Consultant, mission, technologie, localisation..."
-        />
+        <div class="input-wrapper">
+          <span class="input-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M10.5 4a6.5 6.5 0 1 0 3.98 11.64L19.84 21 21 19.84l-5.36-5.36A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+            </svg>
+          </span>
+
+          <input
+            id="company-invitation-search"
+            type="search"
+            name="companyInvitationSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Consultant, mission, technologie, localisation..."
+          >
+        </div>
       </div>
 
-      <div class="status-field">
+      <div class="filter-field">
         <label for="company-invitation-status">
           Statut
         </label>
@@ -106,27 +146,43 @@
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement des propositions...</p>
+
+      <h2>Chargement des propositions</h2>
+
+      <p>
+        Récupération de vos invitations en cours...
+      </p>
     </section>
 
-    <section class="state-card error-state" *ngIf="!loading && errorMessage">
-      <h2>Une erreur est survenue</h2>
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger vos propositions</h2>
+
       <p>{{ errorMessage }}</p>
 
-      <button type="button" (click)="loadInvitations()">
+      <button
+        type="button"
+        (click)="loadInvitations()"
+      >
         Réessayer
       </button>
     </section>
 
     <section
-      class="state-card empty-state"
+      class="state-card"
       *ngIf="!loading && !errorMessage && invitations.length === 0"
     >
+      <div class="state-icon empty-icon">✉</div>
+
       <h2>Aucune proposition envoyée</h2>
 
       <p>
-        Recherchez un consultant et envoyez-lui une proposition de mission
-        complète.
+        Trouvez un consultant correspondant à votre besoin et
+        envoyez-lui une proposition de mission.
       </p>
 
       <a routerLink="/company/search-consultants">
@@ -135,7 +191,7 @@
     </section>
 
     <section
-      class="state-card empty-state"
+      class="state-card"
       *ngIf="
         !loading &&
         !errorMessage &&
@@ -143,13 +199,18 @@
         filteredInvitations.length === 0
       "
     >
+      <div class="state-icon empty-icon">⌕</div>
+
       <h2>Aucun résultat</h2>
 
       <p>
         Aucune proposition ne correspond aux critères sélectionnés.
       </p>
 
-      <button type="button" (click)="resetFilters()">
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
         Réinitialiser les filtres
       </button>
     </section>
@@ -160,23 +221,26 @@
     >
       <article
         class="invitation-card"
-        *ngFor="let invitation of filteredInvitations; trackBy: trackInvitation"
+        *ngFor="
+          let invitation of filteredInvitations;
+          trackBy: trackInvitation
+        "
       >
-        <div class="invitation-header">
-          <div class="consultant-information">
+        <div class="card-top">
+          <div class="consultant-block">
             <div class="consultant-avatar">
               {{ getConsultantInitial(invitation) }}
             </div>
 
             <div>
-              <p class="consultant-label">Consultant</p>
+              <span class="card-label">CONSULTANT</span>
 
               <h2>{{ invitation.consultantName }}</h2>
 
-              <p class="consultant-title">
+              <p>
                 {{
                   invitation.consultantTitle ||
-                    'Titre professionnel non renseigné'
+                  'Titre professionnel non renseigné'
                 }}
               </p>
             </div>
@@ -190,19 +254,17 @@
           </span>
         </div>
 
-        <section class="invitation-content">
-          <p class="content-label">Proposition de mission</p>
+        <section class="mission-content">
+          <span class="card-label">PROPOSITION DE MISSION</span>
 
           <h3>{{ invitation.subject }}</h3>
 
-          <p class="invitation-message">
-            {{ invitation.message }}
-          </p>
+          <p>{{ invitation.message }}</p>
         </section>
 
-        <section class="mission-details-grid">
-          <div class="detail-item">
-            <span>Date de début</span>
+        <section class="details-grid">
+          <article>
+            <span>Début</span>
 
             <strong>
               {{
@@ -211,10 +273,10 @@
                   : 'Non renseignée'
               }}
             </strong>
-          </div>
+          </article>
 
-          <div class="detail-item">
-            <span>Date de fin</span>
+          <article>
+            <span>Fin</span>
 
             <strong>
               {{
@@ -223,43 +285,49 @@
                   : 'Non définie'
               }}
             </strong>
-          </div>
+          </article>
 
-          <div class="detail-item">
-            <span>Type de contrat</span>
+          <article>
+            <span>Contrat</span>
 
             <strong>
               {{ getContractTypeLabel(invitation.contractType) }}
             </strong>
-          </div>
+          </article>
 
-          <div class="detail-item">
-            <span>Mode de travail</span>
+          <article>
+            <span>Mode</span>
 
             <strong>
               {{ getWorkModeLabel(invitation.workMode) }}
             </strong>
-          </div>
+          </article>
 
-          <div class="detail-item">
+          <article>
             <span>Localisation</span>
 
             <strong>
               {{ invitation.location || 'Non renseignée' }}
             </strong>
-          </div>
+          </article>
 
-          <div class="detail-item">
+          <article>
             <span>Rémunération</span>
 
             <strong>
               {{ getSalaryLabel(invitation.salary) }}
             </strong>
-          </div>
+          </article>
         </section>
 
         <section class="technologies-section">
-          <h3>Technologies</h3>
+          <div class="section-heading">
+            <span>Technologies</span>
+
+            <small>
+              {{ invitation.technologies.length }} compétence(s)
+            </small>
+          </div>
 
           <div
             class="empty-technologies"
@@ -278,40 +346,75 @@
           </div>
         </section>
 
-        <section class="notes-section" *ngIf="invitation.notes">
-          <h3>Notes complémentaires</h3>
+        <section
+          class="notes-section"
+          *ngIf="invitation.notes"
+        >
+          <span class="card-label">NOTES</span>
 
           <p>
             {{ invitation.notes }}
           </p>
         </section>
 
-        <div class="invitation-dates">
+        <div class="timeline">
           <div>
-            <span>Envoyée le</span>
+            <span class="timeline-dot"></span>
 
-            <strong>
-              {{ invitation.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
-            </strong>
+            <div>
+              <span>Envoyée le</span>
+
+              <strong>
+                {{ invitation.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+              </strong>
+            </div>
           </div>
 
           <div *ngIf="invitation.respondedAt">
-            <span>Réponse reçue le</span>
+            <span class="timeline-dot response-dot"></span>
 
-            <strong>
-              {{ invitation.respondedAt | date: 'dd/MM/yyyy à HH:mm' }}
-            </strong>
+            <div>
+              <span>Réponse reçue le</span>
+
+              <strong>
+                {{ invitation.respondedAt | date: 'dd/MM/yyyy à HH:mm' }}
+              </strong>
+            </div>
           </div>
 
           <div *ngIf="!invitation.respondedAt">
-            <span>Réponse</span>
-            <strong>En attente du consultant</strong>
+            <span class="timeline-dot waiting-dot"></span>
+
+            <div>
+              <span>Réponse</span>
+              <strong>En attente du consultant</strong>
+            </div>
           </div>
         </div>
 
-        <div class="invitation-actions">
+        <div
+          class="state-message"
+          [ngClass]="getStatusClass(invitation.status)"
+        >
+          <ng-container *ngIf="invitation.status === 'PENDING'">
+            <span>◷</span>
+            Le consultant n’a pas encore répondu à cette proposition.
+          </ng-container>
+
+          <ng-container *ngIf="invitation.status === 'ACCEPTED'">
+            <span>✓</span>
+            Proposition acceptée. Une mission active a été créée.
+          </ng-container>
+
+          <ng-container *ngIf="invitation.status === 'REJECTED'">
+            <span>×</span>
+            Cette proposition a été refusée ou clôturée.
+          </ng-container>
+        </div>
+
+        <div class="card-actions">
           <a
-            class="secondary-link"
+            class="secondary-action"
             [routerLink]="[
               '/company/consultants',
               invitation.consultantId
@@ -322,32 +425,12 @@
 
           <a
             *ngIf="invitation.status === 'ACCEPTED'"
-            class="mission-link"
+            class="mission-action"
             routerLink="/company/missions"
           >
-            Voir les missions
+            Voir la mission
+            <span>→</span>
           </a>
-        </div>
-
-        <div
-          class="invitation-state pending-state"
-          *ngIf="invitation.status === 'PENDING'"
-        >
-          Le consultant n’a pas encore répondu à cette proposition.
-        </div>
-
-        <div
-          class="invitation-state accepted-state"
-          *ngIf="invitation.status === 'ACCEPTED'"
-        >
-          Cette proposition a été acceptée. Une mission active a été créée.
-        </div>
-
-        <div
-          class="invitation-state rejected-state"
-          *ngIf="invitation.status === 'REJECTED'"
-        >
-          Cette proposition a été refusée ou clôturée automatiquement.
         </div>
       </article>
     </section>

@@ -1,55 +1,215 @@
 <div class="profile-page">
-  <div class="profile-card">
-
-    <div class="profile-header">
-      <div class="avatar">
-        {{ company.companyName ? company.companyName.charAt(0) : 'E' }}
-      </div>
-
-      <h1>Profil entreprise</h1>
-      <p>Complétez les informations de votre entreprise.</p>
-    </div>
-
-    <div *ngIf="loading" class="info-message">
-      Chargement du profil...
-    </div>
-
-    <form *ngIf="!loading" (ngSubmit)="saveProfile()">
-
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Nom de l’entreprise</label>
-          <input type="text" name="companyName" [(ngModel)]="company.companyName">
+  <div class="profile-container">
+    <section class="profile-header">
+      <div class="company-identity">
+        <div class="avatar">
+          {{
+            company.companyName
+              ? company.companyName.charAt(0)
+              : 'E'
+          }}
         </div>
 
-        <div class="form-group">
-          <label>Secteur</label>
-          <input type="text" name="sector" [(ngModel)]="company.sector" placeholder="Ex: Télécommunications">
-        </div>
+        <div>
+          <span class="eyebrow">ESPACE ENTREPRISE</span>
 
-        <div class="form-group">
-          <label>Localisation</label>
-          <input type="text" name="location" [(ngModel)]="company.location" placeholder="Ex: Tunis">
-        </div>
+          <h1>Profil de l'entreprise</h1>
 
-        <div class="form-group full">
-          <label>Site web</label>
-          <input type="text" name="website" [(ngModel)]="company.website" placeholder="https://www.exemple.com">
-        </div>
-
-        <div class="form-group full">
-          <label>Description</label>
-          <textarea name="description" [(ngModel)]="company.description" rows="5"></textarea>
+          <p>
+            Présentez votre organisation et maintenez vos
+            informations à jour.
+          </p>
         </div>
       </div>
 
-      <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div class="profile-status">
+        <span class="status-dot"></span>
 
-      <button class="save-btn" type="submit" [disabled]="saving">
-        {{ saving ? 'Enregistrement...' : 'Enregistrer le profil' }}
-      </button>
+        <div>
+          <strong>Profil professionnel</strong>
+          <small>Visible dans votre espace TalentScope</small>
+        </div>
+      </div>
+    </section>
 
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <h2>Chargement du profil</h2>
+      <p>Récupération des informations de votre entreprise...</p>
+    </section>
+
+    <form
+      *ngIf="!loading"
+      class="profile-form"
+      (ngSubmit)="saveProfile()"
+    >
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 22V2h10v5h6v15H4Zm2-2h6V4H6v16Zm8 0h4V9h-4v11ZM8 7h2v2H8V7Zm0 4h2v2H8v-2Zm0 4h2v2H8v-2Zm7-3h2v2h-2v-2Zm0 4h2v2h-2v-2Z" />
+            </svg>
+          </div>
+
+          <div>
+            <span class="eyebrow">IDENTITÉ</span>
+            <h2>Informations générales</h2>
+
+            <p>
+              Ces informations identifient votre entreprise
+              dans TalentScope.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="companyName">
+              Nom de l'entreprise
+            </label>
+
+            <input
+              id="companyName"
+              type="text"
+              name="companyName"
+              [(ngModel)]="company.companyName"
+              placeholder="Nom de votre entreprise"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="sector">
+              Secteur d'activité
+            </label>
+
+            <input
+              id="sector"
+              type="text"
+              name="sector"
+              [(ngModel)]="company.sector"
+              placeholder="Ex : Télécommunications"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="location">
+              Localisation
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              name="location"
+              [(ngModel)]="company.location"
+              placeholder="Ex : Tunis"
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon web-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 6h-3.04a15.7 15.7 0 0 0-1.38-3.17A8.04 8.04 0 0 1 18.9 8ZM12 4c.83 1.2 1.46 2.54 1.84 4h-3.68A13.38 13.38 0 0 1 12 4ZM4.26 14a7.77 7.77 0 0 1 0-4h3.4a17.9 17.9 0 0 0 0 4h-3.4Zm.84 2h3.04c.3 1.11.76 2.18 1.38 3.17A8.04 8.04 0 0 1 5.1 16ZM8.14 8H5.1a8.04 8.04 0 0 1 4.42-3.17A15.7 15.7 0 0 0 8.14 8ZM12 20a13.38 13.38 0 0 1-1.84-4h3.68A13.38 13.38 0 0 1 12 20Zm2.24-6H9.76a15.92 15.92 0 0 1 0-4h4.48a15.92 15.92 0 0 1 0 4Zm.24 5.17A15.7 15.7 0 0 0 15.86 16h3.04a8.04 8.04 0 0 1-4.42 3.17ZM16.34 14a17.9 17.9 0 0 0 0-4h3.4a7.77 7.77 0 0 1 0 4h-3.4Z" />
+            </svg>
+          </div>
+
+          <div>
+            <span class="eyebrow">PRÉSENCE</span>
+            <h2>Présentation de l'entreprise</h2>
+
+            <p>
+              Ajoutez votre site internet et une courte description
+              de votre activité.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="website">
+              Site web
+            </label>
+
+            <input
+              id="website"
+              type="text"
+              name="website"
+              [(ngModel)]="company.website"
+              placeholder="https://www.exemple.com"
+            >
+          </div>
+
+          <div class="form-group full">
+            <div class="label-row">
+              <label for="description">
+                Description
+              </label>
+
+              <span>
+                Présentez brièvement votre entreprise
+              </span>
+            </div>
+
+            <textarea
+              id="description"
+              name="description"
+              [(ngModel)]="company.description"
+              rows="6"
+              placeholder="Décrivez votre activité, vos domaines d'expertise et votre environnement..."
+            ></textarea>
+          </div>
+        </div>
+      </section>
+
+      <div
+        class="alert success-alert"
+        *ngIf="successMessage"
+      >
+        <span>✓</span>
+
+        <div>
+          <strong>Profil enregistré</strong>
+          <p>{{ successMessage }}</p>
+        </div>
+      </div>
+
+      <div
+        class="alert error-alert"
+        *ngIf="errorMessage"
+      >
+        <span>!</span>
+
+        <div>
+          <strong>Enregistrement impossible</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <div>
+          <strong>Enregistrez vos modifications</strong>
+
+          <span>
+            Vos informations seront immédiatement mises à jour.
+          </span>
+        </div>
+
+        <button
+          class="save-btn"
+          type="submit"
+          [disabled]="saving"
+        >
+          {{
+            saving
+              ? 'Enregistrement...'
+              : 'Enregistrer les modifications'
+          }}
+
+          <span *ngIf="!saving">✓</span>
+        </button>
+      </div>
     </form>
   </div>
 </div>

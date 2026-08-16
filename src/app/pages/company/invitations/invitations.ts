@@ -107,11 +107,13 @@ export class CompanyInvitations implements OnInit {
         }
 
         if (error.status === 404) {
-          this.errorMessage = 'Votre profil entreprise est introuvable.';
+          this.errorMessage =
+            'Votre profil entreprise est introuvable.';
           return;
         }
 
-        this.errorMessage = 'Impossible de charger vos propositions.';
+        this.errorMessage =
+          'Impossible de charger vos propositions.';
       }
     });
   }

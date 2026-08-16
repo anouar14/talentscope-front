@@ -1,4 +1,4 @@
-<div class="auth-page">
+<!-- <div class="auth-page">
   <div class="auth-card">
 
     <h1>Connexion</h1>
@@ -89,5 +89,248 @@
       </a>
     </div>
 
+  </div>
+</div> -->
+
+<div class="auth-page">
+  <div class="auth-background auth-background-left"></div>
+  <div class="auth-background auth-background-right"></div>
+
+  <a
+    class="auth-brand"
+    routerLink="/"
+    aria-label="Retour à l'accueil TalentScope"
+  >
+    <span class="brand-mark">T</span>
+
+    <span class="brand-content">
+      <strong>TalentScope</strong>
+      <small>Recrutement intelligent</small>
+    </span>
+  </a>
+
+  <div class="auth-layout">
+    <section class="auth-introduction">
+      <div class="introduction-badge">
+        <span>✦</span>
+        TalentScope
+      </div>
+
+      <h1>
+        Retrouvez votre espace
+        <span>de recrutement intelligent.</span>
+      </h1>
+
+      <p>
+        Connectez-vous pour gérer votre profil, vos propositions,
+        vos missions et profiter du matching intelligent TalentScope.
+      </p>
+
+      <div class="advantages">
+        <div class="advantage">
+          <span class="advantage-icon">✓</span>
+
+          <div>
+            <strong>Une plateforme centralisée</strong>
+            <p>
+              Retrouvez toutes vos opportunités et missions
+              depuis un seul espace.
+            </p>
+          </div>
+        </div>
+
+        <div class="advantage">
+          <span class="advantage-icon">✦</span>
+
+          <div>
+            <strong>Matching intelligent</strong>
+            <p>
+              Des recommandations expliquées grâce à notre
+              moteur hybride.
+            </p>
+          </div>
+        </div>
+
+        <div class="advantage">
+          <span class="advantage-icon">◎</span>
+
+          <div>
+            <strong>Deux expériences personnalisées</strong>
+            <p>
+              Un espace adapté aux consultants et un autre
+              dédié aux entreprises.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="matching-preview">
+        <div class="preview-header">
+          <div>
+            <span>TalentScope AI</span>
+            <strong>Matching de profils</strong>
+          </div>
+
+          <span class="preview-status">
+            <i></i>
+            Analyse terminée
+          </span>
+        </div>
+
+        <div class="preview-candidate">
+          <div class="candidate-avatar">AM</div>
+
+          <div class="candidate-info">
+            <strong>Profil recommandé</strong>
+            <span>Senior Full Stack Developer</span>
+          </div>
+
+          <div class="candidate-score">
+            <strong>94%</strong>
+            <span>Excellent</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="auth-card-container">
+      <div class="auth-card">
+        <div class="auth-heading">
+          <span class="auth-eyebrow">
+            BON RETOUR
+          </span>
+
+          <h2>Connexion</h2>
+
+          <p>
+            Entrez vos identifiants pour accéder à votre espace.
+          </p>
+        </div>
+
+        <form (ngSubmit)="onLogin()">
+          <div class="form-field">
+            <label for="email">
+              Adresse email
+            </label>
+
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v.4l8 5 8-5V7H4Zm16 10V9.75l-8 5-8-5V17h16Z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                id="email"
+                type="email"
+                name="email"
+                [(ngModel)]="email"
+                placeholder="exemple@email.com"
+                autocomplete="email"
+              >
+            </div>
+          </div>
+
+          <div class="form-field">
+            <div class="label-row">
+              <label for="password">
+                Mot de passe
+              </label>
+
+              <a routerLink="/forgot-password">
+                Mot de passe oublié ?
+              </a>
+            </div>
+
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M17 8h-1V6a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v10h14V10a2 2 0 0 0-2-2Zm-7-2a2 2 0 0 1 4 0v2h-4V6Zm7 12H7v-8h10v8Z"
+                  />
+                </svg>
+              </span>
+
+              <input
+                id="password"
+                type="password"
+                name="password"
+                [(ngModel)]="password"
+                placeholder="Votre mot de passe"
+                autocomplete="current-password"
+              >
+            </div>
+          </div>
+
+          <div
+            class="error-message"
+            *ngIf="errorMessage"
+          >
+            <span class="error-icon">!</span>
+
+            <span>
+              {{ errorMessage }}
+            </span>
+          </div>
+
+          <button
+            type="submit"
+            class="primary-button"
+            [disabled]="loading || googleLoading"
+          >
+            <span>
+              {{
+                loading
+                  ? 'Connexion en cours...'
+                  : 'Se connecter'
+              }}
+            </span>
+
+            <span
+              class="button-arrow"
+              *ngIf="!loading"
+            >
+              →
+            </span>
+          </button>
+        </form>
+
+        <div class="separator">
+          <span>ou continuer avec</span>
+        </div>
+
+        <div class="google-section">
+          <div
+            #googleButton
+            class="google-button"
+          ></div>
+
+          <p
+            class="google-loading"
+            *ngIf="googleLoading"
+          >
+            Connexion avec Google en cours...
+          </p>
+        </div>
+
+        <div class="auth-footer">
+          <span>Pas encore de compte ?</span>
+
+          <a routerLink="/register">
+            Créer un compte
+          </a>
+        </div>
+      </div>
+
+      <a
+        routerLink="/"
+        class="back-home"
+      >
+        <span>←</span>
+        Retour à l'accueil
+      </a>
+    </section>
   </div>
 </div>

@@ -3,10 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import {
-  Notification,
-  NotificationType
-} from '../../core/models/notification';
+import { Notification, NotificationType } from '../../core/models/notification';
 import { Auth } from '../../core/services/auth';
 import { NotificationService } from '../../core/services/notification';
 
@@ -106,7 +103,8 @@ export class Notifications implements OnInit {
           return;
         }
 
-        this.errorMessage = 'Impossible de charger vos notifications.';
+        this.errorMessage =
+          'Impossible de charger vos notifications.';
       }
     });
   }
@@ -148,7 +146,8 @@ export class Notifications implements OnInit {
         this.processingNotificationId = null;
 
         if (error.status === 404) {
-          this.actionErrorMessage = 'Cette notification est introuvable.';
+          this.actionErrorMessage =
+            'Cette notification est introuvable.';
           return;
         }
 
@@ -182,6 +181,7 @@ export class Notifications implements OnInit {
         );
 
         this.processingNotificationId = null;
+
         this.actionErrorMessage =
           error.status === 404
             ? 'Cette notification est introuvable.'
@@ -209,6 +209,7 @@ export class Notifications implements OnInit {
         }));
 
         this.markAllLoading = false;
+
         this.actionSuccessMessage =
           'Toutes les notifications ont été marquées comme lues.';
       },
@@ -219,6 +220,7 @@ export class Notifications implements OnInit {
         );
 
         this.markAllLoading = false;
+
         this.actionErrorMessage =
           'Impossible de marquer toutes les notifications comme lues.';
       }
@@ -281,7 +283,7 @@ export class Notifications implements OnInit {
       case 'INVITATION_CLOSED':
         return '!';
       case 'MISSION_CREATED':
-        return '💼';
+        return '◆';
       case 'MISSION_COMPLETED':
         return '✓';
       case 'MISSION_CANCELLED':

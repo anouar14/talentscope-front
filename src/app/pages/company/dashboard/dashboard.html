@@ -2,12 +2,21 @@
   <div class="dashboard-container">
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement du tableau de bord...</p>
+      <h2>Préparation de votre espace</h2>
+      <p>Chargement de vos invitations et missions...</p>
     </section>
 
-    <section class="state-card error-state" *ngIf="!loading && errorMessage">
-      <h2>Une erreur est survenue</h2>
-      <p>{{ errorMessage }}</p>
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger votre espace</h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
 
       <button type="button" (click)="loadDashboard()">
         Réessayer
@@ -15,140 +24,307 @@
     </section>
 
     <ng-container *ngIf="!loading && !errorMessage && company">
-      <section class="hero-card">
-        <div>
-          <p class="eyebrow">Espace entreprise</p>
+      <section class="dashboard-hero">
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span>✦</span>
+            Espace entreprise
+          </div>
 
           <h1>
-            Bonjour {{ company.companyName || 'Entreprise' }} 👋
+            Bonjour
+            <span>{{ company.companyName || 'Entreprise' }}</span>
           </h1>
 
           <p>
-            Suivez vos invitations, vos missions et vos collaborations
-            depuis un espace centralisé.
+            Pilotez vos recherches, propositions et collaborations depuis
+            un espace unique pensé pour accélérer votre recrutement IT.
           </p>
+
+          <div class="hero-actions">
+            <a
+              routerLink="/company/search-consultants"
+              class="primary-action"
+            >
+              <span class="action-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10.5 4a6.5 6.5 0 1 0 3.98 11.64L19.84 21 21 19.84l-5.36-5.36A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+                </svg>
+              </span>
+
+              Trouver un consultant
+              <span>→</span>
+            </a>
+
+            <a
+              routerLink="/company/search-consultants"
+              class="secondary-action"
+            >
+              <span class="sparkle">✦</span>
+              Lancer un matching IA
+            </a>
+          </div>
         </div>
 
-        <button type="button" class="logout-btn" (click)="logout()">
-          Déconnexion
-        </button>
-      </section>
-
-      <section class="stats-grid">
-        <a routerLink="/company/invitations" class="stat-card">
-          <span class="stat-icon">📩</span>
-
-          <div>
-            <h3>{{ totalInvitations }}</h3>
-            <p>Invitations envoyées</p>
-          </div>
-        </a>
-
-        <a routerLink="/company/invitations" class="stat-card">
-          <span class="stat-icon">⏳</span>
-
-          <div>
-            <h3>{{ pendingInvitations }}</h3>
-            <p>Invitations en attente</p>
-          </div>
-        </a>
-
-        <a routerLink="/company/missions" class="stat-card">
-          <span class="stat-icon">💼</span>
-
-          <div>
-            <h3>{{ activeMissions }}</h3>
-            <p>Missions actives</p>
-          </div>
-        </a>
-
-        <a routerLink="/company/missions" class="stat-card">
-          <span class="stat-icon">✅</span>
-
-          <div>
-            <h3>{{ completedMissions }}</h3>
-            <p>Missions terminées</p>
-          </div>
-        </a>
-      </section>
-
-      <section class="secondary-stats">
-        <article>
-          <span>Invitations acceptées</span>
-          <strong>{{ acceptedInvitations }}</strong>
-        </article>
-
-        <article>
-          <span>Invitations refusées</span>
-          <strong>{{ rejectedInvitations }}</strong>
-        </article>
-
-        <article>
-          <span>Missions annulées</span>
-          <strong>{{ cancelledMissions }}</strong>
-        </article>
-
-        <article>
-          <span>Secteur</span>
-          <strong>{{ company.sector || 'À compléter' }}</strong>
-        </article>
-      </section>
-
-      <section class="content-grid">
-        <article class="panel actions-panel">
-          <div class="panel-header">
+        <div class="hero-overview">
+          <div class="overview-header">
             <div>
-              <p class="panel-eyebrow">Navigation</p>
-              <h2>Actions rapides</h2>
+              <span>VUE D'ENSEMBLE</span>
+              <strong>Activité recrutement</strong>
+            </div>
+
+            <span class="overview-live">
+              <i></i>
+              À jour
+            </span>
+          </div>
+
+          <div class="overview-score">
+            <div
+              class="score-circle"
+              [style.--score]="acceptanceRate"
+            >
+              <strong>{{ acceptanceRate }}%</strong>
+              <span>acceptées</span>
+            </div>
+
+            <div class="overview-details">
+              <div>
+                <span>Propositions</span>
+                <strong>{{ totalInvitations }}</strong>
+              </div>
+
+              <div>
+                <span>Missions actives</span>
+                <strong>{{ activeMissions }}</strong>
+              </div>
+
+              <div>
+                <span>Terminées</span>
+                <strong>{{ completedMissions }}</strong>
+              </div>
             </div>
           </div>
 
-          <div class="actions">
+          <div class="overview-footer">
+            <span>
+              <i>✦</i>
+              TalentScope Recruitment Workspace
+            </span>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats-section">
+        <div class="section-title">
+          <div>
+            <span class="section-eyebrow">INDICATEURS</span>
+            <h2>Votre activité en un coup d'œil</h2>
+          </div>
+
+          <p>
+            Consultez rapidement les principaux indicateurs de votre espace.
+          </p>
+        </div>
+
+        <div class="stats-grid">
+          <a routerLink="/company/invitations" class="stat-card">
+            <span class="stat-icon stat-purple">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v.5l8 5 8-5V7H4Zm16 10V9.85l-8 5-8-5V17h16Z" />
+              </svg>
+            </span>
+
+            <div class="stat-content">
+              <span>Invitations envoyées</span>
+              <strong>{{ totalInvitations }}</strong>
+              <small>Voir les propositions →</small>
+            </div>
+          </a>
+
+          <a routerLink="/company/invitations" class="stat-card">
+            <span class="stat-icon stat-orange">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 2a8 8 0 1 1 0 16 8 8 0 0 1 0-16Zm-1 3v6l5 3 1-1.7-4-2.3V7h-2Z" />
+              </svg>
+            </span>
+
+            <div class="stat-content">
+              <span>En attente</span>
+              <strong>{{ pendingInvitations }}</strong>
+              <small>Réponses attendues</small>
+            </div>
+          </a>
+
+          <a routerLink="/company/missions" class="stat-card">
+            <span class="stat-icon stat-green">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 4V2h6v2h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4Zm2 0h2V3h-2v1ZM5 9h14V6H5v3Zm0 2v8h14v-8H5Z" />
+              </svg>
+            </span>
+
+            <div class="stat-content">
+              <span>Missions actives</span>
+              <strong>{{ activeMissions }}</strong>
+              <small>Collaborations en cours</small>
+            </div>
+          </a>
+
+          <a routerLink="/company/missions" class="stat-card">
+            <span class="stat-icon stat-blue">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m9 16.2-3.5-3.5L4.1 14.1 9 19 20 8l-1.4-1.4L9 16.2Z" />
+              </svg>
+            </span>
+
+            <div class="stat-content">
+              <span>Missions terminées</span>
+              <strong>{{ completedMissions }}</strong>
+              <small>Collaborations réalisées</small>
+            </div>
+          </a>
+        </div>
+      </section>
+
+      <section class="mini-stats-grid">
+        <article>
+          <span class="mini-indicator success-indicator"></span>
+
+          <div>
+            <span>Invitations acceptées</span>
+            <strong>{{ acceptedInvitations }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <span class="mini-indicator danger-indicator"></span>
+
+          <div>
+            <span>Invitations refusées</span>
+            <strong>{{ rejectedInvitations }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <span class="mini-indicator muted-indicator"></span>
+
+          <div>
+            <span>Missions annulées</span>
+            <strong>{{ cancelledMissions }}</strong>
+          </div>
+        </article>
+
+        <article>
+          <span class="mini-indicator purple-indicator"></span>
+
+          <div>
+            <span>Secteur</span>
+            <strong>{{ company.sector || 'À compléter' }}</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="panel actions-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="section-eyebrow">ACCÈS RAPIDE</span>
+              <h2>Que souhaitez-vous faire ?</h2>
+            </div>
+          </div>
+
+          <div class="quick-actions">
             <a routerLink="/company/search-consultants">
-              Rechercher des consultants
+              <span class="quick-icon purple-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M10.5 4a6.5 6.5 0 1 0 3.98 11.64L19.84 21 21 19.84l-5.36-5.36A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+                </svg>
+              </span>
+
+              <span class="quick-content">
+                <strong>Rechercher des consultants</strong>
+                <small>Parcourez les profils disponibles</small>
+              </span>
+
+              <span class="quick-arrow">→</span>
             </a>
 
             <a routerLink="/company/search-consultants">
-              Lancer le matching IA
+              <span class="quick-icon ai-icon">✦</span>
+
+              <span class="quick-content">
+                <strong>Lancer le matching IA</strong>
+                <small>Trouvez les profils les plus pertinents</small>
+              </span>
+
+              <span class="quick-arrow">→</span>
             </a>
 
             <a routerLink="/company/invitations">
-              Voir les invitations
+              <span class="quick-icon orange-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 2v.5l8 5 8-5V7H4Zm16 10V9.85l-8 5-8-5V17h16Z" />
+                </svg>
+              </span>
+
+              <span class="quick-content">
+                <strong>Gérer les propositions</strong>
+                <small>Suivez vos invitations envoyées</small>
+              </span>
+
+              <span class="quick-arrow">→</span>
             </a>
 
             <a routerLink="/company/missions">
-              Voir les missions
-            </a>
+              <span class="quick-icon green-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M9 4V2h6v2h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h4Zm2 0h2V3h-2v1ZM5 9h14V6H5v3Zm0 2v8h14v-8H5Z" />
+                </svg>
+              </span>
 
-            <a routerLink="/company/profile">
-              Modifier le profil entreprise
+              <span class="quick-content">
+                <strong>Consulter les missions</strong>
+                <small>Suivez vos collaborations</small>
+              </span>
+
+              <span class="quick-arrow">→</span>
             </a>
           </div>
         </article>
 
-        <article class="panel">
-          <div class="panel-header">
+        <article class="panel company-panel">
+          <div class="panel-heading">
             <div>
-              <p class="panel-eyebrow">Profil</p>
-              <h2>Informations entreprise</h2>
+              <span class="section-eyebrow">VOTRE ENTREPRISE</span>
+              <h2>Informations du profil</h2>
+            </div>
+
+            <a routerLink="/company/profile">
+              Modifier
+            </a>
+          </div>
+
+          <div class="company-profile">
+            <div class="company-avatar">
+              {{
+                company.companyName
+                  ? company.companyName.charAt(0)
+                  : 'E'
+              }}
+            </div>
+
+            <div>
+              <strong>
+                {{ company.companyName || 'Entreprise' }}
+              </strong>
+
+              <span>
+                {{ company.sector || 'Secteur non renseigné' }}
+              </span>
             </div>
           </div>
 
           <div class="company-information">
-            <div>
-              <span>Nom</span>
-              <strong>
-                {{ company.companyName || 'Non renseigné' }}
-              </strong>
-            </div>
-
-            <div>
-              <span>Secteur</span>
-              <strong>
-                {{ company.sector || 'Non renseigné' }}
-              </strong>
-            </div>
-
             <div>
               <span>Localisation</span>
               <strong>
@@ -158,134 +334,176 @@
 
             <div>
               <span>Site web</span>
-
               <strong>
                 {{ company.website || 'Non renseigné' }}
               </strong>
             </div>
           </div>
+
+          <a
+            class="profile-action"
+            routerLink="/company/profile"
+          >
+            Compléter mon profil
+            <span>→</span>
+          </a>
         </article>
       </section>
 
-      <section class="activity-grid">
-        <article class="panel activity-panel">
-          <div class="panel-header">
-            <div>
-              <p class="panel-eyebrow">Activité récente</p>
-              <h2>Dernières invitations</h2>
+      <section class="activity-section">
+        <div class="section-title">
+          <div>
+            <span class="section-eyebrow">ACTIVITÉ RÉCENTE</span>
+            <h2>Suivez vos dernières interactions</h2>
+          </div>
+        </div>
+
+        <div class="activity-grid">
+          <article class="panel activity-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-eyebrow">PROPOSITIONS</span>
+                <h2>Dernières invitations</h2>
+              </div>
+
+              <a routerLink="/company/invitations">
+                Tout voir →
+              </a>
             </div>
 
-            <a routerLink="/company/invitations">
-              Tout voir
-            </a>
-          </div>
-
-          <div class="empty-message" *ngIf="recentInvitations.length === 0">
-            Aucune invitation envoyée pour le moment.
-          </div>
-
-          <div
-            class="activity-list"
-            *ngIf="recentInvitations.length > 0"
-          >
-            <a
-              class="activity-item"
-              *ngFor="
-                let invitation of recentInvitations;
-                trackBy: trackInvitation
-              "
-              [routerLink]="[
-                '/company/consultants',
-                invitation.consultantId
-              ]"
+            <div
+              class="empty-message"
+              *ngIf="recentInvitations.length === 0"
             >
-              <div class="activity-avatar">
-                {{
-                  invitation.consultantName
-                    ? invitation.consultantName.charAt(0)
-                    : 'C'
-                }}
-              </div>
+              <span class="empty-icon">✉</span>
 
-              <div class="activity-content">
-                <strong>{{ invitation.consultantName }}</strong>
-                <p>{{ invitation.subject }}</p>
+              <strong>Aucune invitation</strong>
 
-                <span>
-                  {{
-                    invitation.createdAt
-                      | date: 'dd/MM/yyyy à HH:mm'
-                  }}
-                </span>
-              </div>
+              <p>
+                Les invitations que vous envoyez apparaîtront ici.
+              </p>
 
-              <span
-                class="status-badge"
-                [ngClass]="getInvitationStatusClass(invitation.status)"
-              >
-                {{ getInvitationStatusLabel(invitation.status) }}
-              </span>
-            </a>
-          </div>
-        </article>
-
-        <article class="panel activity-panel">
-          <div class="panel-header">
-            <div>
-              <p class="panel-eyebrow">Collaborations</p>
-              <h2>Dernières missions</h2>
+              <a routerLink="/company/search-consultants">
+                Rechercher un consultant
+              </a>
             </div>
 
-            <a routerLink="/company/missions">
-              Tout voir
-            </a>
-          </div>
-
-          <div class="empty-message" *ngIf="recentMissions.length === 0">
-            Aucune mission créée pour le moment.
-          </div>
-
-          <div class="activity-list" *ngIf="recentMissions.length > 0">
-            <a
-              class="activity-item"
-              *ngFor="
-                let mission of recentMissions;
-                trackBy: trackMission
-              "
-              [routerLink]="[
-                '/company/missions',
-                mission.id
-              ]"
+            <div
+              class="activity-list"
+              *ngIf="recentInvitations.length > 0"
             >
-              <div class="activity-avatar mission-avatar">
-                {{
-                  mission.consultantName
-                    ? mission.consultantName.charAt(0)
-                    : 'M'
-                }}
-              </div>
-
-              <div class="activity-content">
-                <strong>{{ mission.title }}</strong>
-                <p>{{ mission.consultantName }}</p>
-
-                <span>
-                  {{
-                    mission.createdAt
-                      | date: 'dd/MM/yyyy à HH:mm'
-                  }}
-                </span>
-              </div>
-
-              <span
-                class="status-badge"
-                [ngClass]="getMissionStatusClass(mission.status)"
+              <a
+                class="activity-item"
+                *ngFor="
+                  let invitation of recentInvitations;
+                  trackBy: trackInvitation
+                "
+                [routerLink]="[
+                  '/company/consultants',
+                  invitation.consultantId
+                ]"
               >
-                {{ getMissionStatusLabel(mission.status) }}
-              </span>
-            </a>
-          </div>
-        </article>
+                <div class="activity-avatar">
+                  {{
+                    invitation.consultantName
+                      ? invitation.consultantName.charAt(0)
+                      : 'C'
+                  }}
+                </div>
+
+                <div class="activity-content">
+                  <strong>{{ invitation.consultantName }}</strong>
+                  <p>{{ invitation.subject }}</p>
+
+                  <span>
+                    {{
+                      invitation.createdAt
+                        | date: 'dd/MM/yyyy à HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getInvitationStatusClass(invitation.status)"
+                >
+                  {{ getInvitationStatusLabel(invitation.status) }}
+                </span>
+              </a>
+            </div>
+          </article>
+
+          <article class="panel activity-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-eyebrow">COLLABORATIONS</span>
+                <h2>Dernières missions</h2>
+              </div>
+
+              <a routerLink="/company/missions">
+                Tout voir →
+              </a>
+            </div>
+
+            <div
+              class="empty-message"
+              *ngIf="recentMissions.length === 0"
+            >
+              <span class="empty-icon">⌁</span>
+
+              <strong>Aucune mission</strong>
+
+              <p>
+                Les missions issues de vos invitations acceptées
+                apparaîtront ici.
+              </p>
+            </div>
+
+            <div
+              class="activity-list"
+              *ngIf="recentMissions.length > 0"
+            >
+              <a
+                class="activity-item"
+                *ngFor="
+                  let mission of recentMissions;
+                  trackBy: trackMission
+                "
+                [routerLink]="[
+                  '/company/missions',
+                  mission.id
+                ]"
+              >
+                <div class="activity-avatar mission-avatar">
+                  {{
+                    mission.consultantName
+                      ? mission.consultantName.charAt(0)
+                      : 'M'
+                  }}
+                </div>
+
+                <div class="activity-content">
+                  <strong>{{ mission.title }}</strong>
+                  <p>{{ mission.consultantName }}</p>
+
+                  <span>
+                    {{
+                      mission.createdAt
+                        | date: 'dd/MM/yyyy à HH:mm'
+                    }}
+                  </span>
+                </div>
+
+                <span
+                  class="status-badge"
+                  [ngClass]="getMissionStatusClass(mission.status)"
+                >
+                  {{ getMissionStatusLabel(mission.status) }}
+                </span>
+              </a>
+            </div>
+          </article>
+        </div>
       </section>
     </ng-container>
   </div>

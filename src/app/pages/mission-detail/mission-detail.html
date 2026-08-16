@@ -1,16 +1,31 @@
-<div class="mission-detail-page">
-  <div class="mission-detail-container">
-    <a [routerLink]="backLink" class="back-link">
-      ← {{ backLabel }}
+<div class="detail-page">
+  <div class="detail-container">
+    <a
+      [routerLink]="backLink"
+      class="back-link"
+    >
+      <span>←</span>
+      {{ backLabel }}
     </a>
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement de la mission...</p>
+
+      <h2>Chargement de la mission</h2>
+
+      <p>
+        Récupération des informations de la collaboration...
+      </p>
     </section>
 
-    <section class="state-card error-state" *ngIf="!loading && errorMessage">
-      <h1>Mission indisponible</h1>
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon">!</div>
+
+      <h2>Mission indisponible</h2>
+
       <p>{{ errorMessage }}</p>
 
       <a [routerLink]="backLink">
@@ -20,26 +35,29 @@
 
     <main *ngIf="!loading && !errorMessage && mission">
       <div
-        class="feedback-message success-message"
+        class="feedback success-feedback"
         *ngIf="actionSuccessMessage"
       >
+        <span>✓</span>
         {{ actionSuccessMessage }}
       </div>
 
       <div
-        class="feedback-message error-message"
+        class="feedback error-feedback"
         *ngIf="actionErrorMessage"
       >
+        <span>!</span>
         {{ actionErrorMessage }}
       </div>
 
-      <header class="mission-header">
+      <section class="mission-hero">
         <div>
-          <p class="eyebrow">Détail de la mission</p>
+          <span class="eyebrow">DÉTAIL DE LA MISSION</span>
+
           <h1>{{ mission.title }}</h1>
 
           <p class="mission-reference">
-            Référence : {{ mission.id }}
+            Référence · {{ mission.id }}
           </p>
         </div>
 
@@ -49,28 +67,41 @@
         >
           {{ getStatusLabel(mission.status) }}
         </span>
-      </header>
+      </section>
 
       <section class="mission-layout">
         <article class="main-card">
           <section class="content-section">
-            <div class="section-header">
-              <h2>Description de la mission</h2>
+            <div class="section-title">
+              <span class="section-icon purple-icon">▣</span>
+
+              <div>
+                <span class="eyebrow">PRÉSENTATION</span>
+                <h2>Description de la mission</h2>
+              </div>
             </div>
 
             <p class="mission-description">
-              {{ mission.description || 'Aucune description disponible.' }}
+              {{
+                mission.description ||
+                'Aucune description disponible.'
+              }}
             </p>
           </section>
 
           <section class="content-section">
-            <div class="section-header">
-              <h2>Conditions de la mission</h2>
+            <div class="section-title">
+              <span class="section-icon green-icon">◎</span>
+
+              <div>
+                <span class="eyebrow">CONDITIONS</span>
+                <h2>Organisation de la mission</h2>
+              </div>
             </div>
 
             <div class="conditions-grid">
-              <div class="information-item">
-                <span>Date de début</span>
+              <article>
+                <span>Début</span>
 
                 <strong>
                   {{
@@ -79,10 +110,10 @@
                       : 'Non renseignée'
                   }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
-                <span>Date de fin</span>
+              <article>
+                <span>Fin</span>
 
                 <strong>
                   {{
@@ -91,61 +122,80 @@
                       : 'Non définie'
                   }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
-                <span>Type de contrat</span>
+              <article>
+                <span>Contrat</span>
 
                 <strong>
                   {{ getContractTypeLabel(mission.contractType) }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
+              <article>
                 <span>Mode de travail</span>
 
                 <strong>
                   {{ getWorkModeLabel(mission.workMode) }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
+              <article>
                 <span>Localisation</span>
 
                 <strong>
                   {{ mission.location || 'Non renseignée' }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
+              <article>
                 <span>Rémunération</span>
 
                 <strong>
                   {{ getSalaryLabel(mission.salary) }}
                 </strong>
-              </div>
+              </article>
             </div>
           </section>
 
           <section class="content-section">
-            <div class="section-header">
-              <h2>Technologies</h2>
+            <div class="section-title">
+              <span class="section-icon blue-icon">&lt;/&gt;</span>
+
+              <div>
+                <span class="eyebrow">TECHNOLOGIES</span>
+                <h2>Stack technique</h2>
+              </div>
             </div>
 
-            <div class="empty-technologies" *ngIf="!hasTechnologies">
+            <div
+              class="empty-technologies"
+              *ngIf="!hasTechnologies"
+            >
               Aucune technologie renseignée.
             </div>
 
-            <div class="technologies-list" *ngIf="hasTechnologies">
+            <div
+              class="technologies-list"
+              *ngIf="hasTechnologies"
+            >
               <span *ngFor="let technology of mission.technologies">
                 {{ technology }}
               </span>
             </div>
           </section>
 
-          <section class="content-section" *ngIf="mission.notes">
-            <div class="section-header">
-              <h2>Notes complémentaires</h2>
+          <section
+            class="content-section"
+            *ngIf="mission.notes"
+          >
+            <div class="section-title">
+              <span class="section-icon orange-icon">✎</span>
+
+              <div>
+                <span class="eyebrow">INFORMATIONS</span>
+                <h2>Notes complémentaires</h2>
+              </div>
             </div>
 
             <p class="notes-content">
@@ -154,36 +204,46 @@
           </section>
 
           <section class="content-section">
-            <div class="section-header">
-              <h2>Suivi de la mission</h2>
+            <div class="section-title">
+              <span class="section-icon purple-icon">◷</span>
+
+              <div>
+                <span class="eyebrow">HISTORIQUE</span>
+                <h2>Suivi de la mission</h2>
+              </div>
             </div>
 
             <div class="dates-grid">
-              <div class="information-item">
+              <article>
                 <span>Date de création</span>
 
                 <strong>
                   {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
                 </strong>
-              </div>
+              </article>
 
-              <div class="information-item">
+              <article>
                 <span>Dernière mise à jour</span>
 
                 <strong>
                   {{ mission.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
                 </strong>
-              </div>
+              </article>
             </div>
           </section>
 
-          <section class="management-section" *ngIf="canManageMission">
+          <section
+            class="management-section"
+            *ngIf="canManageMission"
+          >
             <div>
-              <h2>Gestion de la mission</h2>
+              <span class="eyebrow">GESTION</span>
+
+              <h2>Gérer cette mission</h2>
 
               <p>
-                Terminez la mission lorsqu’elle est achevée ou annulez-la si
-                la collaboration doit prendre fin.
+                Vous pouvez clôturer la mission lorsqu’elle est terminée
+                ou l’annuler si la collaboration doit prendre fin.
               </p>
             </div>
 
@@ -194,7 +254,11 @@
                 [disabled]="updating"
                 (click)="completeMission()"
               >
-                {{ updating ? 'Modification...' : 'Marquer comme terminée' }}
+                {{
+                  updating
+                    ? 'Modification...'
+                    : 'Marquer comme terminée'
+                }}
               </button>
 
               <button
@@ -211,9 +275,9 @@
 
         <aside class="sidebar">
           <article class="profile-card">
-            <p class="card-label">Entreprise</p>
+            <span class="eyebrow">ENTREPRISE</span>
 
-            <div class="profile-header">
+            <div class="profile-content">
               <div class="avatar company-avatar">
                 {{ companyInitial }}
               </div>
@@ -226,9 +290,9 @@
           </article>
 
           <article class="profile-card">
-            <p class="card-label">Consultant</p>
+            <span class="eyebrow">CONSULTANT</span>
 
-            <div class="profile-header">
+            <div class="profile-content">
               <div class="avatar consultant-avatar">
                 {{ consultantInitial }}
               </div>
@@ -237,54 +301,81 @@
                 <h2>{{ mission.consultantName }}</h2>
 
                 <p>
-                  {{ mission.consultantTitle || 'Titre non renseigné' }}
+                  {{
+                    mission.consultantTitle ||
+                    'Titre non renseigné'
+                  }}
                 </p>
               </div>
             </div>
           </article>
 
           <article class="technical-card">
+            <span class="eyebrow">RÉFÉRENCES</span>
             <h2>Informations techniques</h2>
 
-            <div class="technical-information">
+            <div class="technical-list">
               <div>
-                <span>Identifiant de l’invitation</span>
+                <span>Invitation</span>
                 <strong>{{ mission.invitationId }}</strong>
               </div>
 
               <div>
-                <span>Identifiant de l’entreprise</span>
+                <span>Entreprise</span>
                 <strong>{{ mission.companyId }}</strong>
               </div>
 
               <div>
-                <span>Identifiant du consultant</span>
+                <span>Consultant</span>
                 <strong>{{ mission.consultantId }}</strong>
               </div>
             </div>
           </article>
+
+          <article
+            class="status-card"
+            [ngClass]="getStatusClass(mission.status)"
+          >
+            <span
+              *ngIf="mission.status === 'ACTIVE'"
+              class="status-icon"
+            >
+              ●
+            </span>
+
+            <span
+              *ngIf="mission.status === 'COMPLETED'"
+              class="status-icon"
+            >
+              ✓
+            </span>
+
+            <span
+              *ngIf="mission.status === 'CANCELLED'"
+              class="status-icon"
+            >
+              ×
+            </span>
+
+            <div>
+              <strong>
+                {{ getStatusLabel(mission.status) }}
+              </strong>
+
+              <p *ngIf="mission.status === 'ACTIVE'">
+                La collaboration est actuellement en cours.
+              </p>
+
+              <p *ngIf="mission.status === 'COMPLETED'">
+                La mission a été terminée avec succès.
+              </p>
+
+              <p *ngIf="mission.status === 'CANCELLED'">
+                La collaboration a été annulée.
+              </p>
+            </div>
+          </article>
         </aside>
-      </section>
-
-      <section
-        class="mission-state-message active-message"
-        *ngIf="mission.status === 'ACTIVE'"
-      >
-        Cette mission est actuellement active.
-      </section>
-
-      <section
-        class="mission-state-message completed-message"
-        *ngIf="mission.status === 'COMPLETED'"
-      >
-        Cette mission est terminée. Le consultant est de nouveau disponible.
-      </section>
-
-      <section
-        class="mission-state-message cancelled-message"
-        *ngIf="mission.status === 'CANCELLED'"
-      >
-        Cette mission a été annulée. Le consultant est de nouveau disponible.
       </section>
     </main>
   </div>

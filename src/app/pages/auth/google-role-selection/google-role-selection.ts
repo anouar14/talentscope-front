@@ -1,26 +1,18 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpErrorResponse } from '@angular/common/http';
-
-import {
-  Auth,
-  GoogleAuthResponse
-} from '../../../core/services/auth';
+import { Auth, GoogleAuthResponse } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-google-role-selection',
   standalone: true,
-  imports: [
-    CommonModule
-  ],
+  imports: [CommonModule],
   templateUrl: './google-role-selection.html',
   styleUrl: './google-role-selection.css'
 })
 export class GoogleRoleSelection implements OnInit {
-
-  selectedRole:
-    'CONSULTANT' | 'COMPANY' | null = null;
+  selectedRole: 'CONSULTANT' | 'COMPANY' | null = null;
 
   googleCredential = '';
   googleUserName = '';
@@ -30,34 +22,26 @@ export class GoogleRoleSelection implements OnInit {
   errorMessage = '';
 
   constructor(
-    private authService: Auth,
-    private router: Router
+    private readonly authService: Auth,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.googleCredential =
-      sessionStorage.getItem(
-        'googleCredential'
-      ) ?? '';
+      sessionStorage.getItem('googleCredential') ?? '';
 
     this.googleUserName =
-      sessionStorage.getItem(
-        'googleUserName'
-      ) ?? '';
+      sessionStorage.getItem('googleUserName') ?? '';
 
     this.googleUserEmail =
-      sessionStorage.getItem(
-        'googleUserEmail'
-      ) ?? '';
+      sessionStorage.getItem('googleUserEmail') ?? '';
 
     if (!this.googleCredential) {
       this.router.navigate(['/login']);
     }
   }
 
-  selectRole(
-    role: 'CONSULTANT' | 'COMPANY'
-  ): void {
+  selectRole(role: 'CONSULTANT' | 'COMPANY'): void {
     this.selectedRole = role;
     this.errorMessage = '';
   }
@@ -85,11 +69,10 @@ export class GoogleRoleSelection implements OnInit {
         role: this.selectedRole
       })
       .subscribe({
-        next: (response) => {
+        next: response => {
           this.loading = false;
           this.finishAuthentication(response);
         },
-
         error: (error: HttpErrorResponse) => {
           console.error(error);
 
@@ -120,24 +103,18 @@ export class GoogleRoleSelection implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  private finishAuthentication(
-    response: GoogleAuthResponse
-  ): void {
+  private finishAuthentication(response: GoogleAuthResponse): void {
     try {
       this.authService.saveGoogleAuth(response);
       this.clearGoogleSession();
 
       if (response.role === 'CONSULTANT') {
-        this.router.navigate([
-          '/consultant/dashboard'
-        ]);
+        this.router.navigate(['/consultant/dashboard']);
         return;
       }
 
       if (response.role === 'COMPANY') {
-        this.router.navigate([
-          '/company/dashboard'
-        ]);
+        this.router.navigate(['/company/dashboard']);
         return;
       }
 
@@ -151,16 +128,8 @@ export class GoogleRoleSelection implements OnInit {
   }
 
   private clearGoogleSession(): void {
-    sessionStorage.removeItem(
-      'googleCredential'
-    );
-
-    sessionStorage.removeItem(
-      'googleUserName'
-    );
-
-    sessionStorage.removeItem(
-      'googleUserEmail'
-    );
+    sessionStorage.removeItem('googleCredential');
+    sessionStorage.removeItem('googleUserName');
+    sessionStorage.removeItem('googleUserEmail');
   }
 }

@@ -1,90 +1,158 @@
 <div class="search-page">
   <div class="search-container">
-    <section class="search-header">
-      <p class="eyebrow">Espace entreprise</p>
+    <section class="page-header">
+      <div>
+        <span class="eyebrow">RECRUTEMENT</span>
 
-      <h1>Rechercher des consultants</h1>
-
-      <p>
-        Recherchez manuellement des profils ou utilisez le matching IA à partir
-        d’une description de poste.
-      </p>
-    </section>
-
-    <section class="matching-section">
-      <div class="matching-header">
-        <span class="matching-badge">Matching IA</span>
-
-        <h2>Trouver les profils les plus adaptés</h2>
+        <h1>
+          Trouvez le bon
+          <span>consultant IT.</span>
+        </h1>
 
         <p>
-          Décrivez le poste, les compétences recherchées, l’expérience attendue
-          et la localisation.
+          Recherchez librement parmi les profils disponibles ou confiez
+          l’analyse de votre besoin au moteur de matching TalentScope.
         </p>
       </div>
 
-      <label for="jobDescription">
-        Description du poste
-      </label>
-
-      <textarea
-        id="jobDescription"
-        name="jobDescription"
-        [(ngModel)]="jobDescription"
-        maxlength="5000"
-        placeholder="Exemple : Nous recherchons un développeur Java Spring Boot avec 3 ans d’expérience, maîtrisant Angular, MongoDB, Docker et les API REST..."
-      ></textarea>
-
-      <div class="description-footer">
-        <span>
-          {{ jobDescription.length }} / 5000 caractères
-        </span>
-
-        <span>
-          Minimum : 20 caractères
-        </span>
-      </div>
-
-      <p class="error" *ngIf="matchingErrorMessage">
-        {{ matchingErrorMessage }}
-      </p>
-
-      <div class="matching-actions">
-        <button
-          type="button"
-          class="matching-button"
-          [disabled]="matchingLoading"
-          (click)="launchMatching()"
-        >
-          {{
-            matchingLoading
-              ? 'Analyse des profils en cours...'
-              : 'Lancer le matching IA'
-          }}
-        </button>
-
-        <button
-          type="button"
-          class="reset-button"
-          *ngIf="jobDescription || matchingExecuted"
-          [disabled]="matchingLoading"
-          (click)="resetMatching()"
-        >
-          Réinitialiser
-        </button>
-      </div>
-
-      <div class="matching-loader" *ngIf="matchingLoading">
-        <div class="spinner"></div>
+      <div class="header-badge">
+        <span>✦</span>
 
         <div>
-          <strong>Analyse IA en cours</strong>
+          <strong>TalentScope AI</strong>
+          <small>Matching hybride et explicable</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="matching-section">
+      <div class="matching-intro">
+        <div class="matching-icon">✦</div>
+
+        <div>
+          <span class="eyebrow">MATCHING INTELLIGENT</span>
+          <h2>Décrivez simplement votre besoin.</h2>
 
           <p>
-            Le moteur extrait les critères du poste, présélectionne les profils
-            et réalise l’analyse qualitative.
+            Indiquez le poste, les technologies, l’expérience,
+            la localisation ou tout autre critère important.
           </p>
         </div>
+      </div>
+
+      <div class="matching-workspace">
+        <label for="jobDescription">
+          Description de la mission
+        </label>
+
+        <div class="textarea-wrapper">
+          <textarea
+            id="jobDescription"
+            name="jobDescription"
+            [(ngModel)]="jobDescription"
+            maxlength="5000"
+            placeholder="Exemple : Nous recherchons un développeur Java Spring Boot avec 3 ans d’expérience, maîtrisant Angular, MongoDB, Docker et les API REST..."
+          ></textarea>
+
+          <div class="textarea-hint">
+            <span>✦ Analyse automatique des critères</span>
+            <span>{{ jobDescription.length }} / 5000</span>
+          </div>
+        </div>
+
+        <div class="description-footer">
+          <span>
+            Plus votre description est précise, plus le matching est pertinent.
+          </span>
+
+          <span>Minimum 20 caractères</span>
+        </div>
+
+        <div
+          class="alert alert-error"
+          *ngIf="matchingErrorMessage"
+        >
+          <span>!</span>
+          {{ matchingErrorMessage }}
+        </div>
+
+        <div class="matching-actions">
+          <button
+            type="button"
+            class="matching-button"
+            [disabled]="matchingLoading"
+            (click)="launchMatching()"
+          >
+            <span class="button-sparkle">✦</span>
+
+            {{
+              matchingLoading
+                ? 'Analyse des profils en cours...'
+                : 'Lancer le matching IA'
+            }}
+
+            <span *ngIf="!matchingLoading">→</span>
+          </button>
+
+          <button
+            type="button"
+            class="reset-button"
+            *ngIf="jobDescription || matchingExecuted"
+            [disabled]="matchingLoading"
+            (click)="resetMatching()"
+          >
+            Réinitialiser
+          </button>
+        </div>
+
+        <div class="matching-loader" *ngIf="matchingLoading">
+          <div class="spinner"></div>
+
+          <div>
+            <strong>TalentScope analyse les profils</strong>
+
+            <p>
+              Extraction des critères, pré-sélection Java puis
+              analyse qualitative par l’intelligence artificielle.
+            </p>
+          </div>
+
+          <span class="loader-status">
+            Analyse IA
+          </span>
+        </div>
+      </div>
+
+      <div class="matching-steps">
+        <article>
+          <span>01</span>
+          <strong>Extraction</strong>
+          <small>Analyse de votre besoin</small>
+        </article>
+
+        <i>→</i>
+
+        <article>
+          <span>02</span>
+          <strong>Pré-sélection</strong>
+          <small>Classement Java</small>
+        </article>
+
+        <i>→</i>
+
+        <article>
+          <span>03</span>
+          <strong>Analyse IA</strong>
+          <small>Évaluation qualitative</small>
+        </article>
+
+        <i>→</i>
+
+        <article>
+          <span>04</span>
+          <strong>Classement</strong>
+          <small>Score hybride final</small>
+        </article>
       </div>
     </section>
 
@@ -94,17 +162,33 @@
     >
       <div class="results-title">
         <div>
-          <p class="eyebrow">Résultats IA</p>
-          <h2>Classement des consultants</h2>
+          <span class="eyebrow">RÉSULTATS DU MATCHING</span>
+          <h2>Consultants recommandés</h2>
+
+          <p>
+            Les profils sont classés selon leur compatibilité globale
+            avec votre description.
+          </p>
         </div>
 
         <span class="results-count">
-          {{ analyzedConsultants }} consultant(s) analysé(s)
+          <strong>{{ analyzedConsultants }}</strong>
+          profil(s) analysé(s)
         </span>
       </div>
 
-      <div class="no-results" *ngIf="matchingResults.length === 0">
-        Aucun consultant disponible n’a été trouvé.
+      <div
+        class="no-results"
+        *ngIf="matchingResults.length === 0"
+      >
+        <span>⌕</span>
+
+        <strong>Aucun profil disponible</strong>
+
+        <p>
+          Aucun consultant disponible ne correspond actuellement
+          à votre recherche.
+        </p>
       </div>
 
       <div class="matching-grid">
@@ -116,59 +200,69 @@
             trackBy: trackMatchResult
           "
         >
-          <div class="ranking">
-            #{{ index + 1 }}
-          </div>
-
-          <div class="match-card-header">
-            <div class="avatar">
-              {{
-                result.firstName
-                  ? result.firstName.charAt(0)
-                  : 'C'
-              }}
+          <div class="match-top">
+            <div class="ranking">
+              <span>RANG</span>
+              <strong>#{{ index + 1 }}</strong>
             </div>
 
-            <div class="consultant-identity">
-              <h3>
-                {{ result.firstName || 'Prénom' }}
-                {{ result.lastName || '' }}
-              </h3>
+            <div class="candidate-header">
+              <div class="avatar">
+                {{
+                  result.firstName
+                    ? result.firstName.charAt(0)
+                    : 'C'
+                }}
+              </div>
 
-              <p>
-                {{ result.title || 'Titre non renseigné' }}
-              </p>
+              <div class="consultant-identity">
+                <h3>
+                  {{ result.firstName || 'Prénom' }}
+                  {{ result.lastName || '' }}
+                </h3>
+
+                <p>
+                  {{ result.title || 'Titre non renseigné' }}
+                </p>
+
+                <div class="meta">
+                  <span>
+                    <i>⌖</i>
+                    {{
+                      result.location ||
+                      'Localisation non renseignée'
+                    }}
+                  </span>
+
+                  <span>
+                    <i>◷</i>
+                    {{ result.experienceYears || 0 }} an(s)
+                  </span>
+
+                  <span
+                    class="availability"
+                    [class.unavailable]="!result.available"
+                  >
+                    <i></i>
+
+                    {{
+                      result.available
+                        ? 'Disponible'
+                        : 'Non disponible'
+                    }}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div
-              class="score"
+              class="global-score"
               [ngClass]="getScoreClass(result.score)"
             >
-              <strong>{{ result.score }}%</strong>
               <span>Score global</span>
+              <strong>{{ result.score }}%</strong>
+              <small>Hybride Java + IA</small>
             </div>
-          </div>
-
-          <div class="meta">
-            <span>
-              📍
-              {{
-                result.location ||
-                'Localisation non renseignée'
-              }}
-            </span>
-
-            <span>
-              💼 {{ result.experienceYears || 0 }} an(s)
-            </span>
-
-            <span>
-              {{
-                result.available
-                  ? '🟢 Disponible'
-                  : '⚪ Non disponible'
-              }}
-            </span>
           </div>
 
           <section
@@ -177,7 +271,7 @@
           >
             <div class="recommendation-content">
               <span class="section-label">
-                Niveau de recommandation
+                RECOMMANDATION
               </span>
 
               <h4>
@@ -208,47 +302,64 @@
             </div>
           </section>
 
-          <section class="confidence-card">
-            <div class="confidence-header">
-              <div>
-                <span class="section-label">
-                  Confiance de l’analyse
-                </span>
+          <div class="analysis-grid">
+            <section class="confidence-card">
+              <div class="confidence-header">
+                <div>
+                  <span class="section-label">
+                    CONFIANCE
+                  </span>
 
-                <strong>
-                  {{ getConfidenceLabel(result.confidence) }}
-                </strong>
+                  <strong>
+                    {{ getConfidenceLabel(result.confidence) }}
+                  </strong>
+                </div>
+
+                <span
+                  class="confidence-value"
+                  [ngClass]="getConfidenceClass(result.confidence)"
+                >
+                  {{ result.confidence }}%
+                </span>
               </div>
 
-              <span
-                class="confidence-value"
-                [ngClass]="getConfidenceClass(result.confidence)"
-              >
-                {{ result.confidence }}%
-              </span>
-            </div>
+              <div class="progress-track confidence-track">
+                <div
+                  class="progress-fill"
+                  [ngClass]="getProgressClass(result.confidence)"
+                  [style.width.%]="result.confidence"
+                ></div>
+              </div>
 
-            <div class="progress-track confidence-track">
-              <div
-                class="progress-fill"
-                [ngClass]="getProgressClass(result.confidence)"
-                [style.width.%]="result.confidence"
-              ></div>
-            </div>
+              <p>
+                Niveau de fiabilité calculé à partir de la complétude
+                des données disponibles.
+              </p>
+            </section>
 
-            <p>
-              Cet indicateur mesure la complétude du profil et la précision
-              des critères extraits de la description du poste.
-            </p>
-          </section>
+            <section class="analysis-block">
+              <span class="section-label">ANALYSE IA</span>
+              <h4>Pourquoi ce profil ?</h4>
+
+              <p>
+                {{ result.explanation }}
+              </p>
+            </section>
+          </div>
 
           <section class="score-breakdown">
             <div class="section-heading">
-              <span class="section-label">
-                Détail du score
-              </span>
+              <div>
+                <span class="section-label">
+                  SCORE DÉTAILLÉ
+                </span>
 
-              <h4>Compatibilité par critère</h4>
+                <h4>Compatibilité par critère</h4>
+              </div>
+
+              <span class="hybrid-label">
+                70% Java · 30% IA
+              </span>
             </div>
 
             <div class="criteria-list">
@@ -279,14 +390,6 @@
             </div>
           </section>
 
-          <section class="analysis-block">
-            <h4>Analyse globale du profil</h4>
-
-            <p>
-              {{ result.explanation }}
-            </p>
-          </section>
-
           <section class="evaluation-grid">
             <article class="evaluation-card strengths-card">
               <div class="evaluation-heading">
@@ -294,7 +397,7 @@
 
                 <div>
                   <span class="section-label">
-                    Points forts
+                    POINTS FORTS
                   </span>
 
                   <h4>Atouts du profil</h4>
@@ -305,7 +408,7 @@
                 class="empty-evaluation"
                 *ngIf="result.strengths.length === 0"
               >
-                Aucun point fort spécifique n’a été généré.
+                Aucun point fort spécifique généré.
               </div>
 
               <ul *ngIf="result.strengths.length > 0">
@@ -321,10 +424,10 @@
 
                 <div>
                   <span class="section-label">
-                    Points faibles
+                    POINTS DE VIGILANCE
                   </span>
 
-                  <h4>Points de vigilance</h4>
+                  <h4>Éléments à vérifier</h4>
                 </div>
               </div>
 
@@ -332,7 +435,7 @@
                 class="empty-evaluation"
                 *ngIf="result.weaknesses.length === 0"
               >
-                Aucun point de vigilance important n’a été détecté.
+                Aucun point de vigilance important détecté.
               </div>
 
               <ul *ngIf="result.weaknesses.length > 0">
@@ -345,7 +448,11 @@
 
           <section class="skills-analysis">
             <div class="skills-column">
-              <h4>Compétences correspondantes</h4>
+              <div class="skills-heading">
+                <span class="skill-status matched-status">✓</span>
+
+                <h4>Compétences correspondantes</h4>
+              </div>
 
               <div
                 class="empty-skills"
@@ -356,13 +463,17 @@
 
               <div class="skills matched-skills">
                 <span *ngFor="let skill of result.matchedSkills">
-                  ✓ {{ skill }}
+                  {{ skill }}
                 </span>
               </div>
             </div>
 
             <div class="skills-column">
-              <h4>Compétences manquantes</h4>
+              <div class="skills-heading">
+                <span class="skill-status missing-status">!</span>
+
+                <h4>Compétences manquantes</h4>
+              </div>
 
               <div
                 class="empty-skills"
@@ -384,103 +495,157 @@
             class="profile-button"
             (click)="viewConsultantProfile(result.consultantId)"
           >
-            Voir le profil complet
+            Consulter le profil complet
+            <span>→</span>
           </button>
         </article>
       </div>
     </section>
 
-    <section class="manual-search-title">
-      <p class="eyebrow">Recherche classique</p>
-      <h2>Tous les consultants</h2>
-    </section>
+    <section class="manual-section">
+      <div class="manual-search-title">
+        <div>
+          <span class="eyebrow">RECHERCHE CLASSIQUE</span>
+          <h2>Explorer tous les consultants</h2>
 
-    <section class="search-box">
-      <input
-        type="text"
-        name="searchTerm"
-        [(ngModel)]="searchTerm"
-        (input)="filterConsultants()"
-        placeholder="Rechercher par compétence, nom, titre ou localisation..."
-      />
-    </section>
-
-    <p class="loading" *ngIf="loading">
-      Chargement des consultants...
-    </p>
-
-    <p class="error" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </p>
-
-    <section class="results-info" *ngIf="!loading">
-      {{ filteredConsultants.length }} consultant(s) trouvé(s)
-    </section>
-
-    <section class="consultants-grid" *ngIf="!loading">
-      <article
-        class="consultant-card"
-        *ngFor="
-          let consultant of filteredConsultants;
-          trackBy: trackConsultant
-        "
-      >
-        <div class="card-header">
-          <div class="avatar">
-            {{
-              consultant.firstName
-                ? consultant.firstName.charAt(0)
-                : 'C'
-            }}
-          </div>
-
-          <div>
-            <h3>
-              {{ consultant.firstName || 'Prénom' }}
-              {{ consultant.lastName || '' }}
-            </h3>
-
-            <p>
-              {{ consultant.title || 'Titre non renseigné' }}
-            </p>
-          </div>
+          <p>
+            Recherchez directement par nom, titre, localisation
+            ou compétence.
+          </p>
         </div>
 
-        <div class="meta">
-          <span>
-            📍
-            {{
-              consultant.location ||
-              'Localisation non renseignée'
-            }}
-          </span>
+        <span class="consultants-total">
+          {{ consultants.length }} profil(s)
+        </span>
+      </div>
 
-          <span>
-            💼 {{ consultant.experienceYears || 0 }} an(s)
-          </span>
+      <div class="search-box">
+        <span class="search-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M10.5 4a6.5 6.5 0 1 0 3.98 11.64L19.84 21 21 19.84l-5.36-5.36A6.5 6.5 0 0 0 10.5 4Zm0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9Z" />
+          </svg>
+        </span>
 
-          <span>
-            {{
-              consultant.available
-                ? '🟢 Disponible'
-                : '⚪ Non disponible'
-            }}
-          </span>
-        </div>
-
-        <div class="skills">
-          <span *ngFor="let skill of consultant.skills">
-            {{ skill }}
-          </span>
-        </div>
-
-        <button
-          type="button"
-          (click)="viewConsultantProfile(consultant.id)"
+        <input
+          type="text"
+          name="searchTerm"
+          [(ngModel)]="searchTerm"
+          (input)="filterConsultants()"
+          placeholder="Rechercher une compétence, un nom, un titre ou une localisation..."
         >
-          Voir le profil
-        </button>
-      </article>
+
+        <span class="search-result-count">
+          {{ filteredConsultants.length }}
+        </span>
+      </div>
+
+      <div class="loading-state" *ngIf="loading">
+        <div class="spinner"></div>
+        Chargement des consultants...
+      </div>
+
+      <div class="alert alert-error" *ngIf="errorMessage">
+        <span>!</span>
+        {{ errorMessage }}
+      </div>
+
+      <div
+        class="no-results"
+        *ngIf="!loading && filteredConsultants.length === 0"
+      >
+        <span>⌕</span>
+        <strong>Aucun consultant trouvé</strong>
+
+        <p>
+          Essayez avec un autre nom, titre, lieu ou compétence.
+        </p>
+      </div>
+
+      <section
+        class="consultants-grid"
+        *ngIf="!loading && filteredConsultants.length > 0"
+      >
+        <article
+          class="consultant-card"
+          *ngFor="
+            let consultant of filteredConsultants;
+            trackBy: trackConsultant
+          "
+        >
+          <div class="card-header">
+            <div class="avatar small-avatar">
+              {{
+                consultant.firstName
+                  ? consultant.firstName.charAt(0)
+                  : 'C'
+              }}
+            </div>
+
+            <div>
+              <h3>
+                {{ consultant.firstName || 'Prénom' }}
+                {{ consultant.lastName || '' }}
+              </h3>
+
+              <p>
+                {{ consultant.title || 'Titre non renseigné' }}
+              </p>
+            </div>
+
+            <span
+              class="availability consultant-availability"
+              [class.unavailable]="!consultant.available"
+            >
+              <i></i>
+
+              {{
+                consultant.available
+                  ? 'Disponible'
+                  : 'Indisponible'
+              }}
+            </span>
+          </div>
+
+          <div class="consultant-meta">
+            <span>
+              <strong>⌖</strong>
+              {{ consultant.location || 'Non renseignée' }}
+            </span>
+
+            <span>
+              <strong>◷</strong>
+              {{ consultant.experienceYears || 0 }} an(s)
+            </span>
+          </div>
+
+          <div
+            class="skills"
+            *ngIf="consultant.skills.length > 0"
+          >
+            <span
+              *ngFor="let skill of consultant.skills.slice(0, 6)"
+            >
+              {{ skill }}
+            </span>
+          </div>
+
+          <div
+            class="empty-skills"
+            *ngIf="consultant.skills.length === 0"
+          >
+            Aucune compétence renseignée.
+          </div>
+
+          <button
+            type="button"
+            class="consultant-profile-button"
+            (click)="viewConsultantProfile(consultant.id)"
+          >
+            Voir le profil
+            <span>→</span>
+          </button>
+        </article>
+      </section>
     </section>
   </div>
 </div>

@@ -1,88 +1,354 @@
 <div class="upload-page">
-  <div class="upload-card">
+  <div class="upload-container">
+    <section class="page-header">
+      <div>
+        <span class="eyebrow">TALENTSCOPE AI</span>
 
-    <div class="upload-header">
-      <div class="icon">📄</div>
-      <h1>Upload CV</h1>
-      <p>Ajoutez votre CV au format PDF pour compléter votre profil.</p>
-    </div>
+        <h1>
+          Analysez votre
+          <span>CV automatiquement.</span>
+        </h1>
 
-    <div class="drop-zone">
+        <p>
+          Ajoutez votre CV PDF puis laissez TalentScope extraire
+          automatiquement votre identité, votre titre, votre expérience,
+          votre localisation et vos compétences.
+        </p>
+      </div>
+
+      <a
+        routerLink="/consultant/profile"
+        class="back-profile"
+      >
+        ← Retour au profil
+      </a>
+    </section>
+
+    <section class="workflow-card">
+      <div class="workflow-step active">
+        <span>01</span>
+
+        <div>
+          <strong>Ajouter le CV</strong>
+          <small>Document PDF</small>
+        </div>
+      </div>
+
+      <i>→</i>
+
+      <div class="workflow-step">
+        <span>02</span>
+
+        <div>
+          <strong>Analyser</strong>
+          <small>Extraction IA</small>
+        </div>
+      </div>
+
+      <i>→</i>
+
+      <div class="workflow-step">
+        <span>03</span>
+
+        <div>
+          <strong>Vérifier</strong>
+          <small>Aperçu des données</small>
+        </div>
+      </div>
+
+      <i>→</i>
+
+      <div class="workflow-step">
+        <span>04</span>
+
+        <div>
+          <strong>Confirmer</strong>
+          <small>Mise à jour du profil</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="upload-card">
+      <div class="card-heading">
+        <div class="heading-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 2H6v16h10V7h-3V4Zm-2 5h2v4h3l-4 4-4-4h3V9Z" />
+          </svg>
+        </div>
+
+        <div>
+          <span class="eyebrow">ÉTAPE 1</span>
+          <h2>Importer votre CV</h2>
+
+          <p>
+            Seuls les documents au format PDF sont acceptés.
+          </p>
+        </div>
+      </div>
+
       <input
         type="file"
         id="cv"
         accept="application/pdf"
         (change)="onFileSelected($event)"
         hidden
-      />
+      >
 
-      <label for="cv">
-        <strong>Choisir un fichier PDF</strong>
-        <span *ngIf="!selectedFile">Aucun fichier sélectionné</span>
-        <span *ngIf="selectedFile">{{ selectedFile.name }}</span>
+      <label
+        for="cv"
+        class="drop-zone"
+        [class.file-selected]="selectedFile"
+      >
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 16V8l-3 3-1.4-1.4L12 5.2l4.4 4.4L15 11l-3-3v8h-2Zm-7 4a3 3 0 0 1-3-3 5 5 0 0 1 4.3-4.95A6 6 0 0 1 18 10.5h.5a3.5 3.5 0 0 1 .5 6.96V20H5Z" />
+          </svg>
+        </div>
+
+        <strong>
+          {{
+            selectedFile
+              ? 'CV sélectionné'
+              : 'Sélectionner votre CV'
+          }}
+        </strong>
+
+        <span *ngIf="!selectedFile">
+          Cliquez ici pour choisir un fichier PDF.
+        </span>
+
+        <span
+          class="selected-file-name"
+          *ngIf="selectedFile"
+        >
+          {{ selectedFile.name }}
+        </span>
+
+        <small>Format accepté : PDF</small>
       </label>
-    </div>
 
-    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
-    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div
+        class="feedback success-feedback"
+        *ngIf="successMessage"
+      >
+        <span>✓</span>
+        {{ successMessage }}
+      </div>
 
-    <div class="buttons-container">
-      <button class="upload-btn" (click)="uploadCv()" [disabled]="loading">
-        {{ loading ? 'Traitement en cours...' : 'Envoyer le CV' }}
+      <div
+        class="feedback error-feedback"
+        *ngIf="errorMessage"
+      >
+        <span>!</span>
+        {{ errorMessage }}
+      </div>
+
+      <div class="buttons-container">
+        <button
+          class="upload-btn"
+          type="button"
+          [disabled]="loading"
+          (click)="uploadCv()"
+        >
+          <span class="button-icon">↑</span>
+
+          {{
+            loading
+              ? 'Traitement en cours...'
+              : 'Envoyer le CV'
+          }}
+        </button>
+
+        <button
+          class="analyze-btn"
+          type="button"
+          [disabled]="loading"
+          (click)="previewCvAnalysis()"
+        >
+          <span>✦</span>
+          Analyser mon CV avec l'IA
+        </button>
+      </div>
+
+      <div
+        class="cv-result"
+        *ngIf="cvUrl"
+      >
+        <span class="result-icon">✓</span>
+
+        <div>
+          <span>CV ENREGISTRÉ</span>
+          <strong>Votre document est prêt pour l'analyse.</strong>
+          <small>{{ cvUrl }}</small>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="cv-preview"
+      *ngIf="cvPreview"
+    >
+      <div class="preview-header">
+        <div class="preview-title">
+          <div class="ai-icon">✦</div>
+
+          <div>
+            <span class="eyebrow">RÉSULTAT DE L'ANALYSE</span>
+            <h2>Informations détectées</h2>
+
+            <p>
+              Vérifiez les données avant de les appliquer
+              à votre profil TalentScope.
+            </p>
+          </div>
+        </div>
+
+        <span class="analysis-badge">
+          <i></i>
+          Analyse terminée
+        </span>
+      </div>
+
+      <div class="preview-grid">
+        <article>
+          <span>Prénom</span>
+
+          <strong>
+            {{ cvPreview.firstName || 'Non détecté' }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Nom</span>
+
+          <strong>
+            {{ cvPreview.lastName || 'Non détecté' }}
+          </strong>
+        </article>
+
+        <article class="wide">
+          <span>Titre professionnel</span>
+
+          <strong>
+            {{ cvPreview.title || 'Non détecté' }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Expérience</span>
+
+          <strong>
+            {{ cvPreview.experienceYears || 0 }} an(s)
+          </strong>
+        </article>
+
+        <article>
+          <span>Localisation</span>
+
+          <strong>
+            {{ cvPreview.location || 'Non détectée' }}
+          </strong>
+        </article>
+      </div>
+
+      <div class="skills-preview">
+        <div>
+          <span class="eyebrow">COMPÉTENCES DÉTECTÉES</span>
+
+          <h3>
+            Expertise extraite du CV
+          </h3>
+        </div>
+
+        <span class="skills-counter">
+          {{ cvPreview.skills?.length || 0 }}
+        </span>
+
+        <div
+          class="preview-skills"
+          *ngIf="cvPreview.skills?.length > 0"
+        >
+          <span *ngFor="let skill of cvPreview.skills">
+            {{ skill }}
+          </span>
+        </div>
+
+        <div
+          class="empty-skills"
+          *ngIf="!cvPreview.skills?.length"
+        >
+          Aucune compétence détectée.
+        </div>
+      </div>
+
+      <div class="confirmation-notice">
+        <span>i</span>
+
+        <p>
+          En confirmant, les informations détectées seront
+          enregistrées dans votre profil consultant.
+        </p>
+      </div>
+
+      <button
+        class="confirm-btn"
+        type="button"
+        [disabled]="loading"
+        (click)="confirmCvAnalysis()"
+      >
+        <span>✓</span>
+
+        {{
+          loading
+            ? 'Mise à jour en cours...'
+            : 'Confirmer et mettre à jour mon profil'
+        }}
       </button>
+    </section>
 
-      <button class="analyze-btn" (click)="previewCvAnalysis()" [disabled]="loading">
-        Analyser mon CV
-      </button>
+    <div class="page-actions">
+      <a routerLink="/consultant/profile">
+        ← Retour au profil
+      </a>
+
+      <a routerLink="/consultant/dashboard">
+        Tableau de bord →
+      </a>
     </div>
-
-    <div class="cv-result" *ngIf="cvUrl">
-      <p>CV enregistré :</p>
-      <span>{{ cvUrl }}</span>
-    </div>
-
-    <div class="cv-preview" *ngIf="cvPreview">
-      <h3>Résultat de l’analyse IA</h3>
-
-      <p><strong>Prénom :</strong> {{ cvPreview.firstName }}</p>
-      <p><strong>Nom :</strong> {{ cvPreview.lastName }}</p>
-      <p><strong>Titre :</strong> {{ cvPreview.title }}</p>
-      <p><strong>Expérience :</strong> {{ cvPreview.experienceYears }} ans</p>
-      <p><strong>Localisation :</strong> {{ cvPreview.location }}</p>
-
-      <p><strong>Compétences :</strong></p>
-      <ul>
-        <li *ngFor="let skill of cvPreview.skills">
-          {{ skill }}
-        </li>
-      </ul>
-
-      <button class="upload-btn" (click)="confirmCvAnalysis()" [disabled]="loading">
-        Confirmer et mettre à jour mon profil
-      </button>
-    </div>
-
-    <div class="actions">
-      <a routerLink="/consultant/profile" class="action-link">← Retour au profil</a>
-      <a routerLink="/consultant/dashboard" class="action-link">Aller au Dashboard →</a>
-    </div>
-
   </div>
 </div>
 
-<div class="analysis-success" *ngIf="analysisSuccess">
-  <div class="success-content">
-    <div class="success-icon">🎉</div>
-    <div class="success-text">
-      <strong>CV analysé avec succès !</strong>
-      <p>Votre profil a été mis à jour avec les nouvelles informations.</p>
-    </div>
+<div
+  class="analysis-success"
+  *ngIf="analysisSuccess"
+>
+  <div class="success-icon">✓</div>
+
+  <div class="success-text">
+    <strong>Profil mis à jour</strong>
+
+    <p>
+      Votre CV a été analysé et les nouvelles informations
+      ont été enregistrées.
+    </p>
   </div>
 
   <div class="success-actions">
-    <button class="profile-btn" routerLink="/consultant/profile">
-      Voir mon profil mis à jour
+    <button
+      type="button"
+      class="profile-btn"
+      routerLink="/consultant/profile"
+    >
+      Voir mon profil
     </button>
-    <button class="close-btn" (click)="closeSuccess()">✕</button>
+
+    <button
+      type="button"
+      class="close-btn"
+      (click)="closeSuccess()"
+      aria-label="Fermer"
+    >
+      ×
+    </button>
   </div>
 </div>

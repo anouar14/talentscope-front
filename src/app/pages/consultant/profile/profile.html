@@ -1,125 +1,393 @@
 <div class="profile-page">
-  <div class="profile-card">
-
-    <div class="profile-header">
-      <div class="avatar">
-        {{ consultant.firstName ? consultant.firstName.charAt(0) : 'C' }}
-      </div>
-
-      <h1>Mon profil consultant</h1>
-      <p>Complétez vos informations pour améliorer votre matching.</p>
-    </div>
-
-    <div *ngIf="loading" class="info-message">
-      Chargement du profil...
-    </div>
-
-    <form *ngIf="!loading" (ngSubmit)="saveProfile()">
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Prénom</label>
-          <input type="text" name="firstName" [(ngModel)]="consultant.firstName">
+  <div class="profile-container">
+    <section class="profile-hero">
+      <div class="profile-identity">
+        <div class="avatar">
+          {{
+            consultant.firstName
+              ? consultant.firstName.charAt(0)
+              : 'C'
+          }}
         </div>
 
-        <div class="form-group">
-          <label>Nom</label>
-          <input type="text" name="lastName" [(ngModel)]="consultant.lastName">
-        </div>
+        <div>
+          <span class="eyebrow">ESPACE CONSULTANT</span>
 
-        <div class="form-group full">
-          <label>Titre professionnel</label>
-          <input type="text" name="title" [(ngModel)]="consultant.title" placeholder="Ex: Développeur Full Stack">
-        </div>
+          <h1>
+            Mon profil
+            <span>professionnel.</span>
+          </h1>
 
-        <div class="form-group">
-          <label>Localisation</label>
-          <input type="text" name="location" [(ngModel)]="consultant.location" placeholder="Ex: Tunis">
-        </div>
-
-        <div class="form-group">
-          <label>Années d'expérience</label>
-          <input type="number" name="experienceYears" [(ngModel)]="consultant.experienceYears" min="0">
+          <p>
+            Maintenez vos informations et compétences à jour afin
+            d'améliorer la pertinence de votre matching TalentScope.
+          </p>
         </div>
       </div>
 
-      <div class="availability">
-        <label>Disponibilité</label>
+      <div
+        class="availability-badge"
+        [class.unavailable]="!consultant.available"
+      >
+        <i></i>
 
-        <div class="switch-row">
-          <input type="checkbox" name="available" [(ngModel)]="consultant.available">
-          <span>{{ consultant.available ? 'Disponible' : 'Non disponible' }}</span>
-        </div>
+        {{
+          consultant.available
+            ? 'Disponible'
+            : 'Non disponible'
+        }}
       </div>
+    </section>
 
-      <div class="skills-section">
-        <label>Compétences</label>
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+
+      <h2>Chargement du profil</h2>
+
+      <p>
+        Récupération de vos informations professionnelles...
+      </p>
+    </section>
+
+    <form
+      *ngIf="!loading"
+      class="profile-form"
+      (ngSubmit)="saveProfile()"
+    >
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 10c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6Zm-6.8 6c.55-2.13 3.34-4 6.8-4s6.25 1.87 6.8 4H5.2Z" />
+            </svg>
+          </div>
+
+          <div>
+            <span class="eyebrow">IDENTITÉ</span>
+            <h2>Informations personnelles</h2>
+
+            <p>
+              Ces informations permettent aux entreprises de mieux
+              identifier votre profil.
+            </p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="firstName">Prénom</label>
+
+            <input
+              id="firstName"
+              type="text"
+              name="firstName"
+              [(ngModel)]="consultant.firstName"
+              placeholder="Votre prénom"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Nom</label>
+
+            <input
+              id="lastName"
+              type="text"
+              name="lastName"
+              [(ngModel)]="consultant.lastName"
+              placeholder="Votre nom"
+            >
+          </div>
+
+          <div class="form-group full">
+            <label for="title">Titre professionnel</label>
+
+            <input
+              id="title"
+              type="text"
+              name="title"
+              [(ngModel)]="consultant.title"
+              placeholder="Ex : Développeur Full Stack"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="location">Localisation</label>
+
+            <input
+              id="location"
+              type="text"
+              name="location"
+              [(ngModel)]="consultant.location"
+              placeholder="Ex : Tunis"
+            >
+          </div>
+
+          <div class="form-group">
+            <label for="experienceYears">
+              Années d'expérience
+            </label>
+
+            <input
+              id="experienceYears"
+              type="number"
+              name="experienceYears"
+              [(ngModel)]="consultant.experienceYears"
+              min="0"
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon availability-icon">◎</div>
+
+          <div>
+            <span class="eyebrow">DISPONIBILITÉ</span>
+            <h2>Statut professionnel</h2>
+
+            <p>
+              Indiquez aux entreprises si vous êtes actuellement
+              ouvert aux nouvelles opportunités.
+            </p>
+          </div>
+        </div>
+
+        <label class="availability-control">
+          <input
+            type="checkbox"
+            name="available"
+            [(ngModel)]="consultant.available"
+          >
+
+          <span class="switch">
+            <i></i>
+          </span>
+
+          <span class="availability-text">
+            <strong>
+              {{
+                consultant.available
+                  ? 'Disponible pour une mission'
+                  : 'Indisponible actuellement'
+              }}
+            </strong>
+
+            <small>
+              {{
+                consultant.available
+                  ? 'Votre profil peut être proposé dans les recherches.'
+                  : 'Votre profil reste visible mais indiqué indisponible.'
+              }}
+            </small>
+          </span>
+        </label>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon skills-icon">✦</div>
+
+          <div>
+            <span class="eyebrow">EXPERTISE</span>
+            <h2>Compétences professionnelles</h2>
+
+            <p>
+              Ajoutez les technologies et domaines dans lesquels
+              vous êtes compétent.
+            </p>
+          </div>
+
+          <span class="skills-count">
+            {{ consultant.skills.length }}
+          </span>
+        </div>
 
         <div class="skill-input">
-          <input
-            type="text"
-            name="newSkill"
-            [(ngModel)]="newSkill"
-            placeholder="Ex: Angular"
-            (keydown.enter)="$event.preventDefault(); addSkill()">
+          <div class="skill-field">
+            <span>＋</span>
 
-          <button type="button" (click)="addSkill()">
-            <span class="btn-icon">+</span>
+            <input
+              type="text"
+              name="newSkill"
+              [(ngModel)]="newSkill"
+              placeholder="Ex : Angular"
+              (keydown.enter)="$event.preventDefault(); addSkill()"
+            >
+          </div>
+
+          <button
+            type="button"
+            (click)="addSkill()"
+          >
             Ajouter
           </button>
         </div>
 
-        <div class="skills-list" *ngIf="consultant.skills.length > 0">
-          <span class="skill-tag" *ngFor="let skill of consultant.skills">
+        <div
+          class="skills-empty"
+          *ngIf="consultant.skills.length === 0"
+        >
+          <span>✦</span>
+
+          <div>
+            <strong>Aucune compétence renseignée</strong>
+
+            <p>
+              Ajoutez quelques compétences pour améliorer
+              votre visibilité dans les recherches.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="skills-list"
+          *ngIf="consultant.skills.length > 0"
+        >
+          <span
+            class="skill-tag"
+            *ngFor="let skill of consultant.skills"
+          >
             {{ skill }}
-            <button type="button" (click)="removeSkill(skill)">×</button>
+
+            <button
+              type="button"
+              (click)="removeSkill(skill)"
+              [attr.aria-label]="'Supprimer ' + skill"
+            >
+              ×
+            </button>
           </span>
         </div>
-      </div>
+      </section>
 
-      <div class="cv-section">
-        <div class="cv-box" *ngIf="consultant.cvUrl; else noCv">
-          <div class="cv-icon">📄</div>
-
-          <div class="cv-info">
-            <p>CV déjà envoyé</p>
-            <strong>{{ consultant.cvUrl.split('/').pop() }}</strong>
-            <span>{{ consultant.cvUrl }}</span>
+      <section class="form-card">
+        <div class="section-heading">
+          <div class="section-icon cv-heading-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 2H6v16h10V7h-3V4Zm-4 7h4v2H9v-2Zm0 4h4v2H9v-2Z" />
+            </svg>
           </div>
 
-          <a class="cv-btn secondary" href="#">
-            Télécharger
-          </a>
+          <div>
+            <span class="eyebrow">CURRICULUM VITAE</span>
+            <h2>Mon CV</h2>
 
-          <a class="cv-btn primary" routerLink="/consultant/upload-cv">
-            Remplacer le CV
+            <p>
+              Votre CV est utilisé pour enrichir votre profil
+              et permettre son analyse intelligente.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="cv-box"
+          *ngIf="consultant.cvUrl; else noCv"
+        >
+          <div class="cv-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 2H6v16h10V7h-3V4Zm-4 7h4v2H9v-2Zm0 4h4v2H9v-2Z" />
+            </svg>
+          </div>
+
+          <div class="cv-info">
+            <span class="cv-status">CV DISPONIBLE</span>
+
+            <strong>
+              {{ consultant.cvUrl.split('/').pop() }}
+            </strong>
+
+            <small>
+              Votre CV est actuellement associé à votre profil.
+            </small>
+          </div>
+
+          <a
+            class="cv-btn primary"
+            routerLink="/consultant/upload-cv"
+          >
+            Gérer mon CV
+            <span>→</span>
           </a>
         </div>
 
         <ng-template #noCv>
           <div class="cv-box empty">
-            <div class="cv-icon">📄</div>
-
-            <div class="cv-info">
-              <p>Aucun CV envoyé</p>
-              <span>Ajoutez votre CV au format PDF pour compléter votre profil.</span>
+            <div class="cv-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M6 2h8l4 4v16H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm7 2H6v16h10V7h-3V4Zm-4 7h4v2H9v-2Zm0 4h4v2H9v-2Z" />
+              </svg>
             </div>
 
-            <a class="cv-btn primary" routerLink="/consultant/upload-cv">
+            <div class="cv-info">
+              <span class="cv-status">CV MANQUANT</span>
+
+              <strong>Aucun CV ajouté</strong>
+
+              <small>
+                Ajoutez un fichier PDF pour activer l'analyse IA.
+              </small>
+            </div>
+
+            <a
+              class="cv-btn primary"
+              routerLink="/consultant/upload-cv"
+            >
               Ajouter un CV
+              <span>→</span>
             </a>
           </div>
         </ng-template>
+      </section>
+
+      <div
+        class="feedback success-feedback"
+        *ngIf="successMessage"
+      >
+        <span>✓</span>
+
+        <div>
+          <strong>Profil mis à jour</strong>
+          <p>{{ successMessage }}</p>
+        </div>
       </div>
 
-      <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
-      <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <div
+        class="feedback error-feedback"
+        *ngIf="errorMessage"
+      >
+        <span>!</span>
 
-      <button class="save-btn" type="submit" [disabled]="saving">
-        <span>💾</span>
-        {{ saving ? 'Enregistrement...' : 'Enregistrer le profil' }}
-      </button>
+        <div>
+          <strong>Enregistrement impossible</strong>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </div>
 
+      <div class="form-footer">
+        <div>
+          <strong>Enregistrer vos modifications</strong>
+
+          <span>
+            Vos nouvelles informations seront immédiatement
+            appliquées à votre profil.
+          </span>
+        </div>
+
+        <button
+          class="save-btn"
+          type="submit"
+          [disabled]="saving"
+        >
+          {{
+            saving
+              ? 'Enregistrement...'
+              : 'Enregistrer le profil'
+          }}
+
+          <span *ngIf="!saving">✓</span>
+        </button>
+      </div>
     </form>
   </div>
 </div>

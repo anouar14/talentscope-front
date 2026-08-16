@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConsultantService } from '../../../core/services/consultant';
-import { Consultant } from '../../../core/models/consultant';
 import { RouterLink } from '@angular/router';
+import { Consultant } from '../../../core/models/consultant';
+import { ConsultantService } from '../../../core/services/consultant';
+
 @Component({
   selector: 'app-profile',
   imports: [CommonModule, FormsModule, RouterLink],
@@ -11,7 +12,6 @@ import { RouterLink } from '@angular/router';
   styleUrls: ['./profile.css']
 })
 export class ConsultantProfile implements OnInit {
-
   consultant: Consultant = {
     id: '',
     userId: '',
@@ -31,7 +31,7 @@ export class ConsultantProfile implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  constructor(private consultantService: ConsultantService) {}
+  constructor(private readonly consultantService: ConsultantService) {}
 
   ngOnInit(): void {
     this.loadProfile();
@@ -41,11 +41,12 @@ export class ConsultantProfile implements OnInit {
     this.loading = true;
 
     this.consultantService.getProfile().subscribe({
-      next: (data) => {
+      next: data => {
         this.consultant = {
           ...data,
           skills: data.skills || []
         };
+
         this.loading = false;
       },
       error: () => {
@@ -66,7 +67,9 @@ export class ConsultantProfile implements OnInit {
   }
 
   removeSkill(skill: string): void {
-    this.consultant.skills = this.consultant.skills.filter(s => s !== skill);
+    this.consultant.skills = this.consultant.skills.filter(
+      currentSkill => currentSkill !== skill
+    );
   }
 
   saveProfile(): void {
@@ -75,7 +78,7 @@ export class ConsultantProfile implements OnInit {
     this.errorMessage = '';
 
     this.consultantService.updateProfile(this.consultant).subscribe({
-      next: (data) => {
+      next: data => {
         this.consultant = {
           ...data,
           skills: data.skills || []
@@ -85,7 +88,8 @@ export class ConsultantProfile implements OnInit {
         this.saving = false;
       },
       error: () => {
-        this.errorMessage = 'Erreur lors de l’enregistrement du profil.';
+        this.errorMessage =
+          'Erreur lors de l’enregistrement du profil.';
         this.saving = false;
       }
     });

@@ -1,28 +1,14 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  OnInit
-} from '@angular/core';
-import {
-  FormsModule,
-  NgForm
-} from '@angular/forms';
-import {
-  ActivatedRoute,
-  Router,
-  RouterLink
-} from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterLink
-  ],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './reset-password.html',
   styleUrl: './reset-password.css'
 })
@@ -41,9 +27,9 @@ export class ResetPassword implements OnInit {
   errorMessage = '';
 
   constructor(
-    private authService: Auth,
-    private activatedRoute: ActivatedRoute,
-    private router: Router
+    private readonly authService: Auth,
+    private readonly activatedRoute: ActivatedRoute,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
@@ -66,31 +52,6 @@ export class ResetPassword implements OnInit {
       this.confirmPassword.length > 0 &&
       this.newPassword !== this.confirmPassword
     );
-  }
-
-  private validateToken(): void {
-    this.validatingToken = true;
-
-    this.authService
-      .validateResetToken(this.token)
-      .subscribe({
-        next: (response) => {
-          this.validatingToken = false;
-          this.tokenValid = response.valid;
-
-          if (!response.valid) {
-            this.errorMessage =
-              'Ce lien de réinitialisation est invalide ou a expiré.';
-          }
-        },
-
-        error: () => {
-          this.validatingToken = false;
-          this.tokenValid = false;
-          this.errorMessage =
-            'Impossible de vérifier le lien de réinitialisation.';
-        }
-      });
   }
 
   onResetPassword(form: NgForm): void {
@@ -119,12 +80,9 @@ export class ResetPassword implements OnInit {
     this.loading = true;
 
     this.authService
-      .resetPassword(
-        this.token,
-        this.newPassword
-      )
+      .resetPassword(this.token, this.newPassword)
       .subscribe({
-        next: (response) => {
+        next: response => {
           this.loading = false;
           this.successMessage = response.message;
           this.tokenValid = false;
@@ -133,12 +91,12 @@ export class ResetPassword implements OnInit {
             this.router.navigate(['/login']);
           }, 2000);
         },
-
         error: (error: HttpErrorResponse) => {
           this.loading = false;
 
           if (error.status === 400) {
             this.tokenValid = false;
+
             this.errorMessage =
               'Le lien est invalide, expiré ou le mot de passe ne respecte pas les règles.';
             return;
@@ -148,5 +106,28 @@ export class ResetPassword implements OnInit {
             'Impossible de modifier le mot de passe.';
         }
       });
+  }
+
+  private validateToken(): void {
+    this.validatingToken = true;
+
+    this.authService.validateResetToken(this.token).subscribe({
+      next: response => {
+        this.validatingToken = false;
+        this.tokenValid = response.valid;
+
+        if (!response.valid) {
+          this.errorMessage =
+            'Ce lien de réinitialisation est invalide ou a expiré.';
+        }
+      },
+      error: () => {
+        this.validatingToken = false;
+        this.tokenValid = false;
+
+        this.errorMessage =
+          'Impossible de vérifier le lien de réinitialisation.';
+      }
+    });
   }
 }

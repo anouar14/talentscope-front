@@ -1,20 +1,30 @@
 <div class="detail-page">
   <div class="detail-container">
-    <button type="button" class="back-button" (click)="goBack()">
-      ← Retour aux consultants
+    <button
+      type="button"
+      class="back-button"
+      (click)="goBack()"
+    >
+      <span>←</span>
+      Retour aux consultants
     </button>
 
-    <div class="loading-card" *ngIf="loading">
-      Chargement du profil...
-    </div>
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <h2>Chargement du profil</h2>
+      <p>Récupération des informations du consultant...</p>
+    </section>
 
-    <div class="error-card" *ngIf="errorMessage">
+    <section class="state-card error-state" *ngIf="errorMessage">
+      <div class="state-icon">!</div>
+
+      <h2>Profil indisponible</h2>
       <p>{{ errorMessage }}</p>
 
       <a routerLink="/company/search-consultants">
         Retour à la recherche
       </a>
-    </div>
+    </section>
 
     <ng-container *ngIf="consultant && !loading">
       <section class="profile-header">
@@ -27,8 +37,8 @@
             }}
           </div>
 
-          <div>
-            <p class="eyebrow">Profil consultant</p>
+          <div class="identity-content">
+            <span class="eyebrow">PROFIL CONSULTANT</span>
 
             <h1>
               {{ consultant.firstName || 'Prénom' }}
@@ -38,24 +48,72 @@
             <p class="title">
               {{ consultant.title || 'Titre non renseigné' }}
             </p>
+
+            <div class="profile-meta">
+              <span>
+                <i>⌖</i>
+                {{ consultant.location || 'Localisation non renseignée' }}
+              </span>
+
+              <span>
+                <i>◷</i>
+                {{ consultant.experienceYears || 0 }} an(s) d'expérience
+              </span>
+            </div>
           </div>
         </div>
 
-        <div
-          class="availability"
-          [class.unavailable]="!consultant.available"
-        >
-          {{
-            consultant.available
-              ? 'Disponible'
-              : 'Non disponible'
-          }}
+        <div class="profile-header-actions">
+          <span
+            class="availability"
+            [class.unavailable]="!consultant.available"
+          >
+            <i></i>
+
+            {{
+              consultant.available
+                ? 'Disponible'
+                : 'Non disponible'
+            }}
+          </span>
+
+          <button
+            type="button"
+            class="mission-button"
+            [disabled]="!consultant.available"
+            (click)="openInvitationForm()"
+          >
+            {{
+              consultant.available
+                ? 'Proposer une mission'
+                : 'Consultant indisponible'
+            }}
+          </button>
         </div>
       </section>
 
+      <div
+        class="alert success-alert"
+        *ngIf="invitationSuccessMessage"
+      >
+        <span>✓</span>
+        {{ invitationSuccessMessage }}
+      </div>
+
       <section class="profile-grid">
         <article class="information-card">
-          <h2>Informations professionnelles</h2>
+          <div class="card-heading">
+            <span class="card-icon">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0-8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm0 10c-5 0-9 2.5-9 6v2h18v-2c0-3.5-4-6-9-6Zm-6.8 6c.55-2.13 3.34-4 6.8-4s6.25 1.87 6.8 4H5.2Z" />
+              </svg>
+            </span>
+
+            <div>
+              <span class="eyebrow">INFORMATIONS</span>
+              <h2>Profil professionnel</h2>
+            </div>
+          </div>
 
           <div class="information-list">
             <div class="information-item">
@@ -67,15 +125,15 @@
             </div>
 
             <div class="information-item">
-              <span>Expérience</span>
+              <span>Expérience professionnelle</span>
 
               <strong>
                 {{ consultant.experienceYears || 0 }} an(s)
               </strong>
             </div>
 
-            <div class="information-item">
-              <span>CV</span>
+            <div class="information-item cv-item">
+              <span>Curriculum Vitae</span>
 
               <div class="cv-information">
                 <strong>
@@ -93,23 +151,42 @@
                   [disabled]="cvDownloadLoading"
                   (click)="downloadCv()"
                 >
-                  {{
-                    cvDownloadLoading
-                      ? 'Téléchargement...'
-                      : 'Télécharger le CV'
-                  }}
+                  <span>
+                    {{
+                      cvDownloadLoading
+                        ? 'Téléchargement...'
+                        : 'Télécharger le CV'
+                    }}
+                  </span>
+
+                  <span *ngIf="!cvDownloadLoading">↓</span>
                 </button>
               </div>
             </div>
+          </div>
 
-            <p class="form-error" *ngIf="cvDownloadErrorMessage">
-              {{ cvDownloadErrorMessage }}
-            </p>
+          <div
+            class="alert error-alert"
+            *ngIf="cvDownloadErrorMessage"
+          >
+            <span>!</span>
+            {{ cvDownloadErrorMessage }}
           </div>
         </article>
 
         <article class="skills-card">
-          <h2>Compétences</h2>
+          <div class="card-heading">
+            <span class="card-icon skills-icon">✦</span>
+
+            <div>
+              <span class="eyebrow">EXPERTISE</span>
+              <h2>Compétences techniques</h2>
+            </div>
+
+            <span class="skill-count">
+              {{ consultant.skills.length }}
+            </span>
+          </div>
 
           <div
             class="empty-message"
@@ -118,7 +195,10 @@
             Aucune compétence renseignée.
           </div>
 
-          <div class="skills">
+          <div
+            class="skills"
+            *ngIf="consultant.skills.length > 0"
+          >
             <span *ngFor="let skill of consultant.skills">
               {{ skill }}
             </span>
@@ -127,12 +207,15 @@
       </section>
 
       <section class="actions-card">
+        <div class="action-decoration">✦</div>
+
         <div>
-          <h2>Ce profil vous intéresse ?</h2>
+          <span class="eyebrow">COLLABORATION</span>
+          <h2>Ce profil correspond à votre besoin ?</h2>
 
           <p>
-            Consultez son CV ou envoyez-lui une proposition de mission
-            détaillée.
+            Envoyez une proposition de mission complète directement
+            au consultant.
           </p>
         </div>
 
@@ -143,15 +226,13 @@
         >
           {{
             consultant.available
-              ? 'Proposer une mission'
-              : 'Consultant indisponible'
+              ? 'Créer une proposition'
+              : 'Profil indisponible'
           }}
+
+          <span *ngIf="consultant.available">→</span>
         </button>
       </section>
-
-      <p class="success-message" *ngIf="invitationSuccessMessage">
-        {{ invitationSuccessMessage }}
-      </p>
 
       <section
         class="invitation-form-card"
@@ -159,13 +240,18 @@
       >
         <div class="form-header">
           <div>
-            <p class="eyebrow">Nouvelle proposition</p>
+            <span class="eyebrow">NOUVELLE PROPOSITION</span>
 
             <h2>
-              Proposition de mission pour
+              Créer une mission pour
               {{ consultant.firstName }}
               {{ consultant.lastName }}
             </h2>
+
+            <p>
+              Renseignez les informations nécessaires afin que le
+              consultant puisse évaluer précisément votre proposition.
+            </p>
           </div>
 
           <button
@@ -173,179 +259,225 @@
             class="close-button"
             [disabled]="invitationLoading"
             (click)="closeInvitationForm()"
+            aria-label="Fermer"
           >
             ×
           </button>
         </div>
 
-        <div class="form-grid">
-          <div class="form-field full-width">
-            <label for="invitationSubject">
-              Titre de la mission *
-            </label>
+        <div class="form-section">
+          <div class="form-section-title">
+            <span>01</span>
 
-            <input
-              id="invitationSubject"
-              type="text"
-              name="invitationSubject"
-              [(ngModel)]="invitationSubject"
-              maxlength="150"
-              placeholder="Exemple : Développeur Java Spring Boot"
-            />
+            <div>
+              <strong>Informations générales</strong>
+              <small>Présentation de la mission</small>
+            </div>
           </div>
 
-          <div class="form-field full-width">
-            <label for="invitationMessage">
-              Description de la mission *
-            </label>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="invitationSubject">
+                Titre de la mission *
+              </label>
 
-            <textarea
-              id="invitationMessage"
-              name="invitationMessage"
-              [(ngModel)]="invitationMessage"
-              maxlength="3000"
-              placeholder="Présentez le contexte, les responsabilités et les objectifs..."
-            ></textarea>
-          </div>
-
-          <div class="form-field">
-            <label for="invitationStartDate">
-              Date de début *
-            </label>
-
-            <input
-              id="invitationStartDate"
-              type="date"
-              name="invitationStartDate"
-              [(ngModel)]="invitationStartDate"
-              [min]="minimumStartDate"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="invitationEndDate">
-              Date de fin
-            </label>
-
-            <input
-              id="invitationEndDate"
-              type="date"
-              name="invitationEndDate"
-              [(ngModel)]="invitationEndDate"
-              [min]="minimumEndDate"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="invitationContractType">
-              Type de contrat *
-            </label>
-
-            <select
-              id="invitationContractType"
-              name="invitationContractType"
-              [(ngModel)]="invitationContractType"
-            >
-              <option value="">Sélectionner</option>
-
-              <option
-                *ngFor="let contractType of contractTypes"
-                [value]="contractType.value"
+              <input
+                id="invitationSubject"
+                type="text"
+                name="invitationSubject"
+                [(ngModel)]="invitationSubject"
+                maxlength="150"
+                placeholder="Exemple : Développeur Java Spring Boot"
               >
-                {{ contractType.label }}
-              </option>
-            </select>
-          </div>
+            </div>
 
-          <div class="form-field">
-            <label for="invitationWorkMode">
-              Mode de travail *
-            </label>
+            <div class="form-field full-width">
+              <label for="invitationMessage">
+                Description de la mission *
+              </label>
 
-            <select
-              id="invitationWorkMode"
-              name="invitationWorkMode"
-              [(ngModel)]="invitationWorkMode"
-            >
-              <option value="">Sélectionner</option>
+              <textarea
+                id="invitationMessage"
+                name="invitationMessage"
+                [(ngModel)]="invitationMessage"
+                maxlength="3000"
+                placeholder="Présentez le contexte, les responsabilités et les objectifs..."
+              ></textarea>
 
-              <option
-                *ngFor="let workMode of workModes"
-                [value]="workMode.value"
-              >
-                {{ workMode.label }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-field">
-            <label for="invitationLocation">
-              Localisation *
-            </label>
-
-            <input
-              id="invitationLocation"
-              type="text"
-              name="invitationLocation"
-              [(ngModel)]="invitationLocation"
-              maxlength="150"
-              placeholder="Exemple : Tunis"
-            />
-          </div>
-
-          <div class="form-field">
-            <label for="invitationSalary">
-              Rémunération
-            </label>
-
-            <input
-              id="invitationSalary"
-              type="number"
-              name="invitationSalary"
-              [(ngModel)]="invitationSalary"
-              min="0.01"
-              step="0.01"
-              placeholder="Exemple : 3500"
-            />
-          </div>
-
-          <div class="form-field full-width">
-            <label for="invitationTechnologies">
-              Technologies *
-            </label>
-
-            <input
-              id="invitationTechnologies"
-              type="text"
-              name="invitationTechnologies"
-              [(ngModel)]="invitationTechnologies"
-              placeholder="Java, Spring Boot, Angular, MongoDB"
-            />
-
-            <small>
-              Séparez les technologies par des virgules.
-            </small>
-          </div>
-
-          <div class="form-field full-width">
-            <label for="invitationNotes">
-              Notes complémentaires
-            </label>
-
-            <textarea
-              id="invitationNotes"
-              name="invitationNotes"
-              [(ngModel)]="invitationNotes"
-              maxlength="2000"
-              class="notes-textarea"
-              placeholder="Conditions particulières, rythme de présence, avantages..."
-            ></textarea>
+              <small>
+                Décrivez clairement le contexte et les responsabilités.
+              </small>
+            </div>
           </div>
         </div>
 
-        <p class="form-error" *ngIf="invitationErrorMessage">
+        <div class="form-section">
+          <div class="form-section-title">
+            <span>02</span>
+
+            <div>
+              <strong>Organisation</strong>
+              <small>Dates, contrat et mode de travail</small>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="invitationStartDate">
+                Date de début *
+              </label>
+
+              <input
+                id="invitationStartDate"
+                type="date"
+                name="invitationStartDate"
+                [(ngModel)]="invitationStartDate"
+                [min]="minimumStartDate"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="invitationEndDate">
+                Date de fin
+              </label>
+
+              <input
+                id="invitationEndDate"
+                type="date"
+                name="invitationEndDate"
+                [(ngModel)]="invitationEndDate"
+                [min]="minimumEndDate"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="invitationContractType">
+                Type de contrat *
+              </label>
+
+              <select
+                id="invitationContractType"
+                name="invitationContractType"
+                [(ngModel)]="invitationContractType"
+              >
+                <option value="">Sélectionner</option>
+
+                <option
+                  *ngFor="let contractType of contractTypes"
+                  [value]="contractType.value"
+                >
+                  {{ contractType.label }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label for="invitationWorkMode">
+                Mode de travail *
+              </label>
+
+              <select
+                id="invitationWorkMode"
+                name="invitationWorkMode"
+                [(ngModel)]="invitationWorkMode"
+              >
+                <option value="">Sélectionner</option>
+
+                <option
+                  *ngFor="let workMode of workModes"
+                  [value]="workMode.value"
+                >
+                  {{ workMode.label }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">
+            <span>03</span>
+
+            <div>
+              <strong>Détails complémentaires</strong>
+              <small>Lieu, rémunération et technologies</small>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="invitationLocation">
+                Localisation *
+              </label>
+
+              <input
+                id="invitationLocation"
+                type="text"
+                name="invitationLocation"
+                [(ngModel)]="invitationLocation"
+                maxlength="150"
+                placeholder="Exemple : Tunis"
+              >
+            </div>
+
+            <div class="form-field">
+              <label for="invitationSalary">
+                Rémunération
+              </label>
+
+              <input
+                id="invitationSalary"
+                type="number"
+                name="invitationSalary"
+                [(ngModel)]="invitationSalary"
+                min="0.01"
+                step="0.01"
+                placeholder="Exemple : 3500"
+              >
+            </div>
+
+            <div class="form-field full-width">
+              <label for="invitationTechnologies">
+                Technologies *
+              </label>
+
+              <input
+                id="invitationTechnologies"
+                type="text"
+                name="invitationTechnologies"
+                [(ngModel)]="invitationTechnologies"
+                placeholder="Java, Spring Boot, Angular, MongoDB"
+              >
+
+              <small>
+                Séparez les technologies par des virgules.
+              </small>
+            </div>
+
+            <div class="form-field full-width">
+              <label for="invitationNotes">
+                Notes complémentaires
+              </label>
+
+              <textarea
+                id="invitationNotes"
+                name="invitationNotes"
+                [(ngModel)]="invitationNotes"
+                maxlength="2000"
+                class="notes-textarea"
+                placeholder="Conditions particulières, rythme de présence, avantages..."
+              ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="alert error-alert"
+          *ngIf="invitationErrorMessage"
+        >
+          <span>!</span>
           {{ invitationErrorMessage }}
-        </p>
+        </div>
 
         <div class="form-actions">
           <button
@@ -368,6 +500,8 @@
                 ? 'Envoi en cours...'
                 : 'Envoyer la proposition'
             }}
+
+            <span *ngIf="!invitationLoading">→</span>
           </button>
         </div>
       </section>

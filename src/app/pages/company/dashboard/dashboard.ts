@@ -86,6 +86,16 @@ export class CompanyDashboard implements OnInit {
     return this.missions.slice(0, 3);
   }
 
+  get acceptanceRate(): number {
+    if (this.totalInvitations === 0) {
+      return 0;
+    }
+
+    return Math.round(
+      (this.acceptedInvitations / this.totalInvitations) * 100
+    );
+  }
+
   loadDashboard(): void {
     this.loading = true;
     this.errorMessage = '';

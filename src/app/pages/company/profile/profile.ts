@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CompanyService } from '../../../core/services/company';
 import { Company } from '../../../core/models/company';
+import { CompanyService } from '../../../core/services/company';
 
 @Component({
   selector: 'app-company-profile',
@@ -26,7 +26,9 @@ export class CompanyProfile implements OnInit {
   successMessage = '';
   errorMessage = '';
 
-  constructor(private companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService
+  ) {}
 
   ngOnInit(): void {
     this.loadProfile();
@@ -36,12 +38,13 @@ export class CompanyProfile implements OnInit {
     this.loading = true;
 
     this.companyService.getProfile().subscribe({
-      next: (data) => {
+      next: data => {
         this.company = data;
         this.loading = false;
       },
       error: () => {
-        this.errorMessage = 'Impossible de charger le profil entreprise.';
+        this.errorMessage =
+          'Impossible de charger le profil entreprise.';
         this.loading = false;
       }
     });
@@ -53,13 +56,15 @@ export class CompanyProfile implements OnInit {
     this.errorMessage = '';
 
     this.companyService.updateProfile(this.company).subscribe({
-      next: (data) => {
+      next: data => {
         this.company = data;
-        this.successMessage = 'Profil entreprise enregistré avec succès.';
+        this.successMessage =
+          'Profil entreprise enregistré avec succès.';
         this.saving = false;
       },
       error: () => {
-        this.errorMessage = 'Erreur lors de l’enregistrement.';
+        this.errorMessage =
+          'Erreur lors de l’enregistrement.';
         this.saving = false;
       }
     });

@@ -1,30 +1,45 @@
-<div class="missions-page">
-  <div class="missions-container">
-    <header class="page-header">
+<div class="page-shell">
+  <div class="page-container">
+    <section class="page-hero">
       <div>
-        <p class="eyebrow">Espace consultant</p>
-        <h1>Mes missions</h1>
+        <span class="eyebrow">MISSIONS</span>
 
-        <p class="page-description">
-          Retrouvez les missions créées après l’acceptation de vos
-          propositions.
+        <h1>
+          Suivez vos
+          <span>collaborations.</span>
+        </h1>
+
+        <p>
+          Retrouvez toutes les missions créées après acceptation
+          de vos propositions et suivez leur évolution.
         </p>
       </div>
 
-      <a routerLink="/consultant/invitations" class="primary-link">
+      <a
+        routerLink="/consultant/invitations"
+        class="primary-action"
+      >
         Voir mes propositions
+        <span>→</span>
       </a>
-    </header>
+    </section>
 
-    <section class="summary-grid" *ngIf="!loading && !errorMessage">
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
       <button
         type="button"
         class="summary-card"
         [class.active]="selectedStatus === 'ALL'"
         (click)="filterByStatus('ALL')"
       >
-        <span>Total des missions</span>
-        <strong>{{ missions.length }}</strong>
+        <span class="summary-icon purple">▣</span>
+
+        <div>
+          <span>Toutes les missions</span>
+          <strong>{{ missions.length }}</strong>
+        </div>
       </button>
 
       <button
@@ -33,8 +48,12 @@
         [class.active]="selectedStatus === 'ACTIVE'"
         (click)="filterByStatus('ACTIVE')"
       >
-        <span>Missions actives</span>
-        <strong>{{ activeMissionCount }}</strong>
+        <span class="summary-icon green">●</span>
+
+        <div>
+          <span>Actives</span>
+          <strong>{{ activeMissionCount }}</strong>
+        </div>
       </button>
 
       <button
@@ -43,8 +62,12 @@
         [class.active]="selectedStatus === 'COMPLETED'"
         (click)="filterByStatus('COMPLETED')"
       >
-        <span>Missions terminées</span>
-        <strong>{{ completedMissionCount }}</strong>
+        <span class="summary-icon blue">✓</span>
+
+        <div>
+          <span>Terminées</span>
+          <strong>{{ completedMissionCount }}</strong>
+        </div>
       </button>
 
       <button
@@ -53,8 +76,12 @@
         [class.active]="selectedStatus === 'CANCELLED'"
         (click)="filterByStatus('CANCELLED')"
       >
-        <span>Missions annulées</span>
-        <strong>{{ cancelledMissionCount }}</strong>
+        <span class="summary-icon red">×</span>
+
+        <div>
+          <span>Annulées</span>
+          <strong>{{ cancelledMissionCount }}</strong>
+        </div>
       </button>
     </section>
 
@@ -67,13 +94,17 @@
           Rechercher une mission
         </label>
 
-        <input
-          id="consultant-mission-search"
-          type="search"
-          name="missionSearch"
-          [(ngModel)]="searchTerm"
-          placeholder="Entreprise, mission, technologie, localisation..."
-        />
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="consultant-mission-search"
+            type="search"
+            name="missionSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Entreprise, mission, technologie, localisation..."
+          >
+        </div>
       </div>
 
       <div class="filter-field">
@@ -105,27 +136,43 @@
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-      <p>Chargement de vos missions...</p>
+
+      <h2>Chargement de vos missions</h2>
+
+      <p>
+        Récupération de vos collaborations...
+      </p>
     </section>
 
-    <section class="state-card error-state" *ngIf="!loading && errorMessage">
-      <h2>Une erreur est survenue</h2>
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger vos missions</h2>
+
       <p>{{ errorMessage }}</p>
 
-      <button type="button" (click)="loadMissions()">
+      <button
+        type="button"
+        (click)="loadMissions()"
+      >
         Réessayer
       </button>
     </section>
 
     <section
-      class="state-card empty-state"
+      class="state-card"
       *ngIf="!loading && !errorMessage && missions.length === 0"
     >
+      <div class="state-icon empty-icon">▣</div>
+
       <h2>Aucune mission pour le moment</h2>
 
       <p>
-        Une mission apparaîtra ici lorsque vous accepterez une proposition
-        d’entreprise.
+        Lorsqu'une entreprise vous proposera une mission et que
+        vous l'accepterez, elle apparaîtra automatiquement ici.
       </p>
 
       <a routerLink="/consultant/invitations">
@@ -134,7 +181,7 @@
     </section>
 
     <section
-      class="state-card empty-state"
+      class="state-card"
       *ngIf="
         !loading &&
         !errorMessage &&
@@ -142,10 +189,18 @@
         filteredMissions.length === 0
       "
     >
-      <h2>Aucun résultat</h2>
-      <p>Aucune mission ne correspond aux critères sélectionnés.</p>
+      <div class="state-icon empty-icon">⌕</div>
 
-      <button type="button" (click)="resetFilters()">
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucune mission ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
         Réinitialiser les filtres
       </button>
     </section>
@@ -156,11 +211,15 @@
     >
       <article
         class="mission-card"
-        *ngFor="let mission of filteredMissions; trackBy: trackMission"
+        *ngFor="
+          let mission of filteredMissions;
+          trackBy: trackMission
+        "
       >
-        <div class="mission-card-header">
+        <div class="mission-header">
           <div>
-            <p class="mission-label">Mission</p>
+            <span class="eyebrow">MISSION</span>
+
             <h2>{{ mission.title }}</h2>
           </div>
 
@@ -174,21 +233,28 @@
 
         <div class="company-block">
           <div class="avatar">
-            {{ mission.companyName ? mission.companyName.charAt(0) : 'E' }}
+            {{
+              mission.companyName
+                ? mission.companyName.charAt(0)
+                : 'E'
+            }}
           </div>
 
           <div>
-            <span>Entreprise</span>
+            <span>ENTREPRISE</span>
             <strong>{{ mission.companyName }}</strong>
           </div>
         </div>
 
         <p class="mission-description">
-          {{ mission.description || 'Aucune description disponible.' }}
+          {{
+            mission.description ||
+            'Aucune description disponible.'
+          }}
         </p>
 
         <div class="conditions-grid">
-          <div>
+          <article>
             <span>Début</span>
 
             <strong>
@@ -198,9 +264,9 @@
                   : 'Non renseigné'
               }}
             </strong>
-          </div>
+          </article>
 
-          <div>
+          <article>
             <span>Fin</span>
 
             <strong>
@@ -210,27 +276,27 @@
                   : 'Non définie'
               }}
             </strong>
-          </div>
+          </article>
 
-          <div>
+          <article>
             <span>Contrat</span>
             <strong>{{ getContractTypeLabel(mission.contractType) }}</strong>
-          </div>
+          </article>
 
-          <div>
+          <article>
             <span>Mode</span>
             <strong>{{ getWorkModeLabel(mission.workMode) }}</strong>
-          </div>
+          </article>
 
-          <div>
+          <article>
             <span>Localisation</span>
             <strong>{{ mission.location || 'Non renseignée' }}</strong>
-          </div>
+          </article>
 
-          <div>
+          <article>
             <span>Rémunération</span>
             <strong>{{ getSalaryLabel(mission.salary) }}</strong>
-          </div>
+          </article>
         </div>
 
         <div
@@ -244,7 +310,7 @@
 
         <div class="mission-information">
           <div>
-            <span>Date de création</span>
+            <span>Mission créée</span>
 
             <strong>
               {{ mission.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
@@ -260,10 +326,51 @@
           </div>
         </div>
 
-        <div class="detail-action">
-          <a [routerLink]="['/consultant/missions', mission.id]">
-            Voir tous les détails
-          </a>
+        <a
+          class="detail-action"
+          [routerLink]="[
+            '/consultant/missions',
+            mission.id
+          ]"
+        >
+          Consulter la mission
+          <span>→</span>
+        </a>
+
+        <div
+          class="mission-state active-state"
+          *ngIf="mission.status === 'ACTIVE'"
+        >
+          <span>●</span>
+
+          <div>
+            <strong>Mission en cours</strong>
+            <p>La collaboration est actuellement active.</p>
+          </div>
+        </div>
+
+        <div
+          class="mission-state completed-state"
+          *ngIf="mission.status === 'COMPLETED'"
+        >
+          <span>✓</span>
+
+          <div>
+            <strong>Mission terminée</strong>
+            <p>Cette collaboration est maintenant clôturée.</p>
+          </div>
+        </div>
+
+        <div
+          class="mission-state cancelled-state"
+          *ngIf="mission.status === 'CANCELLED'"
+        >
+          <span>×</span>
+
+          <div>
+            <strong>Mission annulée</strong>
+            <p>Cette collaboration a été interrompue.</p>
+          </div>
         </div>
       </article>
     </section>

@@ -44,9 +44,7 @@ export class App implements OnInit, OnDestroy {
 
     this.router.events
       .pipe(
-        filter(
-          event => event instanceof NavigationEnd
-        ),
+        filter(event => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {

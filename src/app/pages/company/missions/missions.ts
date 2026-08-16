@@ -104,11 +104,13 @@ export class CompanyMissions implements OnInit {
         }
 
         if (error.status === 404) {
-          this.errorMessage = 'Votre profil entreprise est introuvable.';
+          this.errorMessage =
+            'Votre profil entreprise est introuvable.';
           return;
         }
 
-        this.errorMessage = 'Impossible de charger vos missions.';
+        this.errorMessage =
+          'Impossible de charger vos missions.';
       }
     });
   }
@@ -123,7 +125,10 @@ export class CompanyMissions implements OnInit {
   }
 
   completeMission(mission: Mission): void {
-    if (mission.status !== 'ACTIVE' || this.isMissionUpdating(mission.id)) {
+    if (
+      mission.status !== 'ACTIVE' ||
+      this.isMissionUpdating(mission.id)
+    ) {
       return;
     }
 
@@ -137,7 +142,10 @@ export class CompanyMissions implements OnInit {
   }
 
   cancelMission(mission: Mission): void {
-    if (mission.status !== 'ACTIVE' || this.isMissionUpdating(mission.id)) {
+    if (
+      mission.status !== 'ACTIVE' ||
+      this.isMissionUpdating(mission.id)
+    ) {
       return;
     }
 
@@ -223,14 +231,22 @@ export class CompanyMissions implements OnInit {
   }
 
   private countMissionsByStatus(status: MissionStatus): number {
-    return this.missions.filter(mission => mission.status === status).length;
+    return this.missions.filter(
+      mission => mission.status === status
+    ).length;
   }
 
-  private updateMissionStatus(mission: Mission, status: MissionStatus): void {
+  private updateMissionStatus(
+    mission: Mission,
+    status: MissionStatus
+  ): void {
     this.updatingMissionId = mission.id;
     this.clearActionMessages();
 
-    this.missionService.updateMissionStatus(mission.id, status).subscribe({
+    this.missionService.updateMissionStatus(
+      mission.id,
+      status
+    ).subscribe({
       next: updatedMission => {
         this.replaceMission({
           ...updatedMission,
@@ -245,7 +261,10 @@ export class CompanyMissions implements OnInit {
             : 'La mission a été annulée.';
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors de la modification de la mission :', error);
+        console.error(
+          'Erreur lors de la modification de la mission :',
+          error
+        );
 
         this.updatingMissionId = null;
 
@@ -264,7 +283,8 @@ export class CompanyMissions implements OnInit {
         }
 
         if (error.status === 404) {
-          this.actionErrorMessage = 'Cette mission est introuvable.';
+          this.actionErrorMessage =
+            'Cette mission est introuvable.';
           return;
         }
 
@@ -286,7 +306,9 @@ export class CompanyMissions implements OnInit {
 
   private replaceMission(updatedMission: Mission): void {
     this.missions = this.missions.map(mission =>
-      mission.id === updatedMission.id ? updatedMission : mission
+      mission.id === updatedMission.id
+        ? updatedMission
+        : mission
     );
   }
 
@@ -304,7 +326,8 @@ export class CompanyMissions implements OnInit {
       error.error?.detail ||
       error.error?.error;
 
-    return typeof backendMessage === 'string' && backendMessage.trim()
+    return typeof backendMessage === 'string' &&
+      backendMessage.trim()
       ? backendMessage
       : defaultMessage;
   }

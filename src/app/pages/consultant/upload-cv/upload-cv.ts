@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ConsultantService } from '../../../core/services/consultant';
 
@@ -19,11 +19,14 @@ export class UploadCv {
   analysisSuccess = false;
   cvPreview: any = null;
 
-  constructor(private consultantService: ConsultantService) {}
+  constructor(private readonly consultantService: ConsultantService) {}
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
 
     const file = input.files[0];
 
@@ -41,7 +44,8 @@ export class UploadCv {
 
   uploadCv(): void {
     if (!this.selectedFile) {
-      this.errorMessage = 'Veuillez choisir un CV avant de continuer.';
+      this.errorMessage =
+        'Veuillez choisir un CV avant de continuer.';
       return;
     }
 
@@ -50,7 +54,7 @@ export class UploadCv {
     this.errorMessage = '';
 
     this.consultantService.uploadCv(this.selectedFile).subscribe({
-      next: (consultant) => {
+      next: consultant => {
         this.cvUrl = consultant.cvUrl;
         this.successMessage = 'CV envoyé avec succès.';
         this.loading = false;
@@ -69,13 +73,13 @@ export class UploadCv {
     this.analysisSuccess = false;
 
     this.consultantService.previewCvAnalysis().subscribe({
-      next: (result) => {
+      next: result => {
         this.cvPreview = result;
         this.loading = false;
       },
-      error: (error) => {
+      error: error => {
         console.error(error);
-        this.errorMessage = "Erreur lors de l'analyse du CV.";
+        this.errorMessage = 'Erreur lors de l’analyse du CV.';
         this.loading = false;
       }
     });
@@ -91,9 +95,10 @@ export class UploadCv {
         this.cvPreview = null;
         this.loading = false;
       },
-      error: (error) => {
+      error: error => {
         console.error(error);
-        this.errorMessage = 'Erreur lors de la sauvegarde du profil.';
+        this.errorMessage =
+          'Erreur lors de la sauvegarde du profil.';
         this.loading = false;
       }
     });

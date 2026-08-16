@@ -1,101 +1,201 @@
 <div class="role-page">
-  <div class="role-card">
-
-    <h1>Choisissez votre type de compte</h1>
-
-    <p class="description">
-      Cette étape est nécessaire uniquement lors de votre
-      première connexion avec Google.
-    </p>
-
-    <div class="google-user">
-      <div class="user-avatar">
-        {{
-          googleUserName
-            ? googleUserName.charAt(0).toUpperCase()
-            : 'G'
-        }}
+  <div class="role-layout">
+    <section class="role-intro">
+      <div class="brand">
+        <span>T</span>
+        <strong>TalentScope</strong>
       </div>
 
-      <div>
-        <strong>
-          {{ googleUserName || 'Utilisateur Google' }}
-        </strong>
+      <div class="intro-content">
+        <span class="eyebrow">BIENVENUE SUR TALENTSCOPE</span>
 
-        <span>
-          {{ googleUserEmail }}
-        </span>
+        <h1>
+          Personnalisez votre
+          <span>expérience.</span>
+        </h1>
+
+        <p>
+          Une dernière étape est nécessaire pour configurer
+          correctement votre espace TalentScope.
+        </p>
+
+        <div class="intro-flow">
+          <article>
+            <span>01</span>
+
+            <div>
+              <strong>Compte Google</strong>
+              <small>Authentification terminée</small>
+            </div>
+
+            <i>✓</i>
+          </article>
+
+          <article class="active">
+            <span>02</span>
+
+            <div>
+              <strong>Type de compte</strong>
+              <small>Choisissez votre espace</small>
+            </div>
+
+            <i>→</i>
+          </article>
+
+          <article>
+            <span>03</span>
+
+            <div>
+              <strong>Votre espace</strong>
+              <small>Accès au dashboard</small>
+            </div>
+          </article>
+        </div>
       </div>
-    </div>
 
-    <div class="role-options">
+      <small class="intro-footer">
+        TalentScope · Recrutement intelligent
+      </small>
+    </section>
 
-      <button
-        type="button"
-        class="role-option"
-        [class.selected]="selectedRole === 'CONSULTANT'"
-        (click)="selectRole('CONSULTANT')"
-      >
-        <span class="role-icon">👤</span>
-
-        <span class="role-content">
-          <strong>Consultant</strong>
-
-          <small>
-            Je souhaite présenter mon profil, déposer mon CV
-            et recevoir des opportunités.
-          </small>
+    <section class="role-content">
+      <div class="role-card">
+        <span class="mobile-brand">
+          <span>T</span>
+          TalentScope
         </span>
-      </button>
 
-      <button
-        type="button"
-        class="role-option"
-        [class.selected]="selectedRole === 'COMPANY'"
-        (click)="selectRole('COMPANY')"
-      >
-        <span class="role-icon">🏢</span>
-
-        <span class="role-content">
-          <strong>Entreprise</strong>
-
-          <small>
-            Je souhaite rechercher des consultants et trouver
-            les meilleurs profils IT.
-          </small>
+        <span class="eyebrow form-eyebrow">
+          TYPE DE COMPTE
         </span>
-      </button>
 
-    </div>
+        <h2>Comment souhaitez-vous utiliser TalentScope ?</h2>
 
-    <p
-      class="error-message"
-      *ngIf="errorMessage"
-    >
-      {{ errorMessage }}
-    </p>
+        <p class="description">
+          Ce choix permet d'adapter les fonctionnalités de votre
+          espace professionnel.
+        </p>
 
-    <button
-      type="button"
-      class="continue-button"
-      [disabled]="loading || !selectedRole"
-      (click)="completeRegistration()"
-    >
-      {{
-        loading
-          ? 'Création du compte...'
-          : 'Continuer'
-      }}
-    </button>
+        <div class="google-user">
+          <div class="user-avatar">
+            {{
+              googleUserName
+                ? googleUserName.charAt(0).toUpperCase()
+                : 'G'
+            }}
+          </div>
 
-    <button
-      type="button"
-      class="cancel-button"
-      [disabled]="loading"
-      (click)="cancel()"
-    >
-      Annuler
-    </button>
+          <div>
+            <span>CONNECTÉ AVEC GOOGLE</span>
 
+            <strong>
+              {{ googleUserName || 'Utilisateur Google' }}
+            </strong>
+
+            <small>
+              {{ googleUserEmail }}
+            </small>
+          </div>
+
+          <span class="verified">✓</span>
+        </div>
+
+        <div class="role-options">
+          <button
+            type="button"
+            class="role-option"
+            [class.selected]="selectedRole === 'CONSULTANT'"
+            (click)="selectRole('CONSULTANT')"
+          >
+            <span class="selection-indicator">
+              <i></i>
+            </span>
+
+            <span class="role-icon consultant-icon">
+              ◇
+            </span>
+
+            <span class="role-content-text">
+              <strong>Je suis Consultant</strong>
+
+              <small>
+                Je souhaite créer mon profil professionnel,
+                analyser mon CV et recevoir des propositions
+                de mission.
+              </small>
+
+              <span class="role-features">
+                Profil · CV intelligent · Missions
+              </span>
+            </span>
+          </button>
+
+          <button
+            type="button"
+            class="role-option"
+            [class.selected]="selectedRole === 'COMPANY'"
+            (click)="selectRole('COMPANY')"
+          >
+            <span class="selection-indicator">
+              <i></i>
+            </span>
+
+            <span class="role-icon company-icon">
+              ▣
+            </span>
+
+            <span class="role-content-text">
+              <strong>Je représente une Entreprise</strong>
+
+              <small>
+                Je souhaite rechercher les meilleurs consultants
+                et utiliser le matching intelligent TalentScope.
+              </small>
+
+              <span class="role-features">
+                Recherche · Matching IA · Recrutement
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <div
+          class="error-message"
+          *ngIf="errorMessage"
+        >
+          <span>!</span>
+          {{ errorMessage }}
+        </div>
+
+        <button
+          type="button"
+          class="continue-button"
+          [disabled]="loading || !selectedRole"
+          (click)="completeRegistration()"
+        >
+          {{
+            loading
+              ? 'Création du compte...'
+              : 'Continuer vers mon espace'
+          }}
+
+          <span *ngIf="!loading">→</span>
+        </button>
+
+        <button
+          type="button"
+          class="cancel-button"
+          [disabled]="loading"
+          (click)="cancel()"
+        >
+          Annuler et revenir à la connexion
+        </button>
+
+        <p class="choice-notice">
+          Votre choix détermine les fonctionnalités accessibles
+          depuis votre compte.
+        </p>
+      </div>
+    </section>
   </div>
 </div>

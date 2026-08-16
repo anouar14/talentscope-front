@@ -40,7 +40,8 @@ export class MissionDetail implements OnInit {
     const missionId = this.route.snapshot.paramMap.get('id');
 
     if (!missionId) {
-      this.errorMessage = 'Identifiant de mission invalide.';
+      this.errorMessage =
+        'Identifiant de mission invalide.';
       return;
     }
 
@@ -48,15 +49,20 @@ export class MissionDetail implements OnInit {
   }
 
   get consultantInitial(): string {
-    return this.mission?.consultantName?.charAt(0).toUpperCase() || 'C';
+    return this.mission?.consultantName
+      ?.charAt(0)
+      .toUpperCase() || 'C';
   }
 
   get companyInitial(): string {
-    return this.mission?.companyName?.charAt(0).toUpperCase() || 'E';
+    return this.mission?.companyName
+      ?.charAt(0)
+      .toUpperCase() || 'E';
   }
 
   get canManageMission(): boolean {
-    return this.isCompanyView && this.mission?.status === 'ACTIVE';
+    return this.isCompanyView &&
+      this.mission?.status === 'ACTIVE';
   }
 
   get hasTechnologies(): boolean {
@@ -78,10 +84,14 @@ export class MissionDetail implements OnInit {
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement de la mission :', error);
+        console.error(
+          'Erreur lors du chargement de la mission :',
+          error
+        );
 
         this.loading = false;
-        this.errorMessage = this.getLoadErrorMessage(error);
+        this.errorMessage =
+          this.getLoadErrorMessage(error);
       }
     });
   }
@@ -140,7 +150,9 @@ export class MissionDetail implements OnInit {
     }
   }
 
-  getContractTypeLabel(contractType: ContractType | null): string {
+  getContractTypeLabel(
+    contractType: ContractType | null
+  ): string {
     switch (contractType) {
       case 'CDI':
         return 'CDI';
@@ -186,31 +198,41 @@ export class MissionDetail implements OnInit {
     this.updating = true;
     this.clearActionMessages();
 
-    this.missionService.updateMissionStatus(this.mission.id, status).subscribe({
-      next: updatedMission => {
-        this.mission = {
-          ...updatedMission,
-          technologies: updatedMission.technologies ?? []
-        };
+    this.missionService
+      .updateMissionStatus(
+        this.mission.id,
+        status
+      )
+      .subscribe({
+        next: updatedMission => {
+          this.mission = {
+            ...updatedMission,
+            technologies: updatedMission.technologies ?? []
+          };
 
-        this.updating = false;
+          this.updating = false;
 
-        this.actionSuccessMessage =
-          status === 'COMPLETED'
-            ? 'La mission a été marquée comme terminée.'
-            : 'La mission a été annulée.';
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors de la modification de la mission :', error);
+          this.actionSuccessMessage =
+            status === 'COMPLETED'
+              ? 'La mission a été marquée comme terminée.'
+              : 'La mission a été annulée.';
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la modification de la mission :',
+            error
+          );
 
-        this.updating = false;
-        this.actionErrorMessage = this.getUpdateErrorMessage(error);
-      }
-    });
+          this.updating = false;
+          this.actionErrorMessage =
+            this.getUpdateErrorMessage(error);
+        }
+      });
   }
 
   private configureView(): void {
-    this.isCompanyView = this.router.url.startsWith('/company/');
+    this.isCompanyView =
+      this.router.url.startsWith('/company/');
 
     if (this.isCompanyView) {
       this.backLink = '/company/missions';
@@ -224,7 +246,9 @@ export class MissionDetail implements OnInit {
     }
   }
 
-  private getLoadErrorMessage(error: HttpErrorResponse): string {
+  private getLoadErrorMessage(
+    error: HttpErrorResponse
+  ): string {
     if (error.status === 403) {
       return 'Vous n’êtes pas autorisé à consulter cette mission.';
     }
@@ -236,7 +260,9 @@ export class MissionDetail implements OnInit {
     return 'Impossible de charger les détails de la mission.';
   }
 
-  private getUpdateErrorMessage(error: HttpErrorResponse): string {
+  private getUpdateErrorMessage(
+    error: HttpErrorResponse
+  ): string {
     if (error.status === 400) {
       return this.extractBackendMessage(
         error,
@@ -271,7 +297,8 @@ export class MissionDetail implements OnInit {
       error.error?.detail ||
       error.error?.error;
 
-    return typeof backendMessage === 'string' && backendMessage.trim()
+    return typeof backendMessage === 'string' &&
+      backendMessage.trim()
       ? backendMessage
       : defaultMessage;
   }
