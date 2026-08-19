@@ -8,6 +8,7 @@ import {
 import {
   Conversation,
   Message,
+  RealtimePresenceEvent,
   SendMessageRequest,
   UnreadMessageCountResponse
 } from '../models/messaging';
@@ -25,7 +26,9 @@ export class MessagingService {
   readonly unreadCount$ =
     this.unreadCountSubject.asObservable();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient
+  ) {}
 
   getConversations(): Observable<Conversation[]> {
     return this.http.get<Conversation[]>(
@@ -75,19 +78,49 @@ export class MessagingService {
     );
   }
 
+  deleteMessageForMe(
+    messageId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/messages/${messageId}`
+    );
+  }
+
+  deleteConversationForMe(
+    conversationId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/conversations/${conversationId}`
+    ).pipe(
+      tap(() => this.refreshUnreadCount())
+    );
+  }
+
+  getPresence(): Observable<RealtimePresenceEvent[]> {
+    return this.http.get<RealtimePresenceEvent[]>(
+      `${this.apiUrl}/presence`
+    );
+  }
+
   refreshUnreadCount(): void {
     this.http.get<UnreadMessageCountResponse>(
       `${this.apiUrl}/unread-count`
     ).subscribe({
       next: response => {
-        this.unreadCountSubject.next(
+        this.setUnreadCount(
           response.unreadCount
         );
       },
       error: () => {
-        this.unreadCountSubject.next(0);
+        this.setUnreadCount(0);
       }
     });
+  }
+
+  setUnreadCount(count: number): void {
+    this.unreadCountSubject.next(
+      Math.max(0, count)
+    );
   }
 
   clearUnreadCount(): void {

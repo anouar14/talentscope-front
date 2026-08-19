@@ -7,8 +7,13 @@ import {
   RouterLinkActive,
   RouterOutlet
 } from '@angular/router';
-import { Subject, filter, takeUntil } from 'rxjs';
+import {
+  Subject,
+  filter,
+  takeUntil
+} from 'rxjs';
 import { Auth } from './core/services/auth';
+import { MessagingRealtimeService } from './core/services/messaging-realtime';
 import { MessagingService } from './core/services/messaging';
 import { NotificationService } from './core/services/notification';
 
@@ -30,31 +35,50 @@ export class App implements OnInit, OnDestroy {
 
   mobileMenuOpen = false;
 
-  private readonly destroy$ = new Subject<void>();
+  private readonly destroy$ =
+    new Subject<void>();
 
   constructor(
     private readonly authService: Auth,
     private readonly notificationService: NotificationService,
     private readonly messagingService: MessagingService,
+    private readonly messagingRealtimeService: MessagingRealtimeService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.notificationService.unreadCount$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe(count => {
         this.unreadNotificationCount = count;
       });
 
     this.messagingService.unreadCount$
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$)
+      )
       .subscribe(count => {
         this.unreadMessageCount = count;
       });
 
+    this.messagingRealtimeService.messageEvents$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe(event => {
+        this.messagingService.setUnreadCount(
+          event.unreadCount
+        );
+      });
+
     this.router.events
       .pipe(
-        filter(event => event instanceof NavigationEnd),
+        filter(
+          event =>
+            event instanceof NavigationEnd
+        ),
         takeUntil(this.destroy$)
       )
       .subscribe(() => {
@@ -66,6 +90,8 @@ export class App implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.messagingRealtimeService.disconnect();
+
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -129,7 +155,8 @@ export class App implements OnInit, OnDestroy {
   }
 
   toggleMobileMenu(): void {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
+    this.mobileMenuOpen =
+      !this.mobileMenuOpen;
   }
 
   closeMobileMenu(): void {
@@ -137,6 +164,8 @@ export class App implements OnInit, OnDestroy {
   }
 
   logout(): void {
+    this.messagingRealtimeService.disconnect();
+
     this.authService.logout();
 
     this.notificationService.clearUnreadCount();
@@ -149,16 +178,22 @@ export class App implements OnInit, OnDestroy {
 
   private refreshNavigationState(): void {
     if (!this.isAuthenticated) {
+      this.messagingRealtimeService.disconnect();
+
       this.notificationService.clearUnreadCount();
       this.messagingService.clearUnreadCount();
       return;
     }
 
     if (this.isAdmin) {
+      this.messagingRealtimeService.disconnect();
+
       this.notificationService.clearUnreadCount();
       this.messagingService.clearUnreadCount();
       return;
     }
+
+    this.messagingRealtimeService.connect();
 
     this.notificationService.refreshUnreadCount();
     this.messagingService.refreshUnreadCount();

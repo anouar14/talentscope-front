@@ -3,16 +3,32 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   ElementRef,
+  HostListener,
+  OnDestroy,
   OnInit,
   ViewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import {
+  ActivatedRoute,
+  Router
+} from '@angular/router';
+import {
+  Subject,
+  takeUntil
+} from 'rxjs';
 import {
   Conversation,
-  Message
+  Message,
+  RealtimeMessageEvent,
+  RealtimePresenceEvent,
+  RealtimeReadEvent,
+  RealtimeTypingEvent
 } from '../../core/models/messaging';
+import { MessagingRealtimeService } from '../../core/services/messaging-realtime';
 import { MessagingService } from '../../core/services/messaging';
+
+type DeleteTarget = 'message' | 'conversation' | null;
 
 @Component({
   selector: 'app-messaging',
@@ -24,7 +40,7 @@ import { MessagingService } from '../../core/services/messaging';
   templateUrl: './messaging.html',
   styleUrl: './messaging.css'
 })
-export class Messaging implements OnInit {
+export class Messaging implements OnInit, OnDestroy {
   @ViewChild('messagesContainer')
   messagesContainer?: ElementRef<HTMLDivElement>;
 
@@ -39,14 +55,34 @@ export class Messaging implements OnInit {
   loadingConversations = false;
   loadingMessages = false;
   sendingMessage = false;
+  deleting = false;
 
   errorMessage = '';
   messageError = '';
 
+  realtimeConnected = false;
+  participantTyping = false;
+
+  onlineConversationIds = new Set<string>();
+
+  deleteTarget: DeleteTarget = null;
+  messageToDelete: Message | null = null;
+
   private requestedConversationId: string | null = null;
+  private typingSent = false;
+
+  private typingTimeout:
+    ReturnType<typeof setTimeout> | null = null;
+
+  private participantTypingTimeout:
+    ReturnType<typeof setTimeout> | null = null;
+
+  private readonly destroy$ =
+    new Subject<void>();
 
   constructor(
     private readonly messagingService: MessagingService,
+    private readonly messagingRealtimeService: MessagingRealtimeService,
     private readonly activatedRoute: ActivatedRoute,
     private readonly router: Router
   ) {}
@@ -57,28 +93,118 @@ export class Messaging implements OnInit {
         'conversationId'
       );
 
+    this.messagingRealtimeService.connected$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(connected => {
+        this.realtimeConnected = connected;
+
+        if (connected) {
+          this.loadPresence();
+        }
+      });
+
+    this.messagingRealtimeService.messageEvents$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        this.handleRealtimeMessage(event);
+      });
+
+    this.messagingRealtimeService.typingEvents$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        this.handleRealtimeTyping(event);
+      });
+
+    this.messagingRealtimeService.readEvents$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        this.handleRealtimeRead(event);
+      });
+
+    this.messagingRealtimeService.presenceEvents$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        this.handleRealtimePresence(event);
+      });
+
     this.loadConversations();
   }
 
+  ngOnDestroy(): void {
+    this.stopTyping();
+
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    if (this.participantTypingTimeout) {
+      clearTimeout(
+        this.participantTypingTimeout
+      );
+    }
+
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  @HostListener('document:visibilitychange')
+  onVisibilityChange(): void {
+    if (
+      document.visibilityState !== 'visible' ||
+      !this.selectedConversation
+    ) {
+      return;
+    }
+
+    this.markConversationAsRead(
+      this.selectedConversation.id,
+      true
+    );
+  }
+
+  @HostListener('window:focus')
+  onWindowFocus(): void {
+    if (!this.selectedConversation) {
+      return;
+    }
+
+    this.markConversationAsRead(
+      this.selectedConversation.id,
+      true
+    );
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapePressed(): void {
+    if (this.deleteTarget) {
+      this.closeDeleteModal();
+    }
+  }
+
   get filteredConversations(): Conversation[] {
-    const search = this.searchTerm.trim().toLowerCase();
+    const search =
+      this.searchTerm
+        .trim()
+        .toLowerCase();
 
     if (!search) {
       return this.conversations;
     }
 
-    return this.conversations.filter(conversation => {
-      const searchableContent = [
-        conversation.participantName,
-        conversation.participantTitle,
-        conversation.lastMessage
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
+    return this.conversations.filter(
+      conversation => {
+        const searchableContent = [
+          conversation.participantName,
+          conversation.participantTitle,
+          conversation.lastMessage
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
 
-      return searchableContent.includes(search);
-    });
+        return searchableContent.includes(search);
+      }
+    );
   }
 
   get canSendMessage(): boolean {
@@ -89,7 +215,33 @@ export class Messaging implements OnInit {
     );
   }
 
-  loadConversations(preserveSelection = false): void {
+  get selectedParticipantOnline(): boolean {
+    if (!this.selectedConversation) {
+      return false;
+    }
+
+    return this.isParticipantOnline(
+      this.selectedConversation.id
+    );
+  }
+
+  get deleteModalTitle(): string {
+    return this.deleteTarget === 'message'
+      ? 'Supprimer le message'
+      : 'Supprimer la conversation';
+  }
+
+  get deleteModalDescription(): string {
+    if (this.deleteTarget === 'message') {
+      return 'Ce message sera supprimé uniquement de votre messagerie. L’autre participant pourra toujours le consulter.';
+    }
+
+    return 'Cette conversation et son historique seront masqués uniquement pour vous. L’autre participant conservera toujours la conversation.';
+  }
+
+  loadConversations(
+    preserveSelection = false
+  ): void {
     this.loadingConversations = true;
     this.errorMessage = '';
 
@@ -97,51 +249,55 @@ export class Messaging implements OnInit {
       ? this.selectedConversation?.id
       : this.requestedConversationId;
 
-    this.messagingService.getConversations().subscribe({
-      next: conversations => {
-        this.conversations = conversations ?? [];
-        this.loadingConversations = false;
+    this.messagingService
+      .getConversations()
+      .subscribe({
+        next: conversations => {
+          this.conversations = conversations ?? [];
+          this.loadingConversations = false;
 
-        if (selectedId) {
-          const selectedConversation =
-            this.conversations.find(
-              conversation =>
-                conversation.id === selectedId
-            );
+          this.loadPresence();
 
-          if (selectedConversation) {
-            this.selectConversation(
-              selectedConversation
-            );
+          if (selectedId) {
+            const selectedConversation =
+              this.conversations.find(
+                conversation =>
+                  conversation.id === selectedId
+              );
 
-            this.requestedConversationId = null;
-            return;
+            if (selectedConversation) {
+              this.selectConversation(
+                selectedConversation
+              );
+
+              this.requestedConversationId = null;
+              return;
+            }
           }
-        }
 
-        if (
-          !this.selectedConversation &&
-          this.conversations.length > 0
-        ) {
-          this.selectConversation(
-            this.conversations[0]
+          if (
+            !this.selectedConversation &&
+            this.conversations.length > 0
+          ) {
+            this.selectConversation(
+              this.conversations[0]
+            );
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors du chargement des conversations :',
+            error
           );
+
+          this.loadingConversations = false;
+
+          this.errorMessage =
+            error.status === 403
+              ? 'Vous n’êtes pas autorisé à accéder à la messagerie.'
+              : 'Impossible de charger vos conversations.';
         }
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error(
-          'Erreur lors du chargement des conversations :',
-          error
-        );
-
-        this.loadingConversations = false;
-
-        this.errorMessage =
-          error.status === 403
-            ? 'Vous n’êtes pas autorisé à accéder à la messagerie.'
-            : 'Impossible de charger vos conversations.';
-      }
-    });
+      });
   }
 
   selectConversation(
@@ -151,9 +307,19 @@ export class Messaging implements OnInit {
       this.selectedConversation?.id === conversation.id &&
       this.messages.length > 0
     ) {
+      if (this.isPageVisible()) {
+        this.markConversationAsRead(
+          conversation.id,
+          true
+        );
+      }
+
       return;
     }
 
+    this.stopTyping();
+
+    this.participantTyping = false;
     this.selectedConversation = conversation;
     this.messages = [];
     this.messageError = '';
@@ -181,9 +347,12 @@ export class Messaging implements OnInit {
           this.messages = messages ?? [];
           this.loadingMessages = false;
 
-          this.markConversationAsRead(
-            conversationId
-          );
+          if (this.isPageVisible()) {
+            this.markConversationAsRead(
+              conversationId,
+              true
+            );
+          }
 
           setTimeout(
             () => this.scrollToBottom(),
@@ -204,6 +373,35 @@ export class Messaging implements OnInit {
       });
   }
 
+  onMessageInput(): void {
+    if (!this.selectedConversation) {
+      return;
+    }
+
+    if (!this.newMessage.trim()) {
+      this.stopTyping();
+      return;
+    }
+
+    if (!this.typingSent) {
+      this.messagingRealtimeService.sendTyping(
+        this.selectedConversation.id,
+        true
+      );
+
+      this.typingSent = true;
+    }
+
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    this.typingTimeout = setTimeout(
+      () => this.stopTyping(),
+      1200
+    );
+  }
+
   sendMessage(): void {
     if (
       !this.canSendMessage ||
@@ -216,6 +414,8 @@ export class Messaging implements OnInit {
     const conversationId =
       this.selectedConversation.id;
 
+    this.stopTyping();
+
     this.sendingMessage = true;
     this.messageError = '';
 
@@ -226,16 +426,16 @@ export class Messaging implements OnInit {
       )
       .subscribe({
         next: message => {
-          this.messages = [
-            ...this.messages,
-            message
-          ];
+          this.addMessageIfMissing(message);
 
           this.newMessage = '';
           this.sendingMessage = false;
 
-          this.updateConversationAfterSend(
-            message
+          this.updateConversationPreview(
+            conversationId,
+            message.content,
+            message.sentAt,
+            false
           );
 
           setTimeout(
@@ -269,7 +469,9 @@ export class Messaging implements OnInit {
       });
   }
 
-  onMessageKeydown(event: KeyboardEvent): void {
+  onMessageKeydown(
+    event: KeyboardEvent
+  ): void {
     if (
       event.key !== 'Enter' ||
       event.shiftKey
@@ -281,10 +483,76 @@ export class Messaging implements OnInit {
     this.sendMessage();
   }
 
-  getInitial(conversation: Conversation): string {
-    return conversation.participantName
-      ?.charAt(0)
-      .toUpperCase() || '?';
+  openMessageDeleteModal(
+    message: Message,
+    event?: MouseEvent
+  ): void {
+    event?.stopPropagation();
+
+    this.messageToDelete = message;
+    this.deleteTarget = 'message';
+  }
+
+  openConversationDeleteModal(): void {
+    if (!this.selectedConversation) {
+      return;
+    }
+
+    this.messageToDelete = null;
+    this.deleteTarget = 'conversation';
+  }
+
+  closeDeleteModal(): void {
+    if (this.deleting) {
+      return;
+    }
+
+    this.deleteTarget = null;
+    this.messageToDelete = null;
+  }
+
+  confirmDelete(): void {
+    if (this.deleting) {
+      return;
+    }
+
+    if (
+      this.deleteTarget === 'message' &&
+      this.messageToDelete
+    ) {
+      this.deleteMessage(
+        this.messageToDelete
+      );
+      return;
+    }
+
+    if (
+      this.deleteTarget === 'conversation' &&
+      this.selectedConversation
+    ) {
+      this.deleteConversation(
+        this.selectedConversation
+      );
+    }
+  }
+
+  isParticipantOnline(
+    conversationId: string
+  ): boolean {
+    return this.onlineConversationIds.has(
+      conversationId
+    );
+  }
+
+  getInitial(
+    conversation: Conversation
+  ): string {
+    return (
+      conversation.participantName
+        ?.charAt(0)
+        .toUpperCase() ||
+      '?'
+    );
   }
 
   formatConversationTime(
@@ -303,23 +571,32 @@ export class Messaging implements OnInit {
       messageDate.getDate() === today.getDate();
 
     if (sameDay) {
-      return new Intl.DateTimeFormat('fr-FR', {
-        hour: '2-digit',
-        minute: '2-digit'
-      }).format(messageDate);
+      return new Intl.DateTimeFormat(
+        'fr-FR',
+        {
+          hour: '2-digit',
+          minute: '2-digit'
+        }
+      ).format(messageDate);
     }
 
-    return new Intl.DateTimeFormat('fr-FR', {
-      day: '2-digit',
-      month: '2-digit'
-    }).format(messageDate);
+    return new Intl.DateTimeFormat(
+      'fr-FR',
+      {
+        day: '2-digit',
+        month: '2-digit'
+      }
+    ).format(messageDate);
   }
 
   formatMessageTime(date: string): string {
-    return new Intl.DateTimeFormat('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(date));
+    return new Intl.DateTimeFormat(
+      'fr-FR',
+      {
+        hour: '2-digit',
+        minute: '2-digit'
+      }
+    ).format(new Date(date));
   }
 
   trackConversation(
@@ -336,8 +613,386 @@ export class Messaging implements OnInit {
     return message.id;
   }
 
-  private markConversationAsRead(
-    conversationId: string
+  private deleteMessage(
+    message: Message
+  ): void {
+    this.deleting = true;
+    this.messageError = '';
+
+    this.messagingService
+      .deleteMessageForMe(message.id)
+      .subscribe({
+        next: () => {
+          this.messages = this.messages.filter(
+            current =>
+              current.id !== message.id
+          );
+
+          this.deleting = false;
+          this.closeDeleteModal();
+
+          this.refreshSelectedConversationAfterMessageDelete();
+
+          this.messagingService.refreshUnreadCount();
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la suppression du message :',
+            error
+          );
+
+          this.deleting = false;
+          this.closeDeleteModal();
+
+          this.messageError =
+            'Impossible de supprimer ce message.';
+        }
+      });
+  }
+
+  private deleteConversation(
+    conversation: Conversation
+  ): void {
+    this.deleting = true;
+    this.messageError = '';
+
+    this.stopTyping();
+
+    this.messagingService
+      .deleteConversationForMe(
+        conversation.id
+      )
+      .subscribe({
+        next: () => {
+          this.conversations =
+            this.conversations.filter(
+              current =>
+                current.id !== conversation.id
+            );
+
+          const updatedPresence =
+            new Set(
+              this.onlineConversationIds
+            );
+
+          updatedPresence.delete(
+            conversation.id
+          );
+
+          this.onlineConversationIds =
+            updatedPresence;
+
+          this.selectedConversation = null;
+          this.messages = [];
+          this.participantTyping = false;
+          this.newMessage = '';
+
+          this.deleting = false;
+          this.closeDeleteModal();
+
+          this.router.navigate([], {
+            relativeTo: this.activatedRoute,
+            queryParams: {
+              conversationId: null
+            },
+            queryParamsHandling: 'merge',
+            replaceUrl: true
+          });
+
+          this.messagingService.refreshUnreadCount();
+
+          if (this.conversations.length > 0) {
+            this.selectConversation(
+              this.conversations[0]
+            );
+          }
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la suppression de la conversation :',
+            error
+          );
+
+          this.deleting = false;
+          this.closeDeleteModal();
+
+          this.messageError =
+            'Impossible de supprimer cette conversation.';
+        }
+      });
+  }
+
+  private refreshSelectedConversationAfterMessageDelete(): void {
+    if (!this.selectedConversation) {
+      return;
+    }
+
+    const lastVisibleMessage =
+      this.messages.length > 0
+        ? this.messages[this.messages.length - 1]
+        : null;
+
+    const conversationId =
+      this.selectedConversation.id;
+
+    this.conversations =
+      this.conversations.map(
+        conversation => {
+          if (
+            conversation.id !==
+            conversationId
+          ) {
+            return conversation;
+          }
+
+          return {
+            ...conversation,
+            lastMessage:
+              lastVisibleMessage?.content ?? null,
+            lastMessageAt:
+              lastVisibleMessage?.sentAt ?? null
+          };
+        }
+      );
+
+    const updatedConversation =
+      this.conversations.find(
+        conversation =>
+          conversation.id === conversationId
+      );
+
+    if (updatedConversation) {
+      this.selectedConversation =
+        updatedConversation;
+    }
+  }
+
+  private loadPresence(): void {
+    if (!this.realtimeConnected) {
+      return;
+    }
+
+    this.messagingService
+      .getPresence()
+      .subscribe({
+        next: events => {
+          this.onlineConversationIds =
+            new Set(
+              events
+                .filter(event => event.online)
+                .map(event => event.conversationId)
+            );
+        },
+        error: error => {
+          console.error(
+            'Impossible de récupérer la présence des utilisateurs :',
+            error
+          );
+        }
+      });
+  }
+
+  private handleRealtimePresence(
+    event: RealtimePresenceEvent
+  ): void {
+    const updatedPresence =
+      new Set(this.onlineConversationIds);
+
+    if (event.online) {
+      updatedPresence.add(
+        event.conversationId
+      );
+    } else {
+      updatedPresence.delete(
+        event.conversationId
+      );
+    }
+
+    this.onlineConversationIds =
+      updatedPresence;
+  }
+
+  private handleRealtimeMessage(
+    event: RealtimeMessageEvent
+  ): void {
+    const conversationId =
+      event.conversationId;
+
+    const isSelected =
+      this.selectedConversation?.id === conversationId;
+
+    if (isSelected) {
+      this.participantTyping = false;
+
+      this.addMessageIfMissing(
+        event.message
+      );
+
+      if (this.isPageVisible()) {
+        this.updateConversationPreview(
+          conversationId,
+          event.message.content,
+          event.message.sentAt,
+          false
+        );
+
+        this.markConversationAsRead(
+          conversationId,
+          true
+        );
+      } else {
+        this.updateConversationPreview(
+          conversationId,
+          event.message.content,
+          event.message.sentAt,
+          true
+        );
+
+        this.messagingService.setUnreadCount(
+          event.unreadCount
+        );
+      }
+
+      setTimeout(
+        () => this.scrollToBottom(),
+        0
+      );
+
+      return;
+    }
+
+    this.messagingService.setUnreadCount(
+      event.unreadCount
+    );
+
+    const conversationExists =
+      this.conversations.some(
+        conversation =>
+          conversation.id === conversationId
+      );
+
+    if (!conversationExists) {
+      this.loadConversations(true);
+      return;
+    }
+
+    this.updateConversationPreview(
+      conversationId,
+      event.message.content,
+      event.message.sentAt,
+      true
+    );
+  }
+
+  private handleRealtimeTyping(
+    event: RealtimeTypingEvent
+  ): void {
+    if (
+      !this.selectedConversation ||
+      event.conversationId !==
+        this.selectedConversation.id
+    ) {
+      return;
+    }
+
+    this.participantTyping = event.typing;
+
+    if (this.participantTypingTimeout) {
+      clearTimeout(
+        this.participantTypingTimeout
+      );
+
+      this.participantTypingTimeout = null;
+    }
+
+    if (!event.typing) {
+      return;
+    }
+
+    this.participantTypingTimeout =
+      setTimeout(() => {
+        this.participantTyping = false;
+        this.participantTypingTimeout = null;
+      }, 2500);
+  }
+
+  private handleRealtimeRead(
+    event: RealtimeReadEvent
+  ): void {
+    if (
+      !this.selectedConversation ||
+      event.conversationId !==
+        this.selectedConversation.id
+    ) {
+      return;
+    }
+
+    const readMessageIds =
+      new Set(event.messageIds);
+
+    this.messages = this.messages.map(
+      message => {
+        if (
+          !message.sentByMe ||
+          !readMessageIds.has(message.id)
+        ) {
+          return message;
+        }
+
+        return {
+          ...message,
+          read: true,
+          readAt: event.readAt
+        };
+      }
+    );
+  }
+
+  private stopTyping(): void {
+    if (
+      !this.typingSent ||
+      !this.selectedConversation
+    ) {
+      return;
+    }
+
+    this.messagingRealtimeService.sendTyping(
+      this.selectedConversation.id,
+      false
+    );
+
+    this.typingSent = false;
+
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+      this.typingTimeout = null;
+    }
+  }
+
+  private addMessageIfMissing(
+    message: Message
+  ): void {
+    const messageExists =
+      this.messages.some(
+        current =>
+          current.id === message.id
+      );
+
+    if (messageExists) {
+      return;
+    }
+
+    this.messages = [
+      ...this.messages,
+      message
+    ];
+  }
+
+  private updateConversationPreview(
+    conversationId: string,
+    content: string,
+    sentAt: string,
+    incrementUnread: boolean
   ): void {
     const conversation =
       this.conversations.find(
@@ -345,7 +1000,60 @@ export class Messaging implements OnInit {
           current.id === conversationId
       );
 
-    if (!conversation || conversation.unreadCount === 0) {
+    if (!conversation) {
+      return;
+    }
+
+    const updatedConversation: Conversation = {
+      ...conversation,
+      lastMessage: content,
+      lastMessageAt: sentAt,
+      updatedAt: sentAt,
+      unreadCount:
+        incrementUnread
+          ? conversation.unreadCount + 1
+          : 0
+    };
+
+    if (
+      this.selectedConversation?.id ===
+      conversationId
+    ) {
+      this.selectedConversation =
+        updatedConversation;
+    }
+
+    this.conversations = [
+      updatedConversation,
+      ...this.conversations.filter(
+        current =>
+          current.id !== conversationId
+      )
+    ];
+  }
+
+  private markConversationAsRead(
+    conversationId: string,
+    force = false
+  ): void {
+    if (!this.isPageVisible()) {
+      return;
+    }
+
+    const conversation =
+      this.conversations.find(
+        current =>
+          current.id === conversationId
+      );
+
+    if (!conversation) {
+      return;
+    }
+
+    if (
+      !force &&
+      conversation.unreadCount === 0
+    ) {
       return;
     }
 
@@ -375,6 +1083,8 @@ export class Messaging implements OnInit {
               unreadCount: 0
             };
           }
+
+          this.messagingService.refreshUnreadCount();
         },
         error: error => {
           console.error(
@@ -385,33 +1095,11 @@ export class Messaging implements OnInit {
       });
   }
 
-  private updateConversationAfterSend(
-    message: Message
-  ): void {
-    if (!this.selectedConversation) {
-      return;
-    }
-
-    const conversationId =
-      this.selectedConversation.id;
-
-    const updatedConversation: Conversation = {
-      ...this.selectedConversation,
-      lastMessage: message.content,
-      lastMessageAt: message.sentAt,
-      updatedAt: message.sentAt
-    };
-
-    this.selectedConversation =
-      updatedConversation;
-
-    this.conversations = [
-      updatedConversation,
-      ...this.conversations.filter(
-        conversation =>
-          conversation.id !== conversationId
-      )
-    ];
+  private isPageVisible(): boolean {
+    return (
+      document.visibilityState === 'visible' &&
+      document.hasFocus()
+    );
   }
 
   private scrollToBottom(): void {

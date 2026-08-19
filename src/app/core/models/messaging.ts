@@ -39,3 +39,39 @@ export interface SendMessageRequest {
 export interface UnreadMessageCountResponse {
   unreadCount: number;
 }
+
+export interface RealtimeMessageEvent {
+  type: 'MESSAGE_RECEIVED';
+
+  conversationId: string;
+
+  message: Message;
+
+  unreadCount: number;
+}
+
+export interface RealtimeTypingEvent {
+  type: 'TYPING';
+
+  conversationId: string;
+
+  typing: boolean;
+}
+
+export interface RealtimeReadEvent {
+  type: 'MESSAGES_READ';
+
+  conversationId: string;
+
+  messageIds: string[];
+
+  readAt: string;
+}
+
+export interface RealtimePresenceEvent {
+  type: 'PRESENCE';
+
+  conversationId: string;
+
+  online: boolean;
+}
