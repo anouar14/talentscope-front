@@ -144,6 +144,14 @@
       </button>
     </section>
 
+    <div
+      class="feedback-message error-message"
+      *ngIf="messagingErrorMessage"
+    >
+      <span>!</span>
+      {{ messagingErrorMessage }}
+    </div>
+
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
 
@@ -422,6 +430,27 @@
           >
             Voir le profil
           </a>
+
+          <button
+            type="button"
+            class="message-action"
+            [disabled]="
+              isOpeningConversation(
+                invitation.consultantId
+              )
+            "
+            (click)="contactConsultant(invitation)"
+          >
+            {{
+              isOpeningConversation(
+                invitation.consultantId
+              )
+                ? 'Ouverture...'
+                : 'Contacter'
+            }}
+
+            <span>✉</span>
+          </button>
 
           <a
             *ngIf="invitation.status === 'ACCEPTED'"

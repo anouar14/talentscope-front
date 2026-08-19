@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   ContractType,
   Invitation,
@@ -10,6 +10,7 @@ import {
   WorkMode
 } from '../../../core/models/invitation';
 import { InvitationService } from '../../../core/services/invitation';
+import { MessagingService } from '../../../core/services/messaging';
 
 type InvitationStatusFilter = 'ALL' | InvitationStatus;
 
@@ -29,7 +30,14 @@ export class CompanyInvitations implements OnInit {
   searchTerm = '';
   selectedStatus: InvitationStatusFilter = 'ALL';
 
-  constructor(private readonly invitationService: InvitationService) {}
+  messagingParticipantId: string | null = null;
+  messagingErrorMessage = '';
+
+  constructor(
+    private readonly invitationService: InvitationService,
+    private readonly messagingService: MessagingService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadInvitations();
@@ -76,19 +84,25 @@ export class CompanyInvitations implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedStatus !== 'ALL' || this.searchTerm.trim().length > 0;
+    return (
+      this.selectedStatus !== 'ALL' ||
+      this.searchTerm.trim().length > 0
+    );
   }
 
   loadInvitations(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.messagingErrorMessage = '';
 
     this.invitationService.getCompanyInvitations().subscribe({
       next: invitations => {
-        this.invitations = (invitations ?? []).map(invitation => ({
-          ...invitation,
-          technologies: invitation.technologies ?? []
-        }));
+        this.invitations = (invitations ?? []).map(
+          invitation => ({
+            ...invitation,
+            technologies: invitation.technologies ?? []
+          })
+        );
 
         this.loading = false;
       },
@@ -118,7 +132,57 @@ export class CompanyInvitations implements OnInit {
     });
   }
 
-  filterByStatus(status: InvitationStatusFilter): void {
+  contactConsultant(invitation: Invitation): void {
+    if (
+      !invitation.consultantId ||
+      this.messagingParticipantId
+    ) {
+      return;
+    }
+
+    this.messagingParticipantId =
+      invitation.consultantId;
+
+    this.messagingErrorMessage = '';
+
+    this.messagingService
+      .openConversation(invitation.consultantId)
+      .subscribe({
+        next: conversation => {
+          this.messagingParticipantId = null;
+
+          this.router.navigate(
+            ['/messaging'],
+            {
+              queryParams: {
+                conversationId: conversation.id
+              }
+            }
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de l’ouverture de la conversation :',
+            error
+          );
+
+          this.messagingParticipantId = null;
+
+          this.messagingErrorMessage =
+            'Impossible d’ouvrir la conversation avec ce consultant.';
+        }
+      });
+  }
+
+  isOpeningConversation(
+    consultantId: string
+  ): boolean {
+    return this.messagingParticipantId === consultantId;
+  }
+
+  filterByStatus(
+    status: InvitationStatusFilter
+  ): void {
     this.selectedStatus = status;
   }
 
@@ -153,7 +217,9 @@ export class CompanyInvitations implements OnInit {
     }
   }
 
-  getContractTypeLabel(contractType: ContractType | null): string {
+  getContractTypeLabel(
+    contractType: ContractType | null
+  ): string {
     switch (contractType) {
       case 'CDI':
         return 'CDI';
@@ -170,7 +236,9 @@ export class CompanyInvitations implements OnInit {
     }
   }
 
-  getWorkModeLabel(workMode: WorkMode | null): string {
+  getWorkModeLabel(
+    workMode: WorkMode | null
+  ): string {
     switch (workMode) {
       case 'ONSITE':
         return 'Sur site';
@@ -191,17 +259,29 @@ export class CompanyInvitations implements OnInit {
     return `${salary.toLocaleString('fr-FR')} DT`;
   }
 
-  getConsultantInitial(invitation: Invitation): string {
-    return invitation.consultantName?.charAt(0).toUpperCase() || 'C';
+  getConsultantInitial(
+    invitation: Invitation
+  ): string {
+    return (
+      invitation.consultantName
+        ?.charAt(0)
+        .toUpperCase() || 'C'
+    );
   }
 
-  trackInvitation(index: number, invitation: Invitation): string {
+  trackInvitation(
+    index: number,
+    invitation: Invitation
+  ): string {
     return invitation.id;
   }
 
-  private countByStatus(status: InvitationStatus): number {
+  private countByStatus(
+    status: InvitationStatus
+  ): number {
     return this.invitations.filter(
-      invitation => invitation.status === status
+      invitation =>
+        invitation.status === status
     ).length;
   }
 }

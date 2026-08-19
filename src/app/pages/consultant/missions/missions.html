@@ -134,6 +134,14 @@
       </button>
     </section>
 
+    <div
+      class="feedback-message error-message"
+      *ngIf="messagingErrorMessage"
+    >
+      <span>!</span>
+      {{ messagingErrorMessage }}
+    </div>
+
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
 
@@ -336,6 +344,27 @@
           Consulter la mission
           <span>→</span>
         </a>
+
+        <button
+          type="button"
+          class="message-action"
+          [disabled]="
+            isOpeningConversation(
+              mission.companyId
+            )
+          "
+          (click)="contactCompany(mission)"
+        >
+          <span>✉</span>
+
+          {{
+            isOpeningConversation(
+              mission.companyId
+            )
+              ? 'Ouverture de la conversation...'
+              : 'Contacter l’entreprise'
+          }}
+        </button>
 
         <div
           class="mission-state active-state"

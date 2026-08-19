@@ -1,0 +1,220 @@
+<div class="admin-page">
+  <div class="admin-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>
+          Entreprises
+          <span>TalentScope.</span>
+        </h1>
+
+        <p>
+          Consultez les organisations inscrites, leur secteur,
+          leur localisation et les informations de leur profil.
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/dashboard"
+        class="back-action"
+      >
+        ← Dashboard
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <article class="summary-card">
+        <span class="summary-icon purple">▣</span>
+
+        <div>
+          <span>Total entreprises</span>
+          <strong>{{ companies.length }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon green">✓</span>
+
+        <div>
+          <span>Comptes actifs</span>
+          <strong>{{ enabledCount }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon red">×</span>
+
+        <div>
+          <span>Désactivés</span>
+          <strong>{{ disabledCount }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon blue">↗</span>
+
+        <div>
+          <span>Sites web renseignés</span>
+          <strong>{{ websiteCount }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && companies.length > 0"
+    >
+      <div class="filter-field search-field">
+        <label for="company-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="company-search"
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Entreprise, secteur, localisation..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="company-status">
+          État du compte
+        </label>
+
+        <select
+          id="company-status"
+          [(ngModel)]="selectedAccountStatus"
+        >
+          <option value="ALL">Tous</option>
+          <option value="ENABLED">Actifs</option>
+          <option value="DISABLED">Désactivés</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <h2>Chargement des entreprises</h2>
+      <p>Récupération des profils...</p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+      <h2>Entreprises indisponibles</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadCompanies()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="companies-grid"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredCompanies.length > 0
+      "
+    >
+      <article
+        class="company-card"
+        [class.disabled-account]="!company.enabled"
+        *ngFor="
+          let company of filteredCompanies;
+          trackBy: trackCompany
+        "
+      >
+        <div class="company-header">
+          <div class="identity">
+            <div class="avatar">
+              {{ getInitial(company) }}
+            </div>
+
+            <div>
+              <h2>
+                {{ company.companyName || 'Entreprise sans nom' }}
+              </h2>
+
+              <p>{{ company.email }}</p>
+            </div>
+          </div>
+
+          <span
+            class="account-badge"
+            [class.disabled]="!company.enabled"
+          >
+            {{
+              company.enabled
+                ? 'Compte actif'
+                : 'Compte désactivé'
+            }}
+          </span>
+        </div>
+
+        <div class="info-grid">
+          <div>
+            <span>Secteur</span>
+            <strong>{{ company.sector || 'Non renseigné' }}</strong>
+          </div>
+
+          <div>
+            <span>Localisation</span>
+            <strong>{{ company.location || 'Non renseignée' }}</strong>
+          </div>
+        </div>
+
+        <div class="website-block">
+          <span>SITE WEB</span>
+
+          <a
+            *ngIf="company.website"
+            [href]="company.website"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ company.website }}
+          </a>
+
+          <strong *ngIf="!company.website">
+            Non renseigné
+          </strong>
+        </div>
+
+        <div class="description-block">
+          <span>DESCRIPTION</span>
+
+          <p>
+            {{
+              company.description ||
+              'Aucune description renseignée.'
+            }}
+          </p>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

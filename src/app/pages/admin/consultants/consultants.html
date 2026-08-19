@@ -1,0 +1,297 @@
+<div class="admin-page">
+  <div class="admin-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>
+          Profils
+          <span>consultants.</span>
+        </h1>
+
+        <p>
+          Supervisez les profils consultants inscrits sur TalentScope,
+          leurs compétences, leur disponibilité et l’état de leur compte.
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/dashboard"
+        class="back-action"
+      >
+        ← Dashboard
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <article class="summary-card">
+        <span class="summary-icon purple">◇</span>
+
+        <div>
+          <span>Total consultants</span>
+          <strong>{{ consultants.length }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon green">●</span>
+
+        <div>
+          <span>Disponibles</span>
+          <strong>{{ availableCount }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon orange">◷</span>
+
+        <div>
+          <span>Indisponibles</span>
+          <strong>{{ unavailableCount }}</strong>
+        </div>
+      </article>
+
+      <article class="summary-card">
+        <span class="summary-icon blue">▤</span>
+
+        <div>
+          <span>CV disponibles</span>
+          <strong>{{ cvCount }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section
+      class="account-alert"
+      *ngIf="!loading && !errorMessage && disabledCount > 0"
+    >
+      <span>!</span>
+
+      <p>
+        {{ disabledCount }}
+        compte(s) consultant(s) sont actuellement désactivés.
+      </p>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && consultants.length > 0"
+    >
+      <div class="filter-field search-field">
+        <label for="consultant-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="consultant-search"
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Nom, email, titre, compétence..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="availability">
+          Disponibilité
+        </label>
+
+        <select
+          id="availability"
+          [(ngModel)]="selectedAvailability"
+        >
+          <option value="ALL">Toutes</option>
+          <option value="AVAILABLE">Disponibles</option>
+          <option value="UNAVAILABLE">Indisponibles</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="account-status">
+          Compte
+        </label>
+
+        <select
+          id="account-status"
+          [(ngModel)]="selectedAccountStatus"
+        >
+          <option value="ALL">Tous</option>
+          <option value="ENABLED">Actifs</option>
+          <option value="DISABLED">Désactivés</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+      <h2>Chargement des consultants</h2>
+      <p>Récupération des profils professionnels...</p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+      <h2>Consultants indisponibles</h2>
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadConsultants()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        consultants.length > 0 &&
+        filteredConsultants.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">⌕</div>
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucun consultant ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section
+      class="consultants-grid"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredConsultants.length > 0
+      "
+    >
+      <article
+        class="consultant-card"
+        [class.disabled-account]="!consultant.enabled"
+        *ngFor="
+          let consultant of filteredConsultants;
+          trackBy: trackConsultant
+        "
+      >
+        <div class="card-header">
+          <div class="identity">
+            <div class="avatar">
+              {{ getInitial(consultant) }}
+            </div>
+
+            <div>
+              <h2>{{ getDisplayName(consultant) }}</h2>
+              <p>{{ consultant.email }}</p>
+            </div>
+          </div>
+
+          <div class="badges">
+            <span
+              class="availability-badge"
+              [class.unavailable]="!consultant.available"
+            >
+              <i></i>
+
+              {{
+                consultant.available
+                  ? 'Disponible'
+                  : 'Indisponible'
+              }}
+            </span>
+
+            <span
+              class="account-badge"
+              [class.disabled]="!consultant.enabled"
+            >
+              {{
+                consultant.enabled
+                  ? 'Compte actif'
+                  : 'Compte désactivé'
+              }}
+            </span>
+          </div>
+        </div>
+
+        <div class="title-block">
+          <span>TITRE PROFESSIONNEL</span>
+
+          <strong>
+            {{ consultant.title || 'Non renseigné' }}
+          </strong>
+        </div>
+
+        <div class="info-grid">
+          <div>
+            <span>Expérience</span>
+            <strong>{{ consultant.experienceYears }} an(s)</strong>
+          </div>
+
+          <div>
+            <span>Localisation</span>
+            <strong>{{ consultant.location || 'Non renseignée' }}</strong>
+          </div>
+
+          <div>
+            <span>CV</span>
+            <strong>
+              {{
+                consultant.cvAvailable
+                  ? 'Disponible'
+                  : 'Non ajouté'
+              }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="skills-section">
+          <div class="section-line">
+            <span>Compétences</span>
+            <small>{{ consultant.skills.length }}</small>
+          </div>
+
+          <div
+            class="skills-list"
+            *ngIf="consultant.skills.length > 0"
+          >
+            <span *ngFor="let skill of consultant.skills">
+              {{ skill }}
+            </span>
+          </div>
+
+          <p
+            class="empty-text"
+            *ngIf="consultant.skills.length === 0"
+          >
+            Aucune compétence renseignée.
+          </p>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,470 @@
+<div class="admin-page">
+  <div class="admin-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>
+          Vue globale de
+          <span>TalentScope.</span>
+        </h1>
+
+        <p>
+          Supervisez les utilisateurs, les profils professionnels,
+          les propositions et l’ensemble des missions de la plateforme.
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/users"
+        class="primary-action"
+      >
+        Gérer les utilisateurs
+        <span>→</span>
+      </a>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement du dashboard</h2>
+
+      <p>
+        Récupération des statistiques de TalentScope...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Dashboard indisponible</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadStatistics()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <ng-container
+      *ngIf="!loading && !errorMessage && statistics"
+    >
+      <section class="main-stats-grid">
+        <article class="stat-card">
+          <div class="stat-icon purple">
+            <span>◎</span>
+          </div>
+
+          <div>
+            <span class="stat-label">UTILISATEURS</span>
+
+            <strong>
+              {{ statistics.totalUsers }}
+            </strong>
+
+            <p>
+              Comptes enregistrés sur TalentScope
+            </p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon blue">
+            <span>◇</span>
+          </div>
+
+          <div>
+            <span class="stat-label">CONSULTANTS</span>
+
+            <strong>
+              {{ statistics.totalConsultants }}
+            </strong>
+
+            <p>
+              {{ statistics.availableConsultants }}
+              actuellement disponible(s)
+            </p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon green">
+            <span>▣</span>
+          </div>
+
+          <div>
+            <span class="stat-label">ENTREPRISES</span>
+
+            <strong>
+              {{ statistics.totalCompanies }}
+            </strong>
+
+            <p>
+              Organisations présentes sur la plateforme
+            </p>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <div class="stat-icon orange">
+            <span>◆</span>
+          </div>
+
+          <div>
+            <span class="stat-label">MISSIONS</span>
+
+            <strong>
+              {{ statistics.totalMissions }}
+            </strong>
+
+            <p>
+              {{ statistics.activeMissions }}
+              actuellement active(s)
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <section class="analytics-grid">
+        <article class="analytics-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">CONSULTANTS</span>
+              <h2>Disponibilité des talents</h2>
+            </div>
+
+            <strong class="percentage">
+              {{ consultantAvailabilityRate }}%
+            </strong>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-value"
+              [style.width.%]="consultantAvailabilityRate"
+            ></div>
+          </div>
+
+          <div class="analytics-values">
+            <div>
+              <span>Disponibles</span>
+
+              <strong>
+                {{ statistics.availableConsultants }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Total</span>
+
+              <strong>
+                {{ statistics.totalConsultants }}
+              </strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="analytics-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">PROPOSITIONS</span>
+              <h2>Taux d’acceptation</h2>
+            </div>
+
+            <strong class="percentage">
+              {{ invitationAcceptanceRate }}%
+            </strong>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-value success-progress"
+              [style.width.%]="invitationAcceptanceRate"
+            ></div>
+          </div>
+
+          <div class="analytics-values">
+            <div>
+              <span>Acceptées</span>
+
+              <strong>
+                {{ statistics.acceptedInvitations }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Total</span>
+
+              <strong>
+                {{ statistics.totalInvitations }}
+              </strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="analytics-card">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">MISSIONS</span>
+              <h2>Missions actuellement actives</h2>
+            </div>
+
+            <strong class="percentage">
+              {{ activeMissionRate }}%
+            </strong>
+          </div>
+
+          <div class="progress-track">
+            <div
+              class="progress-value mission-progress"
+              [style.width.%]="activeMissionRate"
+            ></div>
+          </div>
+
+          <div class="analytics-values">
+            <div>
+              <span>Actives</span>
+
+              <strong>
+                {{ statistics.activeMissions }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Total</span>
+
+              <strong>
+                {{ statistics.totalMissions }}
+              </strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="details-grid">
+        <article class="detail-card">
+          <div class="detail-header">
+            <div>
+              <span class="eyebrow">PROPOSITIONS</span>
+              <h2>État des propositions</h2>
+            </div>
+
+            <span class="total-badge">
+              {{ statistics.totalInvitations }}
+            </span>
+          </div>
+
+          <div class="status-list">
+            <div>
+              <span class="status-dot pending"></span>
+              <span>En attente</span>
+
+              <strong>
+                {{ statistics.pendingInvitations }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="status-dot accepted"></span>
+              <span>Acceptées</span>
+
+              <strong>
+                {{ statistics.acceptedInvitations }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="status-dot rejected"></span>
+              <span>Refusées</span>
+
+              <strong>
+                {{ statistics.rejectedInvitations }}
+              </strong>
+            </div>
+          </div>
+
+          <a
+            routerLink="/admin/invitations"
+            class="detail-link"
+          >
+            Voir toutes les propositions
+            <span>→</span>
+          </a>
+        </article>
+
+        <article class="detail-card">
+          <div class="detail-header">
+            <div>
+              <span class="eyebrow">MISSIONS</span>
+              <h2>État des collaborations</h2>
+            </div>
+
+            <span class="total-badge">
+              {{ statistics.totalMissions }}
+            </span>
+          </div>
+
+          <div class="status-list">
+            <div>
+              <span class="status-dot active"></span>
+              <span>Actives</span>
+
+              <strong>
+                {{ statistics.activeMissions }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="status-dot completed"></span>
+              <span>Terminées</span>
+
+              <strong>
+                {{ statistics.completedMissions }}
+              </strong>
+            </div>
+
+            <div>
+              <span class="status-dot cancelled"></span>
+              <span>Annulées</span>
+
+              <strong>
+                {{ statistics.cancelledMissions }}
+              </strong>
+            </div>
+          </div>
+
+          <a
+            routerLink="/admin/missions"
+            class="detail-link"
+          >
+            Voir toutes les missions
+            <span>→</span>
+          </a>
+        </article>
+      </section>
+
+      <section class="management-section">
+        <div class="management-heading">
+          <div>
+            <span class="eyebrow">GESTION</span>
+
+            <h2>
+              Administration de la plateforme
+            </h2>
+
+            <p>
+              Accédez rapidement aux différents espaces
+              de supervision TalentScope.
+            </p>
+          </div>
+        </div>
+
+        <div class="management-grid">
+          <a
+            routerLink="/admin/users"
+            class="management-card"
+          >
+            <span class="management-icon purple">
+              ◎
+            </span>
+
+            <div>
+              <strong>Utilisateurs</strong>
+
+              <p>
+                Gérer les comptes et leurs accès.
+              </p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a
+            routerLink="/admin/consultants"
+            class="management-card"
+          >
+            <span class="management-icon blue">
+              ◇
+            </span>
+
+            <div>
+              <strong>Consultants</strong>
+
+              <p>
+                Superviser les profils et disponibilités.
+              </p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a
+            routerLink="/admin/companies"
+            class="management-card"
+          >
+            <span class="management-icon green">
+              ▣
+            </span>
+
+            <div>
+              <strong>Entreprises</strong>
+
+              <p>
+                Consulter les organisations inscrites.
+              </p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a
+            routerLink="/admin/invitations"
+            class="management-card"
+          >
+            <span class="management-icon orange">
+              ✦
+            </span>
+
+            <div>
+              <strong>Propositions</strong>
+
+              <p>
+                Suivre l’activité de mise en relation.
+              </p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+
+          <a
+            routerLink="/admin/missions"
+            class="management-card"
+          >
+            <span class="management-icon violet">
+              ◆
+            </span>
+
+            <div>
+              <strong>Missions</strong>
+
+              <p>
+                Superviser les collaborations en cours.
+              </p>
+            </div>
+
+            <span class="arrow">→</span>
+          </a>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</div>

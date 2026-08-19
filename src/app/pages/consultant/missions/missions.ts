@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
+import { MessagingService } from '../../../core/services/messaging';
 import { MissionService } from '../../../core/services/mission';
 
 type MissionStatusFilter = 'ALL' | MissionStatus;
@@ -25,7 +26,14 @@ export class ConsultantMissions implements OnInit {
   searchTerm = '';
   selectedStatus: MissionStatusFilter = 'ALL';
 
-  constructor(private readonly missionService: MissionService) {}
+  messagingParticipantId: string | null = null;
+  messagingErrorMessage = '';
+
+  constructor(
+    private readonly missionService: MissionService,
+    private readonly messagingService: MessagingService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadMissions();
@@ -53,7 +61,10 @@ export class ConsultantMissions implements OnInit {
         .join(' ')
         .toLowerCase();
 
-      return matchesStatus && (!search || searchableContent.includes(search));
+      return (
+        matchesStatus &&
+        (!search || searchableContent.includes(search))
+      );
     });
   }
 
@@ -70,41 +81,102 @@ export class ConsultantMissions implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedStatus !== 'ALL' || this.searchTerm.trim().length > 0;
+    return (
+      this.selectedStatus !== 'ALL' ||
+      this.searchTerm.trim().length > 0
+    );
   }
 
   loadMissions(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.messagingErrorMessage = '';
 
-    this.missionService.getConsultantMissions().subscribe({
-      next: missions => {
-        this.missions = (missions ?? []).map(mission => ({
-          ...mission,
-          technologies: mission.technologies ?? []
-        }));
+    this.missionService
+      .getConsultantMissions()
+      .subscribe({
+        next: missions => {
+          this.missions = (missions ?? []).map(
+            mission => ({
+              ...mission,
+              technologies: mission.technologies ?? []
+            })
+          );
 
-        this.loading = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement des missions :', error);
+          this.loading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors du chargement des missions :',
+            error
+          );
 
-        this.loading = false;
+          this.loading = false;
 
-        if (error.status === 403) {
+          if (error.status === 403) {
+            this.errorMessage =
+              'Vous n’êtes pas autorisé à consulter ces missions.';
+            return;
+          }
+
+          if (error.status === 404) {
+            this.errorMessage =
+              'Votre profil consultant est introuvable.';
+            return;
+          }
+
           this.errorMessage =
-            'Vous n’êtes pas autorisé à consulter ces missions.';
-          return;
+            'Impossible de charger vos missions.';
         }
+      });
+  }
 
-        if (error.status === 404) {
-          this.errorMessage = 'Votre profil consultant est introuvable.';
-          return;
+  contactCompany(mission: Mission): void {
+    if (
+      !mission.companyId ||
+      this.messagingParticipantId
+    ) {
+      return;
+    }
+
+    this.messagingParticipantId =
+      mission.companyId;
+
+    this.messagingErrorMessage = '';
+
+    this.messagingService
+      .openConversation(mission.companyId)
+      .subscribe({
+        next: conversation => {
+          this.messagingParticipantId = null;
+
+          this.router.navigate(
+            ['/messaging'],
+            {
+              queryParams: {
+                conversationId: conversation.id
+              }
+            }
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de l’ouverture de la conversation :',
+            error
+          );
+
+          this.messagingParticipantId = null;
+
+          this.messagingErrorMessage =
+            'Impossible d’ouvrir la conversation avec cette entreprise.';
         }
+      });
+  }
 
-        this.errorMessage = 'Impossible de charger vos missions.';
-      }
-    });
+  isOpeningConversation(
+    companyId: string
+  ): boolean {
+    return this.messagingParticipantId === companyId;
   }
 
   filterByStatus(status: MissionStatusFilter): void {
@@ -142,7 +214,9 @@ export class ConsultantMissions implements OnInit {
     }
   }
 
-  getContractTypeLabel(contractType: ContractType | null): string {
+  getContractTypeLabel(
+    contractType: ContractType | null
+  ): string {
     switch (contractType) {
       case 'CDI':
         return 'CDI';
@@ -159,7 +233,9 @@ export class ConsultantMissions implements OnInit {
     }
   }
 
-  getWorkModeLabel(workMode: WorkMode | null): string {
+  getWorkModeLabel(
+    workMode: WorkMode | null
+  ): string {
     switch (workMode) {
       case 'ONSITE':
         return 'Sur site';
@@ -180,11 +256,19 @@ export class ConsultantMissions implements OnInit {
     return `${salary.toLocaleString('fr-FR')} DT`;
   }
 
-  trackMission(index: number, mission: Mission): string {
+  trackMission(
+    index: number,
+    mission: Mission
+  ): string {
     return mission.id;
   }
 
-  private countMissionsByStatus(status: MissionStatus): number {
-    return this.missions.filter(mission => mission.status === status).length;
+  private countMissionsByStatus(
+    status: MissionStatus
+  ): number {
+    return this.missions.filter(
+      mission =>
+        mission.status === status
+    ).length;
   }
 }

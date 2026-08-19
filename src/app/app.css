@@ -28,7 +28,7 @@
   flex-shrink: 0;
   align-items: center;
   gap: 11px;
-  color: #101828;
+  color: var(--ts-dark);
   text-decoration: none;
 }
 
@@ -37,12 +37,13 @@
   height: 42px;
   display: grid;
   place-items: center;
+  flex-shrink: 0;
   border-radius: 13px;
   color: #ffffff;
   background: linear-gradient(
     135deg,
-    #6d5dfc 0%,
-    #4438ca 100%
+    var(--ts-primary) 0%,
+    var(--ts-primary-dark) 100%
   );
   box-shadow: 0 10px 24px rgba(90, 76, 234, 0.23);
   font-size: 20px;
@@ -56,14 +57,14 @@
 }
 
 .brand-content strong {
-  color: #101828;
+  color: var(--ts-dark);
   font-size: 18px;
   line-height: 1.1;
   letter-spacing: -0.4px;
 }
 
 .brand-content small {
-  color: #667085;
+  color: var(--ts-muted);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.45px;
@@ -84,7 +85,7 @@
   gap: 7px;
   padding: 0 11px;
   border-radius: 10px;
-  color: #667085;
+  color: var(--ts-muted);
   text-decoration: none;
   font-size: 13px;
   font-weight: 700;
@@ -96,13 +97,13 @@
 }
 
 .navigation > a:hover {
-  color: #5143d8;
-  background: #f5f3ff;
+  color: var(--ts-primary-dark);
+  background: var(--ts-primary-soft);
 }
 
 .navigation > a.active {
-  color: #5545df;
-  background: #f0edff;
+  color: var(--ts-primary);
+  background: var(--ts-primary-light);
 }
 
 .navigation > a.active::after {
@@ -113,7 +114,7 @@
   left: 13px;
   height: 3px;
   border-radius: 999px 999px 0 0;
-  background: #6955ed;
+  background: var(--ts-primary);
 }
 
 .nav-icon,
@@ -147,7 +148,7 @@
   border: 2px solid #ffffff;
   border-radius: 999px;
   color: #ffffff;
-  background: #e5484d;
+  background: var(--ts-danger);
   box-shadow: 0 4px 9px rgba(229, 72, 77, 0.22);
   font-size: 9px;
   font-weight: 900;
@@ -157,8 +158,9 @@
 .navigation-divider {
   width: 1px;
   height: 28px;
+  flex-shrink: 0;
   margin: 0 6px;
-  background: #e4e7ec;
+  background: var(--ts-border);
 }
 
 .logout-button {
@@ -168,9 +170,9 @@
   justify-content: center;
   gap: 7px;
   padding: 0 13px;
-  border: 1px solid #e4e7ec;
+  border: 1px solid var(--ts-border);
   border-radius: 10px;
-  color: #475467;
+  color: var(--ts-text);
   background: #ffffff;
   font-family: inherit;
   font-size: 12px;
@@ -200,12 +202,18 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 5px;
   padding: 0;
-  border: 1px solid #e4e7ec;
+  border: 1px solid var(--ts-border);
   border-radius: 11px;
   background: #ffffff;
   cursor: pointer;
+}
+
+.mobile-menu-button:hover {
+  border-color: #d7d1ff;
+  background: var(--ts-primary-soft);
 }
 
 .mobile-menu-button span {
@@ -231,6 +239,7 @@
 }
 
 .application-content {
+  width: 100%;
   min-height: 100vh;
 }
 
@@ -242,7 +251,7 @@
       rgba(109, 93, 252, 0.035),
       transparent 23%
     ),
-    #f8f9fc;
+    var(--ts-background);
 }
 
 @media (max-width: 1260px) {
@@ -288,10 +297,10 @@
     flex-direction: column;
     gap: 5px;
     padding: 12px;
-    border: 1px solid #e4e7ec;
+    border: 1px solid var(--ts-border);
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.98);
-    box-shadow: 0 22px 55px rgba(16, 24, 40, 0.14);
+    box-shadow: var(--ts-shadow-lg);
     backdrop-filter: blur(18px);
   }
 

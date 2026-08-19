@@ -354,6 +354,27 @@
           <span>→</span>
         </a>
 
+        <button
+          type="button"
+          class="message-action"
+          [disabled]="
+            isOpeningConversation(
+              mission.consultantId
+            )
+          "
+          (click)="contactConsultant(mission)"
+        >
+          <span>✉</span>
+
+          {{
+            isOpeningConversation(
+              mission.consultantId
+            )
+              ? 'Ouverture de la conversation...'
+              : 'Contacter le consultant'
+          }}
+        </button>
+
         <div
           class="mission-actions"
           *ngIf="mission.status === 'ACTIVE'"

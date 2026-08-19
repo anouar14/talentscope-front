@@ -1,0 +1,367 @@
+<div class="admin-page">
+  <div class="admin-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>
+          Gestion des
+          <span>utilisateurs.</span>
+        </h1>
+
+        <p>
+          Consultez les comptes TalentScope, filtrez les consultants,
+          entreprises et administrateurs, puis gérez leur accès
+          à la plateforme.
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/dashboard"
+        class="back-action"
+      >
+        ← Dashboard
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedRole === 'ALL'"
+        (click)="filterByRole('ALL')"
+      >
+        <span class="summary-icon purple">◎</span>
+
+        <div>
+          <span>Tous les comptes</span>
+          <strong>{{ users.length }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedRole === 'CONSULTANT'"
+        (click)="filterByRole('CONSULTANT')"
+      >
+        <span class="summary-icon blue">◇</span>
+
+        <div>
+          <span>Consultants</span>
+          <strong>{{ consultantCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedRole === 'COMPANY'"
+        (click)="filterByRole('COMPANY')"
+      >
+        <span class="summary-icon green">▣</span>
+
+        <div>
+          <span>Entreprises</span>
+          <strong>{{ companyCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedRole === 'ADMIN'"
+        (click)="filterByRole('ADMIN')"
+      >
+        <span class="summary-icon orange">◆</span>
+
+        <div>
+          <span>Administrateurs</span>
+          <strong>{{ adminCount }}</strong>
+        </div>
+      </button>
+    </section>
+
+    <section
+      class="account-status"
+      *ngIf="!loading && !errorMessage"
+    >
+      <div>
+        <span class="status-dot enabled-dot"></span>
+
+        <span>Comptes actifs</span>
+
+        <strong>{{ enabledCount }}</strong>
+      </div>
+
+      <div>
+        <span class="status-dot disabled-dot"></span>
+
+        <span>Comptes désactivés</span>
+
+        <strong>{{ disabledCount }}</strong>
+      </div>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && users.length > 0"
+    >
+      <div class="filter-field search-field">
+        <label for="admin-user-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="admin-user-search"
+            type="search"
+            name="adminUserSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Nom, email, titre, rôle..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="admin-user-role">
+          Rôle
+        </label>
+
+        <select
+          id="admin-user-role"
+          name="adminUserRole"
+          [(ngModel)]="selectedRole"
+        >
+          <option value="ALL">Tous les rôles</option>
+          <option value="CONSULTANT">Consultants</option>
+          <option value="COMPANY">Entreprises</option>
+          <option value="ADMIN">Administrateurs</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="admin-user-status">
+          État
+        </label>
+
+        <select
+          id="admin-user-status"
+          name="adminUserStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous</option>
+          <option value="ENABLED">Actifs</option>
+          <option value="DISABLED">Désactivés</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <div
+      class="feedback success-feedback"
+      *ngIf="actionSuccessMessage"
+    >
+      <span>✓</span>
+      {{ actionSuccessMessage }}
+    </div>
+
+    <div
+      class="feedback error-feedback"
+      *ngIf="actionErrorMessage"
+    >
+      <span>!</span>
+      {{ actionErrorMessage }}
+    </div>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement des utilisateurs</h2>
+
+      <p>
+        Récupération des comptes TalentScope...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Utilisateurs indisponibles</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadUsers()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && !errorMessage && users.length === 0"
+    >
+      <div class="state-icon empty-icon">◎</div>
+
+      <h2>Aucun utilisateur</h2>
+
+      <p>
+        Aucun compte n’est actuellement enregistré
+        sur TalentScope.
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        users.length > 0 &&
+        filteredUsers.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">⌕</div>
+
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucun utilisateur ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="users-list"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredUsers.length > 0
+      "
+    >
+      <article
+        class="user-card"
+        [class.disabled-account]="!user.enabled"
+        *ngFor="
+          let user of filteredUsers;
+          trackBy: trackUser
+        "
+      >
+        <div class="user-avatar">
+          {{ getInitial(user) }}
+        </div>
+
+        <div class="user-information">
+          <div class="user-title-line">
+            <div>
+              <h2>{{ user.displayName }}</h2>
+
+              <p>{{ user.email }}</p>
+            </div>
+
+            <div class="badges">
+              <span
+                class="role-badge"
+                [ngClass]="getRoleClass(user.role)"
+              >
+                {{ getRoleLabel(user.role) }}
+              </span>
+
+              <span
+                class="account-badge"
+                [class.disabled]="!user.enabled"
+              >
+                <i></i>
+
+                {{
+                  user.enabled
+                    ? 'Actif'
+                    : 'Désactivé'
+                }}
+              </span>
+            </div>
+          </div>
+
+          <div class="user-meta">
+            <div>
+              <span>Profil</span>
+
+              <strong>
+                {{
+                  user.professionalTitle ||
+                  'Non renseigné'
+                }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Authentification</span>
+
+              <strong>
+                {{ getProviderLabel(user.authProvider) }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Identifiant</span>
+
+              <strong>{{ user.id }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="user-actions">
+          <button
+            *ngIf="user.role !== 'ADMIN'"
+            type="button"
+            [class.enable-button]="!user.enabled"
+            [class.disable-button]="user.enabled"
+            [disabled]="isProcessing(user.id)"
+            (click)="toggleUserStatus(user)"
+          >
+            {{
+              isProcessing(user.id)
+                ? 'Traitement...'
+                : user.enabled
+                  ? 'Désactiver'
+                  : 'Réactiver'
+            }}
+          </button>
+
+          <span
+            class="protected-account"
+            *ngIf="user.role === 'ADMIN'"
+          >
+            Compte protégé
+          </span>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,281 @@
+<div class="admin-page">
+  <div class="admin-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">ADMINISTRATION</span>
+
+        <h1>
+          Supervision des
+          <span>missions.</span>
+        </h1>
+
+        <p>
+          Suivez toutes les collaborations créées sur TalentScope,
+          leur état, leurs participants et leurs informations métier.
+        </p>
+      </div>
+
+      <a
+        routerLink="/admin/dashboard"
+        class="back-action"
+      >
+        ← Dashboard
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
+        (click)="filterByStatus('ALL')"
+      >
+        <span class="summary-icon purple">◆</span>
+
+        <div>
+          <span>Total missions</span>
+          <strong>{{ missions.length }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ACTIVE'"
+        (click)="filterByStatus('ACTIVE')"
+      >
+        <span class="summary-icon green">●</span>
+
+        <div>
+          <span>Actives</span>
+          <strong>{{ activeCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'COMPLETED'"
+        (click)="filterByStatus('COMPLETED')"
+      >
+        <span class="summary-icon blue">✓</span>
+
+        <div>
+          <span>Terminées</span>
+          <strong>{{ completedCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'CANCELLED'"
+        (click)="filterByStatus('CANCELLED')"
+      >
+        <span class="summary-icon red">×</span>
+
+        <div>
+          <span>Annulées</span>
+          <strong>{{ cancelledCount }}</strong>
+        </div>
+      </button>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && missions.length > 0"
+    >
+      <div class="filter-field">
+        <label for="mission-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="mission-search"
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Mission, entreprise, consultant, technologie..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="mission-status">
+          Statut
+        </label>
+
+        <select
+          id="mission-status"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous</option>
+          <option value="ACTIVE">Actives</option>
+          <option value="COMPLETED">Terminées</option>
+          <option value="CANCELLED">Annulées</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section class="state-card" *ngIf="loading">
+      <div class="loader"></div>
+
+      <h2>Chargement des missions</h2>
+
+      <p>
+        Récupération des collaborations TalentScope...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Missions indisponibles</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadMissions()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        missions.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">◆</div>
+
+      <h2>Aucune mission</h2>
+
+      <p>
+        Aucune mission n’a encore été créée sur TalentScope.
+      </p>
+    </section>
+
+    <section
+      class="missions-list"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredMissions.length > 0
+      "
+    >
+      <article
+        class="mission-card"
+        *ngFor="
+          let mission of filteredMissions;
+          trackBy: trackMission
+        "
+      >
+        <div class="card-header">
+          <div>
+            <span class="card-label">MISSION</span>
+            <h2>{{ mission.title }}</h2>
+          </div>
+
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(mission.status)"
+          >
+            {{ getStatusLabel(mission.status) }}
+          </span>
+        </div>
+
+        <div class="participants">
+          <div>
+            <span>Entreprise</span>
+            <strong>{{ mission.companyName }}</strong>
+          </div>
+
+          <span class="relation-arrow">↔</span>
+
+          <div>
+            <span>Consultant</span>
+            <strong>{{ mission.consultantName }}</strong>
+            <small>{{ mission.consultantTitle }}</small>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div>
+            <span>Début</span>
+            <strong>{{ formatDate(mission.startDate) }}</strong>
+          </div>
+
+          <div>
+            <span>Fin</span>
+            <strong>{{ formatDate(mission.endDate) }}</strong>
+          </div>
+
+          <div>
+            <span>Contrat</span>
+            <strong>
+              {{ mission.contractType || 'Non renseigné' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Mode</span>
+            <strong>
+              {{ mission.workMode || 'Non renseigné' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Localisation</span>
+            <strong>
+              {{ mission.location || 'Non renseignée' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Rémunération</span>
+            <strong>{{ formatSalary(mission.salary) }}</strong>
+          </div>
+        </div>
+
+        <div class="description">
+          <span>DESCRIPTION</span>
+          <p>
+            {{ mission.description || 'Aucune description.' }}
+          </p>
+        </div>
+
+        <div
+          class="technologies"
+          *ngIf="mission.technologies.length > 0"
+        >
+          <span
+            *ngFor="let technology of mission.technologies"
+          >
+            {{ technology }}
+          </span>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

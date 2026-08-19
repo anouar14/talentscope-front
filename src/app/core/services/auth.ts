@@ -1,6 +1,11 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
+export type UserRole =
+  | 'CONSULTANT'
+  | 'COMPANY'
+  | 'ADMIN';
 
 export interface RegisterRequest {
   email: string;
@@ -16,7 +21,7 @@ export interface LoginRequest {
 
 export interface AuthResponse {
   token: string;
-  role: string;
+  role: UserRole;
   email: string;
   userId: string;
 }
@@ -28,10 +33,11 @@ export interface MessageResponse {
 export interface TokenValidationResponse {
   valid: boolean;
 }
+
 export interface GoogleAuthResponse {
   requiresRole: boolean;
   token: string | null;
-  role: 'CONSULTANT' | 'COMPANY' | null;
+  role: UserRole | null;
   email: string;
   userId: string | null;
   name: string;
@@ -48,7 +54,7 @@ export interface GoogleCompleteRegistrationRequest {
 export class Auth {
   private readonly apiUrl = 'http://localhost:8080/api/auth';
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
   register(data: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(
@@ -106,8 +112,18 @@ export class Auth {
     return localStorage.getItem('token');
   }
 
-  getRole(): string | null {
-    return localStorage.getItem('role');
+  getRole(): UserRole | null {
+    const role = localStorage.getItem('role');
+
+    if (
+      role === 'CONSULTANT' ||
+      role === 'COMPANY' ||
+      role === 'ADMIN'
+    ) {
+      return role;
+    }
+
+    return null;
   }
 
   getUserId(): string | null {
@@ -118,7 +134,7 @@ export class Auth {
     return !!this.getToken();
   }
 
-  hasRole(role: string): boolean {
+  hasRole(role: UserRole): boolean {
     return this.getRole() === role;
   }
 
@@ -128,39 +144,41 @@ export class Auth {
     localStorage.removeItem('email');
     localStorage.removeItem('userId');
   }
-  googleLogin(
-  credential: string
-): Observable<GoogleAuthResponse> {
-  return this.http.post<GoogleAuthResponse>(
-    `${this.apiUrl}/google`,
-    { credential }
-  );
-}
 
-  completeGoogleRegistration(
-  request: GoogleCompleteRegistrationRequest
-): Observable<GoogleAuthResponse> {
-  return this.http.post<GoogleAuthResponse>(
-    `${this.apiUrl}/google/complete-registration`,
-    request
-  );
-}
-  saveGoogleAuth(response: GoogleAuthResponse): void {
-  if (
-    !response.token ||
-    !response.role ||
-    !response.userId
-  ) {
-    throw new Error(
-      'La réponse Google ne contient pas les données d’authentification.'
+  googleLogin(
+    credential: string
+  ): Observable<GoogleAuthResponse> {
+    return this.http.post<GoogleAuthResponse>(
+      `${this.apiUrl}/google`,
+      { credential }
     );
   }
 
-  this.saveAuth({
-    token: response.token,
-    role: response.role,
-    email: response.email,
-    userId: response.userId
-  });
-}
+  completeGoogleRegistration(
+    request: GoogleCompleteRegistrationRequest
+  ): Observable<GoogleAuthResponse> {
+    return this.http.post<GoogleAuthResponse>(
+      `${this.apiUrl}/google/complete-registration`,
+      request
+    );
+  }
+
+  saveGoogleAuth(response: GoogleAuthResponse): void {
+    if (
+      !response.token ||
+      !response.role ||
+      !response.userId
+    ) {
+      throw new Error(
+        'La réponse Google ne contient pas les données d’authentification.'
+      );
+    }
+
+    this.saveAuth({
+      token: response.token,
+      role: response.role,
+      email: response.email,
+      userId: response.userId
+    });
+  }
 }

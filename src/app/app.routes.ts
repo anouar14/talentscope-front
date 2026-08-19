@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
+import { adminGuard } from './core/guards/admin-guard';
 import { authGuard } from './core/guards/auth.guard';
 import { companyGuard } from './core/guards/company-guard';
 import { consultantGuard } from './core/guards/consultant-guard';
+import { AdminDashboardPage } from './pages/admin/dashboard/dashboard';
+import { AdminUsers } from './pages/admin/users/users';
 import { ForgotPassword } from './pages/auth/forgot-password/forgot-password';
 import { GoogleRoleSelection } from './pages/auth/google-role-selection/google-role-selection';
 import { Login } from './pages/auth/login/login';
@@ -21,6 +24,12 @@ import { UploadCv } from './pages/consultant/upload-cv/upload-cv';
 import { MissionDetail } from './pages/mission-detail/mission-detail';
 import { Notifications } from './pages/notifications/notifications';
 import { Welcome } from './pages/welcome/welcome';
+import { AdminCompanies } from './pages/admin/companies/companies';
+import { AdminConsultants } from './pages/admin/consultants/consultants';
+import { AdminInvitations } from './pages/admin/invitations/invitations';
+import { AdminMissions } from './pages/admin/missions/missions';
+import { messagingGuard } from './core/guards/messaging-guard';
+import { Messaging } from './pages/messaging/messaging';
 
 export const routes: Routes = [
   {
@@ -117,6 +126,41 @@ export const routes: Routes = [
     component: MissionDetail,
     canActivate: [companyGuard]
   },
+  {
+    path: 'admin/dashboard',
+    component: AdminDashboardPage,
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'admin/users',
+    component: AdminUsers,
+    canActivate: [adminGuard]
+  },
+  {
+  path: 'admin/consultants',
+  component: AdminConsultants,
+  canActivate: [adminGuard]
+  },
+  {
+  path: 'admin/companies',
+  component: AdminCompanies,
+  canActivate: [adminGuard]
+  },
+  {
+  path: 'admin/invitations',
+  component: AdminInvitations,
+  canActivate: [adminGuard]
+},
+{
+  path: 'admin/missions',
+  component: AdminMissions,
+  canActivate: [adminGuard]
+},
+{
+  path: 'messaging',
+  component: Messaging,
+  canActivate: [messagingGuard]
+},
   {
     path: '**',
     redirectTo: ''

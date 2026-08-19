@@ -143,7 +143,6 @@
 
       <div>
         <strong>Réponse enregistrée</strong>
-
         <p>{{ actionSuccessMessage }}</p>
       </div>
 
@@ -257,6 +256,7 @@
 
             <div>
               <span class="card-label">ENTREPRISE</span>
+
               <h2>{{ invitation.companyName }}</h2>
 
               <p>
@@ -330,7 +330,10 @@
         <section class="technologies-section">
           <div class="section-line">
             <span>Technologies recherchées</span>
-            <small>{{ invitation.technologies.length }} compétence(s)</small>
+
+            <small>
+              {{ invitation.technologies.length }} compétence(s)
+            </small>
           </div>
 
           <div
@@ -354,7 +357,10 @@
           class="notes-section"
           *ngIf="invitation.notes"
         >
-          <span class="card-label">NOTES COMPLÉMENTAIRES</span>
+          <span class="card-label">
+            NOTES COMPLÉMENTAIRES
+          </span>
+
           <p>{{ invitation.notes }}</p>
         </section>
 
@@ -375,6 +381,27 @@
             </strong>
           </div>
         </div>
+
+        <button
+          type="button"
+          class="message-action"
+          [disabled]="
+            isOpeningConversation(
+              invitation.companyId
+            )
+          "
+          (click)="contactCompany(invitation)"
+        >
+          <span>✉</span>
+
+          {{
+            isOpeningConversation(
+              invitation.companyId
+            )
+              ? 'Ouverture de la conversation...'
+              : 'Contacter l’entreprise'
+          }}
+        </button>
 
         <div
           class="decision-notice"

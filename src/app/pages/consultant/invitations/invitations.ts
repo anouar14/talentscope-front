@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import {
   ContractType,
   Invitation,
@@ -10,6 +10,7 @@ import {
   WorkMode
 } from '../../../core/models/invitation';
 import { InvitationService } from '../../../core/services/invitation';
+import { MessagingService } from '../../../core/services/messaging';
 
 type InvitationStatusFilter = 'ALL' | InvitationStatus;
 
@@ -33,7 +34,13 @@ export class Invitations implements OnInit {
   searchTerm = '';
   selectedStatus: InvitationStatusFilter = 'ALL';
 
-  constructor(private readonly invitationService: InvitationService) {}
+  messagingParticipantId: string | null = null;
+
+  constructor(
+    private readonly invitationService: InvitationService,
+    private readonly messagingService: MessagingService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadInvitations();
@@ -79,7 +86,10 @@ export class Invitations implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedStatus !== 'ALL' || this.searchTerm.trim().length > 0;
+    return (
+      this.selectedStatus !== 'ALL' ||
+      this.searchTerm.trim().length > 0
+    );
   }
 
   loadInvitations(): void {
@@ -87,34 +97,91 @@ export class Invitations implements OnInit {
     this.errorMessage = '';
     this.clearActionMessages();
 
-    this.invitationService.getConsultantInvitations().subscribe({
-      next: invitations => {
-        this.invitations = (invitations ?? []).map(invitation => ({
-          ...invitation,
-          technologies: invitation.technologies ?? []
-        }));
+    this.invitationService
+      .getConsultantInvitations()
+      .subscribe({
+        next: invitations => {
+          this.invitations = (invitations ?? []).map(
+            invitation => ({
+              ...invitation,
+              technologies: invitation.technologies ?? []
+            })
+          );
 
-        this.loading = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement des invitations :', error);
+          this.loading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors du chargement des invitations :',
+            error
+          );
 
-        this.loading = false;
+          this.loading = false;
 
-        if (error.status === 403) {
+          if (error.status === 403) {
+            this.errorMessage =
+              'Vous n’êtes pas autorisé à consulter ces invitations.';
+            return;
+          }
+
+          if (error.status === 404) {
+            this.errorMessage =
+              'Votre profil consultant est introuvable.';
+            return;
+          }
+
           this.errorMessage =
-            'Vous n’êtes pas autorisé à consulter ces invitations.';
-          return;
+            'Impossible de charger vos invitations.';
         }
+      });
+  }
 
-        if (error.status === 404) {
-          this.errorMessage = 'Votre profil consultant est introuvable.';
-          return;
+  contactCompany(invitation: Invitation): void {
+    if (
+      !invitation.companyId ||
+      this.messagingParticipantId
+    ) {
+      return;
+    }
+
+    this.messagingParticipantId =
+      invitation.companyId;
+
+    this.actionErrorMessage = '';
+
+    this.messagingService
+      .openConversation(invitation.companyId)
+      .subscribe({
+        next: conversation => {
+          this.messagingParticipantId = null;
+
+          this.router.navigate(
+            ['/messaging'],
+            {
+              queryParams: {
+                conversationId: conversation.id
+              }
+            }
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de l’ouverture de la conversation :',
+            error
+          );
+
+          this.messagingParticipantId = null;
+
+          this.actionErrorMessage =
+            'Impossible d’ouvrir la conversation avec cette entreprise.';
         }
+      });
+  }
 
-        this.errorMessage = 'Impossible de charger vos invitations.';
-      }
-    });
+  isOpeningConversation(
+    companyId: string
+  ): boolean {
+    return this.messagingParticipantId === companyId;
   }
 
   acceptInvitation(invitation: Invitation): void {
@@ -130,7 +197,10 @@ export class Invitations implements OnInit {
     );
 
     if (confirmed) {
-      this.respondToInvitation(invitation, true);
+      this.respondToInvitation(
+        invitation,
+        true
+      );
     }
   }
 
@@ -147,11 +217,16 @@ export class Invitations implements OnInit {
     );
 
     if (confirmed) {
-      this.respondToInvitation(invitation, false);
+      this.respondToInvitation(
+        invitation,
+        false
+      );
     }
   }
 
-  filterByStatus(status: InvitationStatusFilter): void {
+  filterByStatus(
+    status: InvitationStatusFilter
+  ): void {
     this.selectedStatus = status;
   }
 
@@ -160,7 +235,9 @@ export class Invitations implements OnInit {
     this.selectedStatus = 'ALL';
   }
 
-  isInvitationProcessing(invitationId: string): boolean {
+  isInvitationProcessing(
+    invitationId: string
+  ): boolean {
     return this.actionInvitationId === invitationId;
   }
 
@@ -190,7 +267,9 @@ export class Invitations implements OnInit {
     }
   }
 
-  getContractTypeLabel(contractType: ContractType | null): string {
+  getContractTypeLabel(
+    contractType: ContractType | null
+  ): string {
     switch (contractType) {
       case 'CDI':
         return 'CDI';
@@ -207,7 +286,9 @@ export class Invitations implements OnInit {
     }
   }
 
-  getWorkModeLabel(workMode: WorkMode | null): string {
+  getWorkModeLabel(
+    workMode: WorkMode | null
+  ): string {
     switch (workMode) {
       case 'ONSITE':
         return 'Sur site';
@@ -228,7 +309,10 @@ export class Invitations implements OnInit {
     return `${salary.toLocaleString('fr-FR')} DT`;
   }
 
-  trackInvitation(index: number, invitation: Invitation): string {
+  trackInvitation(
+    index: number,
+    invitation: Invitation
+  ): string {
     return invitation.id;
   }
 
@@ -240,12 +324,16 @@ export class Invitations implements OnInit {
     this.clearActionMessages();
 
     this.invitationService
-      .respondToInvitation(invitation.id, accepted)
+      .respondToInvitation(
+        invitation.id,
+        accepted
+      )
       .subscribe({
         next: updatedInvitation => {
           this.replaceInvitation({
             ...updatedInvitation,
-            technologies: updatedInvitation.technologies ?? []
+            technologies:
+              updatedInvitation.technologies ?? []
           });
 
           this.actionInvitationId = null;
@@ -261,7 +349,8 @@ export class Invitations implements OnInit {
           );
 
           this.actionInvitationId = null;
-          this.actionErrorMessage = this.getActionErrorMessage(error);
+          this.actionErrorMessage =
+            this.getActionErrorMessage(error);
 
           if (error.status === 409) {
             this.loadInvitations();
@@ -270,21 +359,29 @@ export class Invitations implements OnInit {
       });
   }
 
-  private replaceInvitation(updatedInvitation: Invitation): void {
-    this.invitations = this.invitations.map(invitation =>
-      invitation.id === updatedInvitation.id
-        ? updatedInvitation
-        : invitation
+  private replaceInvitation(
+    updatedInvitation: Invitation
+  ): void {
+    this.invitations = this.invitations.map(
+      invitation =>
+        invitation.id === updatedInvitation.id
+          ? updatedInvitation
+          : invitation
     );
   }
 
-  private countByStatus(status: InvitationStatus): number {
+  private countByStatus(
+    status: InvitationStatus
+  ): number {
     return this.invitations.filter(
-      invitation => invitation.status === status
+      invitation =>
+        invitation.status === status
     ).length;
   }
 
-  private getActionErrorMessage(error: HttpErrorResponse): string {
+  private getActionErrorMessage(
+    error: HttpErrorResponse
+  ): string {
     if (error.status === 400) {
       return this.extractBackendMessage(
         error,
@@ -319,9 +416,12 @@ export class Invitations implements OnInit {
       error.error?.detail ||
       error.error?.error;
 
-    return typeof backendMessage === 'string' && backendMessage.trim()
-      ? backendMessage
-      : defaultMessage;
+    return (
+      typeof backendMessage === 'string' &&
+      backendMessage.trim()
+        ? backendMessage
+        : defaultMessage
+    );
   }
 
   private clearActionMessages(): void {

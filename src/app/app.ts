@@ -9,6 +9,7 @@ import {
 } from '@angular/router';
 import { Subject, filter, takeUntil } from 'rxjs';
 import { Auth } from './core/services/auth';
+import { MessagingService } from './core/services/messaging';
 import { NotificationService } from './core/services/notification';
 
 @Component({
@@ -25,6 +26,8 @@ import { NotificationService } from './core/services/notification';
 })
 export class App implements OnInit, OnDestroy {
   unreadNotificationCount = 0;
+  unreadMessageCount = 0;
+
   mobileMenuOpen = false;
 
   private readonly destroy$ = new Subject<void>();
@@ -32,6 +35,7 @@ export class App implements OnInit, OnDestroy {
   constructor(
     private readonly authService: Auth,
     private readonly notificationService: NotificationService,
+    private readonly messagingService: MessagingService,
     private readonly router: Router
   ) {}
 
@@ -40,6 +44,12 @@ export class App implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(count => {
         this.unreadNotificationCount = count;
+      });
+
+    this.messagingService.unreadCount$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(count => {
+        this.unreadMessageCount = count;
       });
 
     this.router.events
@@ -64,6 +74,10 @@ export class App implements OnInit, OnDestroy {
     return this.authService.isLoggedIn();
   }
 
+  get isAdmin(): boolean {
+    return this.authService.hasRole('ADMIN');
+  }
+
   get isCompany(): boolean {
     return this.authService.hasRole('COMPANY');
   }
@@ -73,9 +87,15 @@ export class App implements OnInit, OnDestroy {
   }
 
   get dashboardLink(): string {
-    return this.isCompany
-      ? '/company/dashboard'
-      : '/consultant/dashboard';
+    if (this.isAdmin) {
+      return '/admin/dashboard';
+    }
+
+    if (this.isCompany) {
+      return '/company/dashboard';
+    }
+
+    return '/consultant/dashboard';
   }
 
   get profileLink(): string {
@@ -96,6 +116,18 @@ export class App implements OnInit, OnDestroy {
       : '/consultant/missions';
   }
 
+  get workspaceLabel(): string {
+    if (this.isAdmin) {
+      return 'Espace administration';
+    }
+
+    if (this.isCompany) {
+      return 'Espace entreprise';
+    }
+
+    return 'Espace consultant';
+  }
+
   toggleMobileMenu(): void {
     this.mobileMenuOpen = !this.mobileMenuOpen;
   }
@@ -106,17 +138,29 @@ export class App implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.logout();
+
     this.notificationService.clearUnreadCount();
+    this.messagingService.clearUnreadCount();
+
     this.mobileMenuOpen = false;
+
     this.router.navigate(['/login']);
   }
 
   private refreshNavigationState(): void {
     if (!this.isAuthenticated) {
       this.notificationService.clearUnreadCount();
+      this.messagingService.clearUnreadCount();
+      return;
+    }
+
+    if (this.isAdmin) {
+      this.notificationService.clearUnreadCount();
+      this.messagingService.clearUnreadCount();
       return;
     }
 
     this.notificationService.refreshUnreadCount();
+    this.messagingService.refreshUnreadCount();
   }
 }

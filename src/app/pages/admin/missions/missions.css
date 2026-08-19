@@ -1,0 +1,87 @@
+@import '../invitations/invitations.css';
+
+.status-active {
+  color: #177c62;
+  background: var(--ts-success-light);
+}
+
+.status-completed {
+  color: #286da4;
+  background: var(--ts-info-light);
+}
+
+.status-cancelled {
+  color: #b83b43;
+  background: var(--ts-danger-light);
+}
+
+.missions-list {
+  display: grid;
+  gap: 13px;
+}
+
+.mission-card {
+  padding: 19px;
+  border: 1px solid var(--ts-border-soft);
+  border-radius: 17px;
+  background: #ffffff;
+  box-shadow: var(--ts-shadow-sm);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 13px;
+}
+
+.info-grid div {
+  padding: 10px;
+  border: 1px solid var(--ts-border-soft);
+  border-radius: 9px;
+}
+
+.info-grid span {
+  display: block;
+  color: var(--ts-light-text);
+  font-size: 7px;
+}
+
+.info-grid strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ts-title);
+  font-size: 8px;
+}
+
+.description {
+  margin-top: 13px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #fafafd;
+}
+
+.description > span {
+  color: var(--ts-muted);
+  font-size: 7px;
+  font-weight: 800;
+}
+
+.description p {
+  margin: 5px 0 0;
+  color: var(--ts-text);
+  font-size: 8px;
+  line-height: 1.6;
+}
+
+@media (max-width: 850px) {
+  .info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -262,6 +262,23 @@
   cursor: not-allowed;
 }
 
+.feedback-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.error-message {
+  border: 1px solid #f2ced1;
+  color: #b83b43;
+  background: #fff6f6;
+}
+
 .invitations-grid {
   display: grid;
   gap: 18px;
@@ -518,7 +535,8 @@
   margin-top: 17px;
 }
 
-.card-actions a {
+.card-actions a,
+.message-action {
   min-height: 39px;
   display: inline-flex;
   align-items: center;
@@ -535,6 +553,22 @@
   border: 1px solid var(--ts-border);
   color: var(--ts-text);
   background: #ffffff;
+}
+
+.message-action {
+  border: 1px solid #ddd7ff;
+  color: var(--ts-primary-dark);
+  background: var(--ts-primary-soft);
+}
+
+.message-action:hover:not(:disabled) {
+  border-color: var(--ts-primary);
+  background: var(--ts-primary-light);
+}
+
+.message-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .mission-action {
@@ -662,7 +696,8 @@
     flex-direction: column;
   }
 
-  .card-actions a {
+  .card-actions a,
+  .message-action {
     width: 100%;
   }
 }

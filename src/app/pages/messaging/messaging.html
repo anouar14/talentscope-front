@@ -1,0 +1,358 @@
+<div class="messaging-page">
+  <div class="messaging-container">
+    <section class="page-heading">
+      <div>
+        <span class="eyebrow">MESSAGERIE</span>
+
+        <h1>
+          Vos
+          <span>conversations.</span>
+        </h1>
+
+        <p>
+          Échangez directement avec vos contacts TalentScope
+          au sujet des propositions et des missions.
+        </p>
+      </div>
+    </section>
+
+    <section
+      class="messaging-shell"
+      *ngIf="!errorMessage"
+    >
+      <aside class="conversations-panel">
+        <div class="panel-heading">
+          <div>
+            <span class="panel-label">
+              CONVERSATIONS
+            </span>
+
+            <h2>Messages</h2>
+          </div>
+
+          <span class="conversation-count">
+            {{ conversations.length }}
+          </span>
+        </div>
+
+        <div class="search-box">
+          <span>⌕</span>
+
+          <input
+            type="search"
+            [(ngModel)]="searchTerm"
+            placeholder="Rechercher une conversation..."
+          >
+        </div>
+
+        <div
+          class="conversation-loading"
+          *ngIf="loadingConversations"
+        >
+          <div class="small-loader"></div>
+
+          <span>
+            Chargement...
+          </span>
+        </div>
+
+        <div
+          class="empty-conversations"
+          *ngIf="
+            !loadingConversations &&
+            conversations.length === 0
+          "
+        >
+          <div class="empty-icon">
+            ✉
+          </div>
+
+          <strong>
+            Aucune conversation
+          </strong>
+
+          <p>
+            Vos échanges apparaîtront ici lorsque
+            vous contacterez un membre TalentScope.
+          </p>
+        </div>
+
+        <div
+          class="empty-conversations"
+          *ngIf="
+            !loadingConversations &&
+            conversations.length > 0 &&
+            filteredConversations.length === 0
+          "
+        >
+          <div class="empty-icon">
+            ⌕
+          </div>
+
+          <strong>
+            Aucun résultat
+          </strong>
+
+          <p>
+            Aucune conversation ne correspond
+            à votre recherche.
+          </p>
+        </div>
+
+        <div
+          class="conversation-list"
+          *ngIf="
+            !loadingConversations &&
+            filteredConversations.length > 0
+          "
+        >
+          <button
+            type="button"
+            class="conversation-item"
+            [class.active]="
+              selectedConversation?.id ===
+              conversation.id
+            "
+            *ngFor="
+              let conversation of filteredConversations;
+              trackBy: trackConversation
+            "
+            (click)="selectConversation(conversation)"
+          >
+            <div class="avatar">
+              {{ getInitial(conversation) }}
+            </div>
+
+            <div class="conversation-content">
+              <div class="conversation-top">
+                <strong>
+                  {{ conversation.participantName }}
+                </strong>
+
+                <time>
+                  {{
+                    formatConversationTime(
+                      conversation.lastMessageAt
+                    )
+                  }}
+                </time>
+              </div>
+
+              <span class="participant-title">
+                {{
+                  conversation.participantTitle ||
+                  'Contact TalentScope'
+                }}
+              </span>
+
+              <div class="conversation-bottom">
+                <p>
+                  {{
+                    conversation.lastMessage ||
+                    'Nouvelle conversation'
+                  }}
+                </p>
+
+                <span
+                  class="unread-badge"
+                  *ngIf="conversation.unreadCount > 0"
+                >
+                  {{
+                    conversation.unreadCount > 99
+                      ? '99+'
+                      : conversation.unreadCount
+                  }}
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      <section class="chat-panel">
+        <ng-container *ngIf="selectedConversation">
+          <header class="chat-header">
+            <div class="chat-user">
+              <div class="avatar large">
+                {{ getInitial(selectedConversation) }}
+              </div>
+
+              <div>
+                <h2>
+                  {{ selectedConversation.participantName }}
+                </h2>
+
+                <p>
+                  {{
+                    selectedConversation.participantTitle ||
+                    'Contact TalentScope'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <span class="conversation-status">
+              <i></i>
+              Conversation TalentScope
+            </span>
+          </header>
+
+          <div
+            class="messages-container"
+            #messagesContainer
+          >
+            <div
+              class="messages-loading"
+              *ngIf="loadingMessages"
+            >
+              <div class="loader"></div>
+
+              <p>
+                Chargement des messages...
+              </p>
+            </div>
+
+            <div
+              class="empty-messages"
+              *ngIf="
+                !loadingMessages &&
+                messages.length === 0
+              "
+            >
+              <div class="empty-icon large-empty">
+                ✉
+              </div>
+
+              <h3>
+                Commencez la conversation
+              </h3>
+
+              <p>
+                Envoyez votre premier message à
+                {{ selectedConversation.participantName }}.
+              </p>
+            </div>
+
+            <div
+              class="messages-list"
+              *ngIf="
+                !loadingMessages &&
+                messages.length > 0
+              "
+            >
+              <div
+                class="message-row"
+                [class.mine]="message.sentByMe"
+                *ngFor="
+                  let message of messages;
+                  trackBy: trackMessage
+                "
+              >
+                <div class="message-bubble">
+                  <p>
+                    {{ message.content }}
+                  </p>
+
+                  <div class="message-meta">
+                    <time>
+                      {{ formatMessageTime(message.sentAt) }}
+                    </time>
+
+                    <span
+                      class="read-status"
+                      *ngIf="message.sentByMe"
+                    >
+                      {{
+                        message.read
+                          ? 'Lu'
+                          : 'Envoyé'
+                      }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="message-error"
+            *ngIf="messageError"
+          >
+            <span>!</span>
+            {{ messageError }}
+          </div>
+
+          <footer class="message-composer">
+            <textarea
+              [(ngModel)]="newMessage"
+              maxlength="3000"
+              rows="1"
+              placeholder="Écrire un message..."
+              [disabled]="sendingMessage"
+              (keydown)="onMessageKeydown($event)"
+            ></textarea>
+
+            <div class="composer-footer">
+              <span>
+                Entrée pour envoyer · Maj + Entrée
+                pour une nouvelle ligne
+              </span>
+
+              <button
+                type="button"
+                [disabled]="!canSendMessage"
+                (click)="sendMessage()"
+              >
+                {{
+                  sendingMessage
+                    ? 'Envoi...'
+                    : 'Envoyer'
+                }}
+
+                <span>→</span>
+              </button>
+            </div>
+          </footer>
+        </ng-container>
+
+        <div
+          class="no-conversation-selected"
+          *ngIf="!selectedConversation"
+        >
+          <div class="welcome-chat-icon">
+            ✉
+          </div>
+
+          <h2>
+            Votre messagerie TalentScope
+          </h2>
+
+          <p>
+            Sélectionnez une conversation pour consulter
+            vos messages et poursuivre votre échange.
+          </p>
+        </div>
+      </section>
+    </section>
+
+    <section
+      class="error-state"
+      *ngIf="errorMessage"
+    >
+      <div class="error-icon">!</div>
+
+      <h2>
+        Messagerie indisponible
+      </h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadConversations()"
+      >
+        Réessayer
+      </button>
+    </section>
+  </div>
+</div>

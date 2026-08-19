@@ -2,9 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
+import { MessagingService } from '../../../core/services/messaging';
 import { MissionService } from '../../../core/services/mission';
 
 type MissionStatusFilter = 'ALL' | MissionStatus;
@@ -29,7 +30,13 @@ export class CompanyMissions implements OnInit {
   actionSuccessMessage = '';
   actionErrorMessage = '';
 
-  constructor(private readonly missionService: MissionService) {}
+  messagingParticipantId: string | null = null;
+
+  constructor(
+    private readonly missionService: MissionService,
+    private readonly messagingService: MessagingService,
+    private readonly router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadMissions();
@@ -58,7 +65,10 @@ export class CompanyMissions implements OnInit {
         .join(' ')
         .toLowerCase();
 
-      return matchesStatus && (!search || searchableContent.includes(search));
+      return (
+        matchesStatus &&
+        (!search || searchableContent.includes(search))
+      );
     });
   }
 
@@ -75,7 +85,10 @@ export class CompanyMissions implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return this.selectedStatus !== 'ALL' || this.searchTerm.trim().length > 0;
+    return (
+      this.selectedStatus !== 'ALL' ||
+      this.searchTerm.trim().length > 0
+    );
   }
 
   loadMissions(): void {
@@ -85,15 +98,20 @@ export class CompanyMissions implements OnInit {
 
     this.missionService.getCompanyMissions().subscribe({
       next: missions => {
-        this.missions = (missions ?? []).map(mission => ({
-          ...mission,
-          technologies: mission.technologies ?? []
-        }));
+        this.missions = (missions ?? []).map(
+          mission => ({
+            ...mission,
+            technologies: mission.technologies ?? []
+          })
+        );
 
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
-        console.error('Erreur lors du chargement des missions :', error);
+        console.error(
+          'Erreur lors du chargement des missions :',
+          error
+        );
 
         this.loading = false;
 
@@ -113,6 +131,54 @@ export class CompanyMissions implements OnInit {
           'Impossible de charger vos missions.';
       }
     });
+  }
+
+  contactConsultant(mission: Mission): void {
+    if (
+      !mission.consultantId ||
+      this.messagingParticipantId
+    ) {
+      return;
+    }
+
+    this.messagingParticipantId =
+      mission.consultantId;
+
+    this.actionErrorMessage = '';
+
+    this.messagingService
+      .openConversation(mission.consultantId)
+      .subscribe({
+        next: conversation => {
+          this.messagingParticipantId = null;
+
+          this.router.navigate(
+            ['/messaging'],
+            {
+              queryParams: {
+                conversationId: conversation.id
+              }
+            }
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de l’ouverture de la conversation :',
+            error
+          );
+
+          this.messagingParticipantId = null;
+
+          this.actionErrorMessage =
+            'Impossible d’ouvrir la conversation avec ce consultant.';
+        }
+      });
+  }
+
+  isOpeningConversation(
+    consultantId: string
+  ): boolean {
+    return this.messagingParticipantId === consultantId;
   }
 
   filterByStatus(status: MissionStatusFilter): void {
@@ -137,7 +203,10 @@ export class CompanyMissions implements OnInit {
     );
 
     if (confirmed) {
-      this.updateMissionStatus(mission, 'COMPLETED');
+      this.updateMissionStatus(
+        mission,
+        'COMPLETED'
+      );
     }
   }
 
@@ -154,7 +223,10 @@ export class CompanyMissions implements OnInit {
     );
 
     if (confirmed) {
-      this.updateMissionStatus(mission, 'CANCELLED');
+      this.updateMissionStatus(
+        mission,
+        'CANCELLED'
+      );
     }
   }
 
@@ -188,7 +260,9 @@ export class CompanyMissions implements OnInit {
     }
   }
 
-  getContractTypeLabel(contractType: ContractType | null): string {
+  getContractTypeLabel(
+    contractType: ContractType | null
+  ): string {
     switch (contractType) {
       case 'CDI':
         return 'CDI';
@@ -205,7 +279,9 @@ export class CompanyMissions implements OnInit {
     }
   }
 
-  getWorkModeLabel(workMode: WorkMode | null): string {
+  getWorkModeLabel(
+    workMode: WorkMode | null
+  ): string {
     switch (workMode) {
       case 'ONSITE':
         return 'Sur site';
@@ -226,13 +302,19 @@ export class CompanyMissions implements OnInit {
     return `${salary.toLocaleString('fr-FR')} DT`;
   }
 
-  trackMission(index: number, mission: Mission): string {
+  trackMission(
+    index: number,
+    mission: Mission
+  ): string {
     return mission.id;
   }
 
-  private countMissionsByStatus(status: MissionStatus): number {
+  private countMissionsByStatus(
+    status: MissionStatus
+  ): number {
     return this.missions.filter(
-      mission => mission.status === status
+      mission =>
+        mission.status === status
     ).length;
   }
 
@@ -243,72 +325,80 @@ export class CompanyMissions implements OnInit {
     this.updatingMissionId = mission.id;
     this.clearActionMessages();
 
-    this.missionService.updateMissionStatus(
-      mission.id,
-      status
-    ).subscribe({
-      next: updatedMission => {
-        this.replaceMission({
-          ...updatedMission,
-          technologies: updatedMission.technologies ?? []
-        });
+    this.missionService
+      .updateMissionStatus(
+        mission.id,
+        status
+      )
+      .subscribe({
+        next: updatedMission => {
+          this.replaceMission({
+            ...updatedMission,
+            technologies:
+              updatedMission.technologies ?? []
+          });
 
-        this.updatingMissionId = null;
+          this.updatingMissionId = null;
 
-        this.actionSuccessMessage =
-          status === 'COMPLETED'
-            ? 'La mission a été marquée comme terminée.'
-            : 'La mission a été annulée.';
-      },
-      error: (error: HttpErrorResponse) => {
-        console.error(
-          'Erreur lors de la modification de la mission :',
-          error
-        );
-
-        this.updatingMissionId = null;
-
-        if (error.status === 400) {
-          this.actionErrorMessage = this.extractBackendMessage(
-            error,
-            'Le nouveau statut de la mission est invalide.'
-          );
-          return;
-        }
-
-        if (error.status === 403) {
-          this.actionErrorMessage =
-            'Vous n’êtes pas autorisé à modifier cette mission.';
-          return;
-        }
-
-        if (error.status === 404) {
-          this.actionErrorMessage =
-            'Cette mission est introuvable.';
-          return;
-        }
-
-        if (error.status === 409) {
-          this.actionErrorMessage = this.extractBackendMessage(
-            error,
-            'Cette mission a déjà été terminée ou annulée.'
+          this.actionSuccessMessage =
+            status === 'COMPLETED'
+              ? 'La mission a été marquée comme terminée.'
+              : 'La mission a été annulée.';
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la modification de la mission :',
+            error
           );
 
-          this.loadMissions();
-          return;
-        }
+          this.updatingMissionId = null;
 
-        this.actionErrorMessage =
-          'Impossible de modifier le statut de la mission.';
-      }
-    });
+          if (error.status === 400) {
+            this.actionErrorMessage =
+              this.extractBackendMessage(
+                error,
+                'Le nouveau statut de la mission est invalide.'
+              );
+            return;
+          }
+
+          if (error.status === 403) {
+            this.actionErrorMessage =
+              'Vous n’êtes pas autorisé à modifier cette mission.';
+            return;
+          }
+
+          if (error.status === 404) {
+            this.actionErrorMessage =
+              'Cette mission est introuvable.';
+            return;
+          }
+
+          if (error.status === 409) {
+            this.actionErrorMessage =
+              this.extractBackendMessage(
+                error,
+                'Cette mission a déjà été terminée ou annulée.'
+              );
+
+            this.loadMissions();
+            return;
+          }
+
+          this.actionErrorMessage =
+            'Impossible de modifier le statut de la mission.';
+        }
+      });
   }
 
-  private replaceMission(updatedMission: Mission): void {
-    this.missions = this.missions.map(mission =>
-      mission.id === updatedMission.id
-        ? updatedMission
-        : mission
+  private replaceMission(
+    updatedMission: Mission
+  ): void {
+    this.missions = this.missions.map(
+      mission =>
+        mission.id === updatedMission.id
+          ? updatedMission
+          : mission
     );
   }
 
@@ -326,9 +416,11 @@ export class CompanyMissions implements OnInit {
       error.error?.detail ||
       error.error?.error;
 
-    return typeof backendMessage === 'string' &&
+    return (
+      typeof backendMessage === 'string' &&
       backendMessage.trim()
-      ? backendMessage
-      : defaultMessage;
+        ? backendMessage
+        : defaultMessage
+    );
   }
 }
