@@ -12,6 +12,7 @@ import {
   filter,
   takeUntil
 } from 'rxjs';
+
 import { Auth } from './core/services/auth';
 import { MessagingRealtimeService } from './core/services/messaging-realtime';
 import { MessagingService } from './core/services/messaging';
@@ -140,6 +141,14 @@ export class App implements OnInit, OnDestroy {
     return this.isCompany
       ? '/company/missions'
       : '/consultant/missions';
+  }
+
+  get missionOffersLink(): string {
+    return '/company/mission-offers';
+  }
+
+  get searchMissionsLink(): string {
+    return '/consultant/search-missions';
   }
 
   get workspaceLabel(): string {

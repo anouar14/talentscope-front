@@ -1,0 +1,330 @@
+<div class="detail-page">
+  <div class="detail-container">
+    <a
+      routerLink="/consultant/search-missions"
+      class="back-link"
+    >
+      <span>←</span>
+      Retour aux opportunités
+    </a>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement de la mission</h2>
+
+      <p>
+        Récupération des informations de l’offre...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Mission indisponible</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <a routerLink="/consultant/search-missions">
+        Retour aux opportunités
+      </a>
+    </section>
+
+    <main
+      *ngIf="!loading && !errorMessage && offer"
+    >
+      <div
+        class="feedback success-feedback"
+        *ngIf="actionSuccessMessage"
+      >
+        <span>✓</span>
+        {{ actionSuccessMessage }}
+      </div>
+
+      <div
+        class="feedback error-feedback"
+        *ngIf="actionErrorMessage"
+      >
+        <span>!</span>
+        {{ actionErrorMessage }}
+      </div>
+
+      <section class="offer-hero">
+        <div>
+          <span class="eyebrow">OPPORTUNITÉ</span>
+
+          <h1>{{ offer.title }}</h1>
+
+          <div class="company-line">
+            <span class="company-avatar">
+              {{ companyInitial }}
+            </span>
+
+            <div>
+              <span>ENTREPRISE</span>
+              <strong>{{ offer.companyName }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <span class="status-badge">
+          ● Offre ouverte
+        </span>
+      </section>
+
+      <section class="offer-layout">
+        <article class="main-card">
+          <section class="content-section">
+            <div class="section-heading">
+              <span class="section-icon purple-icon">▣</span>
+
+              <div>
+                <span class="eyebrow">PRÉSENTATION</span>
+                <h2>Description de la mission</h2>
+              </div>
+            </div>
+
+            <p class="description">
+              {{ offer.description }}
+            </p>
+          </section>
+
+          <section class="content-section">
+            <div class="section-heading">
+              <span class="section-icon green-icon">◎</span>
+
+              <div>
+                <span class="eyebrow">CONDITIONS</span>
+                <h2>Organisation de la mission</h2>
+              </div>
+            </div>
+
+            <div class="conditions-grid">
+              <article>
+                <span>Date de début</span>
+
+                <strong>
+                  {{
+                    offer.startDate
+                      ? (offer.startDate | date: 'dd/MM/yyyy')
+                      : 'Non renseignée'
+                  }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Date de fin</span>
+
+                <strong>
+                  {{
+                    offer.endDate
+                      ? (offer.endDate | date: 'dd/MM/yyyy')
+                      : 'Non définie'
+                  }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Contrat</span>
+
+                <strong>
+                  {{ getContractTypeLabel(offer.contractType) }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Mode de travail</span>
+
+                <strong>
+                  {{ getWorkModeLabel(offer.workMode) }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Localisation</span>
+
+                <strong>
+                  {{ offer.location || 'Non renseignée' }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Rémunération</span>
+
+                <strong>
+                  {{ getSalaryLabel(offer.salary) }}
+                </strong>
+              </article>
+
+              <article>
+                <span>Expérience demandée</span>
+
+                <strong>
+                  {{
+                    getExperienceLabel(
+                      offer.minimumExperienceYears
+                    )
+                  }}
+                </strong>
+              </article>
+            </div>
+          </section>
+
+          <section class="content-section">
+            <div class="section-heading">
+              <span class="section-icon blue-icon">&lt;/&gt;</span>
+
+              <div>
+                <span class="eyebrow">COMPÉTENCES</span>
+                <h2>Technologies recherchées</h2>
+              </div>
+            </div>
+
+            <div
+              class="empty-technologies"
+              *ngIf="!hasTechnologies"
+            >
+              Aucune technologie particulière n’a été renseignée.
+            </div>
+
+            <div
+              class="technologies-list"
+              *ngIf="hasTechnologies"
+            >
+              <span
+                *ngFor="let technology of offer.technologies"
+              >
+                {{ technology }}
+              </span>
+            </div>
+          </section>
+
+          <section
+            class="content-section"
+            *ngIf="offer.notes"
+          >
+            <div class="section-heading">
+              <span class="section-icon orange-icon">✎</span>
+
+              <div>
+                <span class="eyebrow">INFORMATIONS</span>
+                <h2>Notes complémentaires</h2>
+              </div>
+            </div>
+
+            <p class="description">
+              {{ offer.notes }}
+            </p>
+          </section>
+        </article>
+
+        <aside class="sidebar">
+          <article
+            class="application-card"
+            *ngIf="!offer.applied"
+          >
+            <span class="eyebrow">CANDIDATURE</span>
+
+            <h2>Cette mission vous intéresse ?</h2>
+
+            <p>
+              Envoyez votre candidature à l’entreprise.
+              Vous pouvez ajouter un court message pour
+              présenter votre intérêt.
+            </p>
+
+            <label for="application-message">
+              Message
+              <span>facultatif</span>
+            </label>
+
+            <textarea
+              id="application-message"
+              name="applicationMessage"
+              maxlength="2000"
+              [(ngModel)]="applicationMessage"
+              placeholder="Présentez brièvement votre motivation ou les éléments de votre profil les plus pertinents..."
+            ></textarea>
+
+            <div class="character-count">
+              {{ applicationMessage.length }} / 2000
+            </div>
+
+            <button
+              type="button"
+              [disabled]="!canApply"
+              (click)="apply()"
+            >
+              {{
+                applying
+                  ? 'Envoi en cours...'
+                  : 'Postuler à cette mission'
+              }}
+            </button>
+          </article>
+
+          <article
+            class="application-state"
+            *ngIf="offer.applied"
+          >
+            <div class="state-check">✓</div>
+
+            <span class="eyebrow">CANDIDATURE</span>
+
+            <h2>
+              {{
+                offer.applicationStatus === 'ACCEPTED'
+                  ? 'Candidature acceptée'
+                  : offer.applicationStatus === 'REJECTED'
+                    ? 'Candidature traitée'
+                    : 'Candidature envoyée'
+              }}
+            </h2>
+
+            <p>
+              {{ getApplicationStatusLabel() }}
+            </p>
+          </article>
+
+          <article class="information-card">
+            <span class="eyebrow">OFFRE</span>
+
+            <h2>Informations</h2>
+
+            <div>
+              <span>Entreprise</span>
+              <strong>{{ offer.companyName }}</strong>
+            </div>
+
+            <div>
+              <span>Candidatures reçues</span>
+              <strong>{{ offer.applicationCount }}</strong>
+            </div>
+
+            <div>
+              <span>Publication</span>
+
+              <strong>
+                {{ offer.createdAt | date: 'dd/MM/yyyy' }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Dernière mise à jour</span>
+
+              <strong>
+                {{ offer.updatedAt | date: 'dd/MM/yyyy' }}
+              </strong>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </main>
+  </div>
+</div>

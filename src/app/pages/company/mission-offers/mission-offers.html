@@ -1,0 +1,484 @@
+<div class="page-shell">
+  <div class="page-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">RECRUTEMENT</span>
+
+        <h1>
+          Gérez vos
+          <span>offres de mission.</span>
+        </h1>
+
+        <p>
+          Publiez de nouvelles opportunités, suivez les candidatures
+          reçues et retrouvez l’ensemble de vos offres TalentScope.
+        </p>
+      </div>
+
+      <a
+        routerLink="/company/mission-offers/create"
+        class="primary-action"
+      >
+        <span>＋</span>
+        Publier une mission
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
+        (click)="filterByStatus('ALL')"
+      >
+        <span class="summary-icon purple">▣</span>
+
+        <div>
+          <span>Toutes les offres</span>
+          <strong>{{ offers.length }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'OPEN'"
+        (click)="filterByStatus('OPEN')"
+      >
+        <span class="summary-icon green">●</span>
+
+        <div>
+          <span>Ouvertes</span>
+          <strong>{{ openCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'FILLED'"
+        (click)="filterByStatus('FILLED')"
+      >
+        <span class="summary-icon blue">✓</span>
+
+        <div>
+          <span>Pourvues</span>
+          <strong>{{ filledCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'CLOSED'"
+        (click)="filterByStatus('CLOSED')"
+      >
+        <span class="summary-icon red">×</span>
+
+        <div>
+          <span>Clôturées</span>
+          <strong>{{ closedCount }}</strong>
+        </div>
+      </button>
+    </section>
+
+    <section
+      class="applications-summary"
+      *ngIf="!loading && !errorMessage && offers.length > 0"
+    >
+      <div class="applications-icon">◎</div>
+
+      <div>
+        <span>CANDIDATURES REÇUES</span>
+
+        <strong>
+          {{ totalApplications }}
+          candidature(s) sur l’ensemble de vos offres
+        </strong>
+      </div>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && offers.length > 0"
+    >
+      <div class="filter-field">
+        <label for="offer-search">
+          Rechercher une offre
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="offer-search"
+            type="search"
+            name="offerSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Titre, technologie, localisation..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="offer-status">
+          Statut
+        </label>
+
+        <select
+          id="offer-status"
+          name="offerStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="OPEN">Ouvertes</option>
+          <option value="FILLED">Pourvues</option>
+          <option value="CLOSED">Clôturées</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <div
+      class="feedback-message success-message"
+      *ngIf="actionSuccessMessage"
+    >
+      <span>✓</span>
+      {{ actionSuccessMessage }}
+    </div>
+
+    <div
+      class="feedback-message error-message"
+      *ngIf="actionErrorMessage"
+    >
+      <span>!</span>
+      {{ actionErrorMessage }}
+    </div>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement de vos offres</h2>
+
+      <p>
+        Récupération des opportunités publiées...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger vos offres</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadOffers()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && !errorMessage && offers.length === 0"
+    >
+      <div class="state-icon empty-icon">▣</div>
+
+      <h2>Aucune offre publiée</h2>
+
+      <p>
+        Publiez votre première mission afin qu’elle soit visible
+        par les consultants disponibles sur TalentScope.
+      </p>
+
+      <a routerLink="/company/mission-offers/create">
+        Publier une mission
+      </a>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        offers.length > 0 &&
+        filteredOffers.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">⌕</div>
+
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucune offre ne correspond aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="offers-grid"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredOffers.length > 0
+      "
+    >
+      <article
+        class="offer-card"
+        *ngFor="
+          let offer of filteredOffers;
+          trackBy: trackOffer
+        "
+      >
+        <div class="offer-header">
+          <div>
+            <span class="eyebrow">OFFRE DE MISSION</span>
+
+            <h2>{{ offer.title }}</h2>
+          </div>
+
+          <span
+            class="status-badge"
+            [ngClass]="getStatusClass(offer.status)"
+          >
+            {{ getStatusLabel(offer.status) }}
+          </span>
+        </div>
+
+        <p class="offer-description">
+          {{
+            offer.description ||
+            'Aucune description disponible.'
+          }}
+        </p>
+
+        <div class="conditions-grid">
+          <article>
+            <span>Début</span>
+
+            <strong>
+              {{
+                offer.startDate
+                  ? (offer.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseigné'
+              }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Fin</span>
+
+            <strong>
+              {{
+                offer.endDate
+                  ? (offer.endDate | date: 'dd/MM/yyyy')
+                  : 'Non définie'
+              }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Contrat</span>
+
+            <strong>
+              {{ getContractTypeLabel(offer.contractType) }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Mode</span>
+
+            <strong>
+              {{ getWorkModeLabel(offer.workMode) }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Localisation</span>
+
+            <strong>
+              {{ offer.location || 'Non renseignée' }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Rémunération</span>
+
+            <strong>
+              {{ getSalaryLabel(offer.salary) }}
+            </strong>
+          </article>
+        </div>
+
+        <div
+          class="technologies-list"
+          *ngIf="offer.technologies.length > 0"
+        >
+          <span
+            *ngFor="
+              let technology of offer.technologies.slice(0, 6)
+            "
+          >
+            {{ technology }}
+          </span>
+
+          <span
+            class="more-technologies"
+            *ngIf="offer.technologies.length > 6"
+          >
+            +{{ offer.technologies.length - 6 }}
+          </span>
+        </div>
+
+        <div class="application-block">
+          <div>
+            <span>CANDIDATURES</span>
+            <strong>{{ offer.applicationCount }}</strong>
+          </div>
+
+          <a
+            [routerLink]="[
+              '/company/mission-offers',
+              offer.id,
+              'applications'
+            ]"
+          >
+            Voir les candidatures
+            <span>→</span>
+          </a>
+        </div>
+
+        <div class="offer-information">
+          <div>
+            <span>Publiée le</span>
+
+            <strong>
+              {{ offer.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Mise à jour</span>
+
+            <strong>
+              {{ offer.updatedAt | date: 'dd/MM/yyyy à HH:mm' }}
+            </strong>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="close-button"
+          *ngIf="offer.status === 'OPEN'"
+          [disabled]="isClosing(offer.id)"
+          (click)="openCloseModal(offer)"
+        >
+          {{
+            isClosing(offer.id)
+              ? 'Clôture en cours...'
+              : 'Clôturer l’offre'
+          }}
+        </button>
+
+        <div
+          class="closed-message filled-message"
+          *ngIf="offer.status === 'FILLED'"
+        >
+          <span>✓</span>
+          Un consultant a été sélectionné pour cette mission.
+        </div>
+
+        <div
+          class="closed-message closed-offer-message"
+          *ngIf="offer.status === 'CLOSED'"
+        >
+          <span>×</span>
+          Cette offre a été clôturée.
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div
+    class="modal-backdrop"
+    *ngIf="offerToClose"
+    (click)="cancelCloseModal()"
+  >
+    <section
+      class="confirmation-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="close-offer-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal-icon danger-modal-icon">
+        !
+      </div>
+
+      <span class="modal-eyebrow">
+        CONFIRMATION
+      </span>
+
+      <h2 id="close-offer-title">
+        Clôturer cette offre ?
+      </h2>
+
+      <p>
+        L’offre
+        <strong>« {{ offerToClose.title }} »</strong>
+        ne sera plus visible dans le catalogue des consultants.
+        Les candidatures encore en attente seront automatiquement
+        clôturées.
+      </p>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="modal-cancel-button"
+          [disabled]="closingOfferId !== null"
+          (click)="cancelCloseModal()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          class="modal-confirm-danger-button"
+          [disabled]="closingOfferId !== null"
+          (click)="confirmCloseOffer()"
+        >
+          {{
+            closingOfferId
+              ? 'Clôture en cours...'
+              : 'Clôturer l’offre'
+          }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

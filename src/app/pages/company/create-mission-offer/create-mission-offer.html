@@ -1,0 +1,347 @@
+<div class="page-shell">
+  <div class="page-container">
+    <a
+      routerLink="/company/mission-offers"
+      class="back-link"
+    >
+      <span>←</span>
+      Retour aux offres
+    </a>
+
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">NOUVELLE OPPORTUNITÉ</span>
+
+        <h1>
+          Publiez une
+          <span>mission.</span>
+        </h1>
+
+        <p>
+          Décrivez précisément votre besoin afin de permettre
+          aux consultants TalentScope de trouver et comprendre
+          rapidement votre opportunité.
+        </p>
+      </div>
+
+      <div class="hero-badge">
+        <span>＋</span>
+
+        <div>
+          <strong>Nouvelle offre</strong>
+          <small>Visible par les consultants</small>
+        </div>
+      </div>
+    </section>
+
+    <div
+      class="feedback error-feedback"
+      *ngIf="errorMessage"
+    >
+      <span>!</span>
+      {{ errorMessage }}
+    </div>
+
+    <form
+      class="offer-form"
+      #offerForm="ngForm"
+      (ngSubmit)="submit()"
+    >
+      <section class="form-card">
+        <div class="section-heading">
+          <span class="section-icon purple-icon">▣</span>
+
+          <div>
+            <span class="eyebrow">PRÉSENTATION</span>
+            <h2>Informations principales</h2>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label for="offer-title">
+              Titre de la mission
+              <span>*</span>
+            </label>
+
+            <input
+              id="offer-title"
+              type="text"
+              name="title"
+              minlength="3"
+              maxlength="150"
+              required
+              [(ngModel)]="title"
+              placeholder="Ex. Développeur Java Spring Boot"
+            >
+
+            <small>
+              {{ title.length }} / 150
+            </small>
+          </div>
+
+          <div class="form-field full-width">
+            <label for="offer-description">
+              Description
+              <span>*</span>
+            </label>
+
+            <textarea
+              id="offer-description"
+              name="description"
+              minlength="10"
+              maxlength="5000"
+              required
+              [(ngModel)]="description"
+              placeholder="Présentez le contexte, les objectifs et les principales responsabilités de la mission..."
+            ></textarea>
+
+            <small>
+              {{ description.length }} / 5000
+            </small>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <span class="section-icon green-icon">◎</span>
+
+          <div>
+            <span class="eyebrow">CONDITIONS</span>
+            <h2>Organisation de la mission</h2>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="start-date">
+              Date de début
+              <span>*</span>
+            </label>
+
+            <input
+              id="start-date"
+              type="date"
+              name="startDate"
+              required
+              [(ngModel)]="startDate"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="end-date">
+              Date de fin
+            </label>
+
+            <input
+              id="end-date"
+              type="date"
+              name="endDate"
+              [(ngModel)]="endDate"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="contract-type">
+              Type de contrat
+              <span>*</span>
+            </label>
+
+            <select
+              id="contract-type"
+              name="contractType"
+              required
+              [(ngModel)]="contractType"
+            >
+              <option value="">
+                Sélectionner
+              </option>
+
+              <option value="CDI">CDI</option>
+              <option value="CDD">CDD</option>
+              <option value="FREELANCE">Freelance</option>
+              <option value="INTERNSHIP">Stage</option>
+              <option value="OTHER">Autre</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="work-mode">
+              Mode de travail
+              <span>*</span>
+            </label>
+
+            <select
+              id="work-mode"
+              name="workMode"
+              required
+              [(ngModel)]="workMode"
+            >
+              <option value="">
+                Sélectionner
+              </option>
+
+              <option value="ONSITE">Sur site</option>
+              <option value="REMOTE">À distance</option>
+              <option value="HYBRID">Hybride</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label for="location">
+              Localisation
+              <span>*</span>
+            </label>
+
+            <input
+              id="location"
+              type="text"
+              name="location"
+              maxlength="150"
+              required
+              [(ngModel)]="location"
+              placeholder="Ex. Tunis"
+            >
+          </div>
+
+          <div class="form-field">
+            <label for="salary">
+              Rémunération
+            </label>
+
+            <div class="number-wrapper">
+              <input
+                id="salary"
+                type="number"
+                name="salary"
+                min="0"
+                [(ngModel)]="salary"
+                placeholder="Ex. 3500"
+              >
+
+              <span>DT</span>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="experience">
+              Expérience minimale
+            </label>
+
+            <div class="number-wrapper">
+              <input
+                id="experience"
+                type="number"
+                name="minimumExperienceYears"
+                min="0"
+                [(ngModel)]="minimumExperienceYears"
+                placeholder="Ex. 3"
+              >
+
+              <span>an(s)</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="validation-warning"
+          *ngIf="startDate && endDate && !areDatesValid"
+        >
+          <span>!</span>
+          La date de fin doit être postérieure ou égale
+          à la date de début.
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <span class="section-icon blue-icon">&lt;/&gt;</span>
+
+          <div>
+            <span class="eyebrow">COMPÉTENCES</span>
+            <h2>Technologies recherchées</h2>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="technologies">
+            Technologies
+          </label>
+
+          <input
+            id="technologies"
+            type="text"
+            name="technologies"
+            [(ngModel)]="technologiesInput"
+            placeholder="Java, Spring Boot, Angular, MongoDB, Docker..."
+          >
+
+          <small>
+            Séparez les technologies par des virgules.
+          </small>
+        </div>
+
+        <div
+          class="technologies-preview"
+          *ngIf="technologies.length > 0"
+        >
+          <span
+            *ngFor="let technology of technologies"
+          >
+            {{ technology }}
+          </span>
+        </div>
+      </section>
+
+      <section class="form-card">
+        <div class="section-heading">
+          <span class="section-icon orange-icon">✎</span>
+
+          <div>
+            <span class="eyebrow">COMPLÉMENT</span>
+            <h2>Informations supplémentaires</h2>
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label for="notes">
+            Notes complémentaires
+          </label>
+
+          <textarea
+            id="notes"
+            class="notes-textarea"
+            name="notes"
+            maxlength="2000"
+            [(ngModel)]="notes"
+            placeholder="Certification souhaitée, disponibilité particulière, contraintes du projet..."
+          ></textarea>
+
+          <small>
+            {{ notes.length }} / 2000
+          </small>
+        </div>
+      </section>
+
+      <section class="form-actions">
+        <a routerLink="/company/mission-offers">
+          Annuler
+        </a>
+
+        <button
+          type="submit"
+          [disabled]="submitting || !formValid"
+        >
+          <span>＋</span>
+
+          {{
+            submitting
+              ? 'Publication en cours...'
+              : 'Publier la mission'
+          }}
+        </button>
+      </section>
+    </form>
+  </div>
+</div>

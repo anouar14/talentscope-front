@@ -1,0 +1,402 @@
+<div class="search-page">
+  <div class="search-container">
+    <section class="page-header">
+      <div>
+        <span class="eyebrow">OPPORTUNITÉS</span>
+
+        <h1>
+          Trouvez votre prochaine
+          <span>mission.</span>
+        </h1>
+
+        <p>
+          Explorez les offres publiées par les entreprises,
+          filtrez les opportunités selon vos préférences et
+          postulez directement aux missions qui correspondent
+          à votre profil.
+        </p>
+      </div>
+
+      <div class="header-badge">
+        <span>⌕</span>
+
+        <div>
+          <strong>{{ offers.length }} offre(s)</strong>
+          <small>Disponibles actuellement</small>
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <article class="summary-card">
+        <span class="summary-icon purple">▣</span>
+
+        <div>
+          <span>Offres disponibles</span>
+          <strong>{{ offers.length }}</strong>
+        </div>
+      </article>
+
+      <a
+        routerLink="/consultant/mission-applications"
+        class="summary-card summary-link"
+      >
+        <span class="summary-icon green">✓</span>
+
+        <div>
+          <span>Mes candidatures</span>
+          <strong>{{ appliedCount }}</strong>
+        </div>
+
+        <span class="summary-arrow">→</span>
+      </a>
+
+      <article class="summary-card">
+        <span class="summary-icon blue">⌕</span>
+
+        <div>
+          <span>Résultats affichés</span>
+          <strong>{{ filteredOffers.length }}</strong>
+        </div>
+      </article>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="!loading && !errorMessage && offers.length > 0"
+    >
+      <div class="search-field">
+        <label for="mission-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="mission-search"
+            type="search"
+            name="missionSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Mission, entreprise, technologie, localisation..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="contract-filter">
+          Contrat
+        </label>
+
+        <select
+          id="contract-filter"
+          name="contractFilter"
+          [(ngModel)]="selectedContract"
+        >
+          <option value="ALL">Tous</option>
+          <option value="CDI">CDI</option>
+          <option value="CDD">CDD</option>
+          <option value="FREELANCE">Freelance</option>
+          <option value="INTERNSHIP">Stage</option>
+          <option value="OTHER">Autre</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="work-mode-filter">
+          Mode
+        </label>
+
+        <select
+          id="work-mode-filter"
+          name="workModeFilter"
+          [(ngModel)]="selectedWorkMode"
+        >
+          <option value="ALL">Tous</option>
+          <option value="ONSITE">Sur site</option>
+          <option value="REMOTE">À distance</option>
+          <option value="HYBRID">Hybride</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="location-filter">
+          Localisation
+        </label>
+
+        <select
+          id="location-filter"
+          name="locationFilter"
+          [(ngModel)]="selectedLocation"
+        >
+          <option value="ALL">Toutes</option>
+
+          <option
+            *ngFor="let location of locations"
+            [value]="location"
+          >
+            {{ location }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="experience-filter">
+          Mon expérience
+        </label>
+
+        <select
+          id="experience-filter"
+          name="experienceFilter"
+          [(ngModel)]="selectedExperience"
+        >
+          <option value="ALL">Toutes</option>
+          <option value="0">Débutant</option>
+          <option value="1">1 an</option>
+          <option value="2">2 ans</option>
+          <option value="3">3 ans</option>
+          <option value="5">5 ans et +</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement des opportunités</h2>
+
+      <p>
+        Recherche des missions actuellement disponibles...
+      </p>
+    </section>
+
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger les offres</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        (click)="loadOffers()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && !errorMessage && offers.length === 0"
+    >
+      <div class="state-icon empty-icon">▣</div>
+
+      <h2>Aucune mission disponible</h2>
+
+      <p>
+        Aucune entreprise n’a publié de nouvelle opportunité
+        pour le moment.
+      </p>
+
+      <a
+        routerLink="/consultant/mission-applications"
+        class="state-link"
+      >
+        Voir mes candidatures
+      </a>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        offers.length > 0 &&
+        filteredOffers.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">⌕</div>
+
+      <h2>Aucun résultat</h2>
+
+      <p>
+        Aucune mission ne correspond actuellement
+        aux critères sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="offers-grid"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredOffers.length > 0
+      "
+    >
+      <article
+        class="offer-card"
+        *ngFor="
+          let offer of filteredOffers;
+          trackBy: trackOffer
+        "
+      >
+        <div class="offer-header">
+          <div class="company-identity">
+            <div class="company-avatar">
+              {{
+                offer.companyName
+                  ? offer.companyName.charAt(0)
+                  : 'E'
+              }}
+            </div>
+
+            <div>
+              <span>ENTREPRISE</span>
+              <strong>{{ offer.companyName }}</strong>
+            </div>
+          </div>
+
+          <span
+            class="application-badge"
+            *ngIf="offer.applied"
+          >
+            ✓ Déjà candidat
+          </span>
+        </div>
+
+        <div class="offer-title">
+          <span class="eyebrow">MISSION</span>
+
+          <h2>{{ offer.title }}</h2>
+        </div>
+
+        <p class="offer-description">
+          {{
+            offer.description ||
+            'Aucune description disponible.'
+          }}
+        </p>
+
+        <div class="conditions-grid">
+          <article>
+            <span>Contrat</span>
+
+            <strong>
+              {{ getContractTypeLabel(offer.contractType) }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Mode</span>
+
+            <strong>
+              {{ getWorkModeLabel(offer.workMode) }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Localisation</span>
+
+            <strong>
+              {{ offer.location || 'Non renseignée' }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Expérience</span>
+
+            <strong>
+              {{
+                getExperienceLabel(
+                  offer.minimumExperienceYears
+                )
+              }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Début</span>
+
+            <strong>
+              {{
+                offer.startDate
+                  ? (offer.startDate | date: 'dd/MM/yyyy')
+                  : 'Non renseigné'
+              }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Rémunération</span>
+
+            <strong>
+              {{ getSalaryLabel(offer.salary) }}
+            </strong>
+          </article>
+        </div>
+
+        <div
+          class="technologies-list"
+          *ngIf="offer.technologies.length > 0"
+        >
+          <span
+            *ngFor="
+              let technology of offer.technologies.slice(0, 6)
+            "
+          >
+            {{ technology }}
+          </span>
+
+          <span
+            *ngIf="offer.technologies.length > 6"
+            class="more-technologies"
+          >
+            +{{ offer.technologies.length - 6 }}
+          </span>
+        </div>
+
+        <div class="offer-footer">
+          <span>
+            Publiée le
+            {{ offer.createdAt | date: 'dd/MM/yyyy' }}
+          </span>
+
+          <a
+            [routerLink]="[
+              '/consultant/mission-offers',
+              offer.id
+            ]"
+          >
+            {{ getApplicationLabel(offer) }}
+            <span>→</span>
+          </a>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>

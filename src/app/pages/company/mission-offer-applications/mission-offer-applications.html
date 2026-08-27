@@ -1,0 +1,455 @@
+<div class="page-shell">
+  <div class="page-container">
+    <a
+      routerLink="/company/mission-offers"
+      class="back-link"
+    >
+      <span>←</span>
+      Retour aux offres
+    </a>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement des candidatures</h2>
+
+      <p>
+        Récupération des consultants ayant postulé...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>Impossible de charger les candidatures</h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <button
+        type="button"
+        *ngIf="offer"
+        (click)="loadPage(offer.id)"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <main
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        offer
+      "
+    >
+      <section class="page-hero">
+        <div>
+          <span class="eyebrow">
+            CANDIDATURES
+          </span>
+
+          <h1>
+            {{ offer.title }}
+          </h1>
+
+          <p>
+            Consultez les profils ayant postulé à cette
+            mission et sélectionnez le consultant qui
+            correspond le mieux à votre besoin.
+          </p>
+        </div>
+
+        <div class="offer-status">
+          <span>STATUT DE L’OFFRE</span>
+
+          <strong>
+            {{ getOfferStatusLabel() }}
+          </strong>
+        </div>
+      </section>
+
+      <section class="offer-summary">
+        <article>
+          <span>Entreprise</span>
+          <strong>{{ offer.companyName }}</strong>
+        </article>
+
+        <article>
+          <span>Localisation</span>
+          <strong>
+            {{ offer.location || 'Non renseignée' }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Début</span>
+
+          <strong>
+            {{
+              offer.startDate
+                ? (offer.startDate | date: 'dd/MM/yyyy')
+                : 'Non renseigné'
+            }}
+          </strong>
+        </article>
+
+        <article>
+          <span>Candidatures</span>
+          <strong>{{ applications.length }}</strong>
+        </article>
+      </section>
+
+      <section class="summary-grid">
+        <article class="summary-card">
+          <span class="summary-icon purple">▣</span>
+
+          <div>
+            <span>Total</span>
+            <strong>{{ applications.length }}</strong>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-icon orange">◷</span>
+
+          <div>
+            <span>En attente</span>
+            <strong>{{ pendingCount }}</strong>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-icon green">✓</span>
+
+          <div>
+            <span>Acceptées</span>
+            <strong>{{ acceptedCount }}</strong>
+          </div>
+        </article>
+
+        <article class="summary-card">
+          <span class="summary-icon red">×</span>
+
+          <div>
+            <span>Refusées</span>
+            <strong>{{ rejectedCount }}</strong>
+          </div>
+        </article>
+      </section>
+
+      <div
+        class="feedback-message success-message"
+        *ngIf="actionSuccessMessage"
+      >
+        <span>✓</span>
+        {{ actionSuccessMessage }}
+      </div>
+
+      <div
+        class="feedback-message error-message"
+        *ngIf="actionErrorMessage"
+      >
+        <span>!</span>
+        {{ actionErrorMessage }}
+      </div>
+
+      <section
+        class="filled-notice"
+        *ngIf="offer.status === 'FILLED'"
+      >
+        <span>✓</span>
+
+        <div>
+          <strong>Mission pourvue</strong>
+
+          <p>
+            Un consultant a déjà été sélectionné pour
+            cette offre. Une mission active a été créée.
+          </p>
+        </div>
+
+        <a routerLink="/company/missions">
+          Voir mes missions
+          <span>→</span>
+        </a>
+      </section>
+
+      <section
+        class="closed-notice"
+        *ngIf="offer.status === 'CLOSED'"
+      >
+        <span>×</span>
+
+        <div>
+          <strong>Offre clôturée</strong>
+
+          <p>
+            Cette offre n’accepte plus de nouvelles
+            candidatures.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="state-card"
+        *ngIf="!hasApplications"
+      >
+        <div class="state-icon empty-icon">◎</div>
+
+        <h2>Aucune candidature reçue</h2>
+
+        <p>
+          Aucun consultant n’a encore postulé à cette
+          mission.
+        </p>
+      </section>
+
+      <section
+        class="applications-grid"
+        *ngIf="hasApplications"
+      >
+        <article
+          class="application-card"
+          *ngFor="
+            let application of applications;
+            trackBy: trackApplication
+          "
+        >
+          <div class="application-header">
+            <div class="consultant-identity">
+              <div class="avatar">
+                {{
+                  application.consultantName
+                    ? application.consultantName.charAt(0)
+                    : 'C'
+                }}
+              </div>
+
+              <div>
+                <span>CONSULTANT</span>
+
+                <h2>
+                  {{ application.consultantName }}
+                </h2>
+
+                <p>
+                  {{
+                    application.consultantTitle ||
+                    'Titre non renseigné'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <span
+              class="status-badge"
+              [ngClass]="
+                getStatusClass(
+                  application.status
+                )
+              "
+            >
+              {{
+                getStatusLabel(
+                  application.status
+                )
+              }}
+            </span>
+          </div>
+
+          <div class="consultant-meta">
+            <article>
+              <span>Expérience</span>
+
+              <strong>
+                {{ application.consultantExperienceYears }}
+                an(s)
+              </strong>
+            </article>
+
+            <article>
+              <span>Localisation</span>
+
+              <strong>
+                {{
+                  application.consultantLocation ||
+                  'Non renseignée'
+                }}
+              </strong>
+            </article>
+
+            <article>
+              <span>Candidature reçue</span>
+
+              <strong>
+                {{
+                  application.appliedAt
+                    | date: 'dd/MM/yyyy à HH:mm'
+                }}
+              </strong>
+            </article>
+          </div>
+
+          <section class="message-block">
+            <span>MESSAGE DU CONSULTANT</span>
+
+            <p>
+              {{
+                application.message ||
+                'Aucun message complémentaire n’a été ajouté.'
+              }}
+            </p>
+          </section>
+
+          <div
+            class="response-information"
+            *ngIf="application.respondedAt"
+          >
+            <span>Traitée le</span>
+
+            <strong>
+              {{
+                application.respondedAt
+                  | date: 'dd/MM/yyyy à HH:mm'
+              }}
+            </strong>
+          </div>
+
+          <button
+            type="button"
+            class="profile-button"
+            (click)="
+              viewConsultant(
+                application.consultantId
+              )
+            "
+          >
+            Consulter le profil
+            <span>→</span>
+          </button>
+
+          <div
+            class="application-actions"
+            *ngIf="
+              application.status === 'PENDING' &&
+              offer.status === 'OPEN'
+            "
+          >
+            <button
+              type="button"
+              class="accept-button"
+              [disabled]="isProcessing(application.id)"
+              (click)="openActionModal(application, 'ACCEPT')"
+            >
+              Accepter
+            </button>
+
+            <button
+              type="button"
+              class="reject-button"
+              [disabled]="isProcessing(application.id)"
+              (click)="openActionModal(application, 'REJECT')"
+            >
+              Refuser
+            </button>
+          </div>
+
+          <div
+            class="application-result accepted-result"
+            *ngIf="application.status === 'ACCEPTED'"
+          >
+            <span>✓</span>
+            Cette candidature a été acceptée.
+          </div>
+
+          <div
+            class="application-result rejected-result"
+            *ngIf="application.status === 'REJECTED'"
+          >
+            <span>×</span>
+            Cette candidature n’a pas été retenue.
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div
+    class="modal-backdrop"
+    *ngIf="selectedApplication && selectedAction"
+    (click)="cancelActionModal()"
+  >
+    <section
+      class="confirmation-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="application-confirmation-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="modal-icon"
+        [class.accept-modal-icon]="selectedAction === 'ACCEPT'"
+        [class.reject-modal-icon]="selectedAction === 'REJECT'"
+      >
+        {{ selectedAction === 'ACCEPT' ? '✓' : '!' }}
+      </div>
+
+      <span class="modal-eyebrow">
+        CONFIRMATION
+      </span>
+
+      <h2 id="application-confirmation-title">
+        {{ confirmationTitle }}
+      </h2>
+
+      <p>
+        {{ confirmationMessage }}
+      </p>
+
+      <div
+        class="accept-information"
+        *ngIf="selectedAction === 'ACCEPT'"
+      >
+        <span>✓</span>
+
+        <p>
+          L’offre passera au statut
+          <strong>Pourvue</strong> et les autres candidatures
+          en attente seront clôturées.
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="modal-cancel-button"
+          [disabled]="processingApplicationId !== null"
+          (click)="cancelActionModal()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          [class.modal-confirm-button]="selectedAction === 'ACCEPT'"
+          [class.modal-confirm-danger-button]="selectedAction === 'REJECT'"
+          [disabled]="processingApplicationId !== null"
+          (click)="confirmApplicationAction()"
+        >
+          {{
+            processingApplicationId
+              ? 'Traitement...'
+              : selectedAction === 'ACCEPT'
+                ? 'Accepter la candidature'
+                : 'Refuser la candidature'
+          }}
+        </button>
+      </div>
+    </section>
+  </div>
+</div>

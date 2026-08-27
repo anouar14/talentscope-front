@@ -1,0 +1,352 @@
+<div class="page-shell">
+  <div class="page-container">
+    <section class="page-hero">
+      <div>
+        <span class="eyebrow">
+          CANDIDATURES
+        </span>
+
+        <h1>
+          Suivez vos
+          <span>candidatures.</span>
+        </h1>
+
+        <p>
+          Retrouvez les missions auxquelles vous avez postulé
+          et suivez l’évolution de chaque candidature.
+        </p>
+      </div>
+
+      <a
+        routerLink="/consultant/search-missions"
+        class="primary-action"
+      >
+        <span>⌕</span>
+        Trouver une mission
+      </a>
+    </section>
+
+    <section
+      class="summary-grid"
+      *ngIf="!loading && !errorMessage"
+    >
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ALL'"
+        (click)="filterByStatus('ALL')"
+      >
+        <span class="summary-icon purple">▣</span>
+
+        <div>
+          <span>Toutes</span>
+          <strong>{{ applications.length }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'PENDING'"
+        (click)="filterByStatus('PENDING')"
+      >
+        <span class="summary-icon orange">◷</span>
+
+        <div>
+          <span>En attente</span>
+          <strong>{{ pendingCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'ACCEPTED'"
+        (click)="filterByStatus('ACCEPTED')"
+      >
+        <span class="summary-icon green">✓</span>
+
+        <div>
+          <span>Acceptées</span>
+          <strong>{{ acceptedCount }}</strong>
+        </div>
+      </button>
+
+      <button
+        type="button"
+        class="summary-card"
+        [class.active]="selectedStatus === 'REJECTED'"
+        (click)="filterByStatus('REJECTED')"
+      >
+        <span class="summary-icon red">×</span>
+
+        <div>
+          <span>Non retenues</span>
+          <strong>{{ rejectedCount }}</strong>
+        </div>
+      </button>
+    </section>
+
+    <section
+      class="filters-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        applications.length > 0
+      "
+    >
+      <div class="filter-field">
+        <label for="application-search">
+          Rechercher
+        </label>
+
+        <div class="input-wrapper">
+          <span>⌕</span>
+
+          <input
+            id="application-search"
+            type="search"
+            name="applicationSearch"
+            [(ngModel)]="searchTerm"
+            placeholder="Mission, entreprise..."
+          >
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label for="application-status">
+          Statut
+        </label>
+
+        <select
+          id="application-status"
+          name="applicationStatus"
+          [(ngModel)]="selectedStatus"
+        >
+          <option value="ALL">
+            Tous les statuts
+          </option>
+
+          <option value="PENDING">
+            En attente
+          </option>
+
+          <option value="ACCEPTED">
+            Acceptées
+          </option>
+
+          <option value="REJECTED">
+            Non retenues
+          </option>
+
+          <option value="WITHDRAWN">
+            Retirées
+          </option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="reset-button"
+        [disabled]="!hasActiveFilters"
+        (click)="resetFilters()"
+      >
+        Réinitialiser
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+
+      <h2>Chargement de vos candidatures</h2>
+
+      <p>
+        Récupération de votre historique...
+      </p>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">
+        !
+      </div>
+
+      <h2>
+        Impossible de charger vos candidatures
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
+
+      <button
+        type="button"
+        (click)="loadApplications()"
+      >
+        Réessayer
+      </button>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        applications.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">
+        ◎
+      </div>
+
+      <h2>
+        Aucune candidature
+      </h2>
+
+      <p>
+        Vous n’avez encore postulé à aucune mission.
+        Explorez les opportunités actuellement disponibles.
+      </p>
+
+      <a routerLink="/consultant/search-missions">
+        Trouver une mission
+      </a>
+    </section>
+
+    <section
+      class="state-card"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        applications.length > 0 &&
+        filteredApplications.length === 0
+      "
+    >
+      <div class="state-icon empty-icon">
+        ⌕
+      </div>
+
+      <h2>
+        Aucun résultat
+      </h2>
+
+      <p>
+        Aucune candidature ne correspond aux critères
+        sélectionnés.
+      </p>
+
+      <button
+        type="button"
+        (click)="resetFilters()"
+      >
+        Réinitialiser les filtres
+      </button>
+    </section>
+
+    <section
+      class="applications-list"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredApplications.length > 0
+      "
+    >
+      <article
+        class="application-card"
+        *ngFor="
+          let application of filteredApplications;
+          trackBy: trackApplication
+        "
+      >
+        <div class="application-main">
+          <div class="company-avatar">
+            {{
+              application.companyName
+                ? application.companyName.charAt(0)
+                : 'E'
+            }}
+          </div>
+
+          <div class="application-content">
+            <div class="application-heading">
+              <div>
+                <span class="eyebrow">
+                  {{ application.companyName }}
+                </span>
+
+                <h2>
+                  {{ application.missionTitle }}
+                </h2>
+              </div>
+
+              <span
+                class="status-badge"
+                [ngClass]="
+                  getStatusClass(application.status)
+                "
+              >
+                {{
+                  getStatusLabel(application.status)
+                }}
+              </span>
+            </div>
+
+            <p class="status-description">
+              {{ getStatusDescription(application) }}
+            </p>
+
+            <div
+              class="message-block"
+              *ngIf="application.message"
+            >
+              <span>VOTRE MESSAGE</span>
+
+              <p>
+                {{ application.message }}
+              </p>
+            </div>
+
+            <div class="application-dates">
+              <div>
+                <span>Candidature envoyée</span>
+
+                <strong>
+                  {{
+                    application.appliedAt
+                      | date: 'dd/MM/yyyy à HH:mm'
+                  }}
+                </strong>
+              </div>
+
+              <div *ngIf="application.respondedAt">
+                <span>Réponse reçue</span>
+
+                <strong>
+                  {{
+                    application.respondedAt
+                      | date: 'dd/MM/yyyy à HH:mm'
+                  }}
+                </strong>
+              </div>
+            </div>
+
+            <div
+              class="application-actions"
+              *ngIf="application.status === 'ACCEPTED'"
+            >
+              <a routerLink="/consultant/missions">
+                Voir ma mission
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
