@@ -477,12 +477,20 @@ textarea {
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  overflow: hidden;
   border-radius: 15px;
   color: #5141d2;
   background: #eae7ff;
   font-size: 17px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .small-avatar {

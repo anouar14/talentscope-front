@@ -24,6 +24,7 @@ import { CreateMissionOffer } from './pages/company/create-mission-offer/create-
 import { CompanyDashboard } from './pages/company/dashboard/dashboard';
 import { CompanyInvitations } from './pages/company/invitations/invitations';
 import { MissionOfferApplications } from './pages/company/mission-offer-applications/mission-offer-applications';
+import { MissionOfferMatching } from './pages/company/mission-offer-matching/mission-offer-matching';
 import { CompanyMissionOffers } from './pages/company/mission-offers/mission-offers';
 import { CompanyMissions } from './pages/company/missions/missions';
 import { CompanyProfile } from './pages/company/profile/profile';
@@ -158,6 +159,11 @@ export const routes: Routes = [
   {
     path: 'company/mission-offers/:id/applications',
     component: MissionOfferApplications,
+    canActivate: [companyGuard]
+  },
+  {
+    path: 'company/mission-offers/:id/matching',
+    component: MissionOfferMatching,
     canActivate: [companyGuard]
   },
   {

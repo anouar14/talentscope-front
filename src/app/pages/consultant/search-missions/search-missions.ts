@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 
 import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { MissionOffer } from '../../../core/models/mission-offer';
+import { CompanyService } from '../../../core/services/company';
 import { MissionOfferService } from '../../../core/services/mission-offer';
 
 type ContractFilter = 'ALL' | ContractType;
@@ -18,8 +19,9 @@ type WorkModeFilter = 'ALL' | WorkMode;
   templateUrl: './search-missions.html',
   styleUrl: './search-missions.css'
 })
-export class SearchMissions implements OnInit {
+export class SearchMissions implements OnInit, OnDestroy {
   offers: MissionOffer[] = [];
+  companyImageUrls: Record<string, string> = {};
 
   loading = false;
   errorMessage = '';
@@ -31,11 +33,16 @@ export class SearchMissions implements OnInit {
   selectedExperience = 'ALL';
 
   constructor(
-    private readonly missionOfferService: MissionOfferService
+    private readonly missionOfferService: MissionOfferService,
+    private readonly companyService: CompanyService
   ) {}
 
   ngOnInit(): void {
     this.loadOffers();
+  }
+
+  ngOnDestroy(): void {
+    this.clearCompanyImages();
   }
 
   get filteredOffers(): MissionOffer[] {
@@ -119,6 +126,8 @@ export class SearchMissions implements OnInit {
     this.loading = true;
     this.errorMessage = '';
 
+    this.clearCompanyImages();
+
     this.missionOfferService
       .getOpenOffers()
       .subscribe({
@@ -129,6 +138,10 @@ export class SearchMissions implements OnInit {
               technologies: offer.technologies ?? []
             })
           );
+
+          this.offers.forEach(offer => {
+            this.loadCompanyImage(offer.companyId);
+          });
 
           this.loading = false;
         },
@@ -164,6 +177,12 @@ export class SearchMissions implements OnInit {
     this.selectedWorkMode = 'ALL';
     this.selectedLocation = 'ALL';
     this.selectedExperience = 'ALL';
+  }
+
+  getCompanyImageUrl(
+    companyId: string
+  ): string | null {
+    return this.companyImageUrls[companyId] ?? null;
   }
 
   getContractTypeLabel(
@@ -249,5 +268,58 @@ export class SearchMissions implements OnInit {
     offer: MissionOffer
   ): string {
     return offer.id;
+  }
+
+  private loadCompanyImage(
+    companyId: string
+  ): void {
+    if (
+      !companyId ||
+      this.companyImageUrls[companyId]
+    ) {
+      return;
+    }
+
+    this.companyService
+      .getProfileImage(companyId)
+      .subscribe({
+        next: blob => {
+          this.companyImageUrls = {
+            ...this.companyImageUrls,
+            [companyId]: URL.createObjectURL(blob)
+          };
+        },
+        error: () => {
+          this.removeCompanyImageUrl(companyId);
+        }
+      });
+  }
+
+  private removeCompanyImageUrl(
+    companyId: string
+  ): void {
+    const currentUrl =
+      this.companyImageUrls[companyId];
+
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+    }
+
+    const {
+      [companyId]: removed,
+      ...remainingUrls
+    } = this.companyImageUrls;
+
+    this.companyImageUrls = remainingUrls;
+  }
+
+  private clearCompanyImages(): void {
+    Object.values(
+      this.companyImageUrls
+    ).forEach(url => {
+      URL.revokeObjectURL(url);
+    });
+
+    this.companyImageUrls = {};
   }
 }

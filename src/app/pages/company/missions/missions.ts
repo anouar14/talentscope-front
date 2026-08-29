@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
+import { ConsultantService } from '../../../core/services/consultant';
 import { MessagingService } from '../../../core/services/messaging';
 import { MissionService } from '../../../core/services/mission';
 
@@ -17,8 +18,9 @@ type MissionStatusFilter = 'ALL' | MissionStatus;
   templateUrl: './missions.html',
   styleUrl: './missions.css'
 })
-export class CompanyMissions implements OnInit {
+export class CompanyMissions implements OnInit, OnDestroy {
   missions: Mission[] = [];
+  consultantImageUrls: Record<string, string> = {};
 
   loading = false;
   errorMessage = '';
@@ -32,14 +34,21 @@ export class CompanyMissions implements OnInit {
 
   messagingParticipantId: string | null = null;
 
+  private readonly loadingConsultantImages = new Set<string>();
+
   constructor(
     private readonly missionService: MissionService,
     private readonly messagingService: MessagingService,
+    private readonly consultantService: ConsultantService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadMissions();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeAllConsultantImageUrls();
   }
 
   get filteredMissions(): Mission[] {
@@ -105,6 +114,8 @@ export class CompanyMissions implements OnInit {
           })
         );
 
+        this.loadConsultantImages();
+
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
@@ -141,9 +152,7 @@ export class CompanyMissions implements OnInit {
       return;
     }
 
-    this.messagingParticipantId =
-      mission.consultantId;
-
+    this.messagingParticipantId = mission.consultantId;
     this.actionErrorMessage = '';
 
     this.messagingService
@@ -179,6 +188,12 @@ export class CompanyMissions implements OnInit {
     consultantId: string
   ): boolean {
     return this.messagingParticipantId === consultantId;
+  }
+
+  getConsultantImageUrl(
+    consultantId: string
+  ): string | null {
+    return this.consultantImageUrls[consultantId] ?? null;
   }
 
   filterByStatus(status: MissionStatusFilter): void {
@@ -307,6 +322,73 @@ export class CompanyMissions implements OnInit {
     mission: Mission
   ): string {
     return mission.id;
+  }
+
+  private loadConsultantImages(): void {
+    const consultantIds = [
+      ...new Set(
+        this.missions
+          .map(mission => mission.consultantId)
+          .filter(
+            (consultantId): consultantId is string =>
+              Boolean(consultantId)
+          )
+      )
+    ];
+
+    consultantIds.forEach(consultantId => {
+      this.loadConsultantImage(consultantId);
+    });
+  }
+
+  private loadConsultantImage(
+    consultantId: string
+  ): void {
+    if (
+      !consultantId ||
+      this.consultantImageUrls[consultantId] ||
+      this.loadingConsultantImages.has(consultantId)
+    ) {
+      return;
+    }
+
+    this.loadingConsultantImages.add(consultantId);
+
+    this.consultantService
+      .getProfileImage(consultantId)
+      .subscribe({
+        next: blob => {
+          this.loadingConsultantImages.delete(consultantId);
+
+          if (!blob || blob.size === 0) {
+            return;
+          }
+
+          const existingUrl =
+            this.consultantImageUrls[consultantId];
+
+          if (existingUrl) {
+            URL.revokeObjectURL(existingUrl);
+          }
+
+          this.consultantImageUrls = {
+            ...this.consultantImageUrls,
+            [consultantId]: URL.createObjectURL(blob)
+          };
+        },
+        error: () => {
+          this.loadingConsultantImages.delete(consultantId);
+        }
+      });
+  }
+
+  private revokeAllConsultantImageUrls(): void {
+    Object.values(this.consultantImageUrls).forEach(
+      imageUrl => URL.revokeObjectURL(imageUrl)
+    );
+
+    this.consultantImageUrls = {};
+    this.loadingConsultantImages.clear();
   }
 
   private countMissionsByStatus(

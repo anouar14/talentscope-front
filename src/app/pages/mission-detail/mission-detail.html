@@ -279,7 +279,15 @@
 
             <div class="profile-content">
               <div class="avatar company-avatar">
-                {{ companyInitial }}
+                <img
+                  *ngIf="companyImageObjectUrl; else companyInitialTemplate"
+                  [src]="companyImageObjectUrl"
+                  [alt]="'Photo de ' + mission.companyName"
+                >
+
+                <ng-template #companyInitialTemplate>
+                  {{ companyInitial }}
+                </ng-template>
               </div>
 
               <div>
@@ -294,7 +302,18 @@
 
             <div class="profile-content">
               <div class="avatar consultant-avatar">
-                {{ consultantInitial }}
+                <img
+                  *ngIf="
+                    consultantImageObjectUrl;
+                    else consultantInitialTemplate
+                  "
+                  [src]="consultantImageObjectUrl"
+                  [alt]="'Photo de ' + mission.consultantName"
+                >
+
+                <ng-template #consultantInitialTemplate>
+                  {{ consultantInitial }}
+                </ng-template>
               </div>
 
               <div>

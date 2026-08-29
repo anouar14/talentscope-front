@@ -268,11 +268,22 @@
         <div class="offer-header">
           <div class="company-identity">
             <div class="company-avatar">
-              {{
-                offer.companyName
-                  ? offer.companyName.charAt(0)
-                  : 'E'
-              }}
+              <img
+                *ngIf="
+                  getCompanyImageUrl(offer.companyId) as companyImage;
+                  else companyInitial
+                "
+                [src]="companyImage"
+                [alt]="'Photo de ' + offer.companyName"
+              >
+
+              <ng-template #companyInitial>
+                {{
+                  offer.companyName
+                    ? offer.companyName.charAt(0)
+                    : 'E'
+                }}
+              </ng-template>
             </div>
 
             <div>

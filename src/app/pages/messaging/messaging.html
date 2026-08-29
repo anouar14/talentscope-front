@@ -112,7 +112,15 @@
           >
             <div class="avatar-wrapper">
               <div class="avatar">
-                {{ getInitial(conversation) }}
+                <img
+                  *ngIf="getParticipantImageUrl(conversation) as imageUrl; else conversationInitial"
+                  [src]="imageUrl"
+                  [alt]="conversation.participantName"
+                >
+
+                <ng-template #conversationInitial>
+                  {{ getInitial(conversation) }}
+                </ng-template>
               </div>
 
               <span
@@ -175,7 +183,15 @@
             <div class="chat-user">
               <div class="avatar-wrapper">
                 <div class="avatar large">
-                  {{ getInitial(selectedConversation) }}
+                  <img
+                    *ngIf="getParticipantImageUrl(selectedConversation) as imageUrl; else selectedConversationInitial"
+                    [src]="imageUrl"
+                    [alt]="selectedConversation.participantName"
+                  >
+
+                  <ng-template #selectedConversationInitial>
+                    {{ getInitial(selectedConversation) }}
+                  </ng-template>
                 </div>
 
                 <span

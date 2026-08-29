@@ -40,22 +40,65 @@ export interface MatchingResponse {
   providedIn: 'root'
 })
 export class CompanyService {
-  private readonly apiUrl = 'http://localhost:8080/api/companies';
+  private readonly apiUrl =
+    'http://localhost:8080/api/companies';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient
+  ) {}
 
   getProfile(): Observable<Company> {
-    return this.http.get<Company>(`${this.apiUrl}/me`);
+    return this.http.get<Company>(
+      `${this.apiUrl}/me`
+    );
   }
 
-  updateProfile(company: Company): Observable<Company> {
-    return this.http.put<Company>(`${this.apiUrl}/me`, company);
+  updateProfile(
+    company: Company
+  ): Observable<Company> {
+    return this.http.put<Company>(
+      `${this.apiUrl}/me`,
+      company
+    );
   }
 
-  matchConsultants(jobDescription: string): Observable<MatchingResponse> {
+  uploadProfileImage(
+    file: File
+  ): Observable<Company> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post<Company>(
+      `${this.apiUrl}/me/profile-image`,
+      formData
+    );
+  }
+
+  deleteProfileImage(): Observable<void> {
+    return this.http.delete<void>(
+      `${this.apiUrl}/me/profile-image`
+    );
+  }
+
+  getProfileImage(
+    companyId: string
+  ): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/${companyId}/profile-image`,
+      {
+        responseType: 'blob'
+      }
+    );
+  }
+
+  matchConsultants(
+    jobDescription: string
+  ): Observable<MatchingResponse> {
     return this.http.post<MatchingResponse>(
       `${this.apiUrl}/matching`,
-      { jobDescription }
+      {
+        jobDescription
+      }
     );
   }
 }

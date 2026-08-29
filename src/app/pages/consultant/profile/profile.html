@@ -3,11 +3,19 @@
     <section class="profile-hero">
       <div class="profile-identity">
         <div class="avatar">
-          {{
-            consultant.firstName
-              ? consultant.firstName.charAt(0)
-              : 'C'
-          }}
+          <img
+            *ngIf="profileImageObjectUrl; else consultantInitial"
+            [src]="profileImageObjectUrl"
+            alt="Photo de profil"
+          >
+
+          <ng-template #consultantInitial>
+            {{
+              consultant.firstName
+                ? consultant.firstName.charAt(0)
+                : 'C'
+            }}
+          </ng-template>
         </div>
 
         <div>
@@ -41,12 +49,8 @@
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
-
       <h2>Chargement du profil</h2>
-
-      <p>
-        Récupération de vos informations professionnelles...
-      </p>
+      <p>Récupération de vos informations professionnelles...</p>
     </section>
 
     <form
@@ -71,6 +75,90 @@
               identifier votre profil.
             </p>
           </div>
+        </div>
+
+        <div class="profile-photo-editor">
+          <div class="profile-photo-preview">
+            <img
+              *ngIf="profileImageObjectUrl; else profileInitial"
+              [src]="profileImageObjectUrl"
+              alt="Photo de profil"
+            >
+
+            <ng-template #profileInitial>
+              {{
+                consultant.firstName
+                  ? consultant.firstName.charAt(0)
+                  : 'C'
+              }}
+            </ng-template>
+          </div>
+
+          <div class="profile-photo-content">
+            <strong>Photo de profil</strong>
+
+            <p>
+              Ajoutez une photo professionnelle pour rendre votre
+              profil plus identifiable auprès des entreprises.
+            </p>
+
+            <small>
+              JPEG, PNG ou WEBP · 5 Mo maximum
+            </small>
+          </div>
+
+          <div class="profile-photo-actions">
+            <input
+              #profileImageInput
+              class="hidden-file-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="onProfileImageSelected($event)"
+            >
+
+            <button
+              type="button"
+              class="photo-primary-button"
+              [disabled]="uploadingImage || deletingImage"
+              (click)="profileImageInput.click()"
+            >
+              {{
+                uploadingImage
+                  ? 'Envoi...'
+                  : consultant.profileImageUrl
+                    ? 'Modifier la photo'
+                    : 'Ajouter une photo'
+              }}
+            </button>
+
+            <button
+              *ngIf="consultant.profileImageUrl"
+              type="button"
+              class="photo-delete-button"
+              [disabled]="uploadingImage || deletingImage"
+              (click)="deleteProfileImage()"
+            >
+              {{
+                deletingImage
+                  ? 'Suppression...'
+                  : 'Supprimer'
+              }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="photo-feedback photo-success"
+          *ngIf="imageSuccessMessage"
+        >
+          ✓ {{ imageSuccessMessage }}
+        </div>
+
+        <div
+          class="photo-feedback photo-error"
+          *ngIf="imageErrorMessage"
+        >
+          ! {{ imageErrorMessage }}
         </div>
 
         <div class="form-grid">
@@ -216,10 +304,7 @@
             >
           </div>
 
-          <button
-            type="button"
-            (click)="addSkill()"
-          >
+          <button type="button" (click)="addSkill()">
             Ajouter
           </button>
         </div>

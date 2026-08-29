@@ -258,7 +258,6 @@
         <div class="offer-header">
           <div>
             <span class="eyebrow">OFFRE DE MISSION</span>
-
             <h2>{{ offer.title }}</h2>
           </div>
 
@@ -369,6 +368,27 @@
             ]"
           >
             Voir les candidatures
+            <span>→</span>
+          </a>
+        </div>
+
+        <div
+          class="application-block"
+          *ngIf="offer.status === 'OPEN'"
+        >
+          <div>
+            <span>MATCHING IA</span>
+            <strong>✦</strong>
+          </div>
+
+          <a
+            [routerLink]="[
+              '/company/mission-offers',
+              offer.id,
+              'matching'
+            ]"
+          >
+            Identifier les consultants
             <span>→</span>
           </a>
         </div>

@@ -25,6 +25,9 @@ import {
   RealtimeReadEvent,
   RealtimeTypingEvent
 } from '../../core/models/messaging';
+import { Auth } from '../../core/services/auth';
+import { CompanyService } from '../../core/services/company';
+import { ConsultantService } from '../../core/services/consultant';
 import { MessagingRealtimeService } from '../../core/services/messaging-realtime';
 import { MessagingService } from '../../core/services/messaging';
 
@@ -65,6 +68,8 @@ export class Messaging implements OnInit, OnDestroy {
 
   onlineConversationIds = new Set<string>();
 
+  participantImageUrls: Record<string, string> = {};
+
   deleteTarget: DeleteTarget = null;
   messageToDelete: Message | null = null;
 
@@ -77,12 +82,18 @@ export class Messaging implements OnInit, OnDestroy {
   private participantTypingTimeout:
     ReturnType<typeof setTimeout> | null = null;
 
+  private readonly loadingParticipantImages =
+    new Set<string>();
+
   private readonly destroy$ =
     new Subject<void>();
 
   constructor(
     private readonly messagingService: MessagingService,
     private readonly messagingRealtimeService: MessagingRealtimeService,
+    private readonly consultantService: ConsultantService,
+    private readonly companyService: CompanyService,
+    private readonly authService: Auth,
     private readonly activatedRoute: ActivatedRoute,
     private readonly router: Router
   ) {}
@@ -142,6 +153,8 @@ export class Messaging implements OnInit, OnDestroy {
         this.participantTypingTimeout
       );
     }
+
+    this.revokeAllParticipantImageUrls();
 
     this.destroy$.next();
     this.destroy$.complete();
@@ -256,6 +269,10 @@ export class Messaging implements OnInit, OnDestroy {
           this.conversations = conversations ?? [];
           this.loadingConversations = false;
 
+          this.loadParticipantImages(
+            this.conversations
+          );
+
           this.loadPresence();
 
           if (selectedId) {
@@ -323,6 +340,10 @@ export class Messaging implements OnInit, OnDestroy {
     this.selectedConversation = conversation;
     this.messages = [];
     this.messageError = '';
+
+    this.loadParticipantImage(
+      conversation
+    );
 
     this.router.navigate([], {
       relativeTo: this.activatedRoute,
@@ -544,6 +565,16 @@ export class Messaging implements OnInit, OnDestroy {
     );
   }
 
+  getParticipantImageUrl(
+    conversation: Conversation
+  ): string | null {
+    return (
+      this.participantImageUrls[
+        conversation.id
+      ] ?? null
+    );
+  }
+
   getInitial(
     conversation: Conversation
   ): string {
@@ -613,6 +644,124 @@ export class Messaging implements OnInit, OnDestroy {
     return message.id;
   }
 
+  private loadParticipantImages(
+    conversations: Conversation[]
+  ): void {
+    conversations.forEach(
+      conversation => {
+        this.loadParticipantImage(
+          conversation
+        );
+      }
+    );
+  }
+
+  private loadParticipantImage(
+    conversation: Conversation
+  ): void {
+    if (
+      this.participantImageUrls[conversation.id] ||
+      this.loadingParticipantImages.has(conversation.id)
+    ) {
+      return;
+    }
+
+    const role = this.authService.getRole();
+
+    if (
+      role !== 'COMPANY' &&
+      role !== 'CONSULTANT'
+    ) {
+      return;
+    }
+
+    this.loadingParticipantImages.add(
+      conversation.id
+    );
+
+    const imageRequest =
+      role === 'COMPANY'
+        ? this.consultantService.getProfileImage(
+            conversation.consultantId
+          )
+        : this.companyService.getProfileImage(
+            conversation.companyId
+          );
+
+    imageRequest
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: blob => {
+          this.loadingParticipantImages.delete(
+            conversation.id
+          );
+
+          if (!blob || blob.size === 0) {
+            return;
+          }
+
+          const previousUrl =
+            this.participantImageUrls[
+              conversation.id
+            ];
+
+          if (previousUrl) {
+            URL.revokeObjectURL(
+              previousUrl
+            );
+          }
+
+          this.participantImageUrls = {
+            ...this.participantImageUrls,
+            [conversation.id]:
+              URL.createObjectURL(blob)
+          };
+        },
+        error: () => {
+          this.loadingParticipantImages.delete(
+            conversation.id
+          );
+        }
+      });
+  }
+
+  private revokeParticipantImageUrl(
+    conversationId: string
+  ): void {
+    const imageUrl =
+      this.participantImageUrls[
+        conversationId
+      ];
+
+    if (!imageUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(imageUrl);
+
+    const updatedImageUrls = {
+      ...this.participantImageUrls
+    };
+
+    delete updatedImageUrls[
+      conversationId
+    ];
+
+    this.participantImageUrls =
+      updatedImageUrls;
+  }
+
+  private revokeAllParticipantImageUrls(): void {
+    Object.values(
+      this.participantImageUrls
+    ).forEach(imageUrl => {
+      URL.revokeObjectURL(imageUrl);
+    });
+
+    this.participantImageUrls = {};
+    this.loadingParticipantImages.clear();
+  }
+
   private deleteMessage(
     message: Message
   ): void {
@@ -664,6 +813,10 @@ export class Messaging implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
+          this.revokeParticipantImageUrl(
+            conversation.id
+          );
+
           this.conversations =
             this.conversations.filter(
               current =>

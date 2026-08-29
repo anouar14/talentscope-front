@@ -6,4 +6,5 @@ export interface Company {
   location: string;
   website: string;
   description: string;
+  profileImageUrl: string | null;
 }

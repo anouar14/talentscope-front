@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { ContractType, WorkMode } from '../../core/models/invitation';
+import { Invitation } from '../../core/models/invitation';
+import { MissionApplication } from '../../core/models/mission-application';
 import { MissionOffer } from '../../core/models/mission-offer';
+import { CompanyService } from '../../core/services/company';
+import { InvitationService } from '../../core/services/invitation';
 import { MissionApplicationService } from '../../core/services/mission-application';
 import { MissionOfferService } from '../../core/services/mission-offer';
 
@@ -20,27 +23,34 @@ import { MissionOfferService } from '../../core/services/mission-offer';
   templateUrl: './mission-offer-detail.html',
   styleUrl: './mission-offer-detail.css'
 })
-export class MissionOfferDetail implements OnInit {
+export class MissionOfferDetail implements OnInit, OnDestroy {
   offer: MissionOffer | null = null;
 
+  pendingOfferInvitation: Invitation | null = null;
+  companyImageObjectUrl: string | null = null;
+
   loading = false;
+  invitationCheckLoading = false;
   applying = false;
 
   errorMessage = '';
-  actionSuccessMessage = '';
-  actionErrorMessage = '';
+  invitationCheckErrorMessage = '';
+  applicationErrorMessage = '';
+  applicationSuccessMessage = '';
 
   applicationMessage = '';
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly missionOfferService: MissionOfferService,
-    private readonly missionApplicationService: MissionApplicationService
+    private readonly missionApplicationService: MissionApplicationService,
+    private readonly invitationService: InvitationService,
+    private readonly companyService: CompanyService
   ) {}
 
   ngOnInit(): void {
-    const offerId =
-      this.route.snapshot.paramMap.get('id');
+    const offerId = this.route.snapshot.paramMap.get('id');
 
     if (!offerId) {
       this.errorMessage =
@@ -51,31 +61,56 @@ export class MissionOfferDetail implements OnInit {
     this.loadOffer(offerId);
   }
 
-  get companyInitial(): string {
-    return this.offer?.companyName
-      ?.charAt(0)
-      .toUpperCase() || 'E';
+  ngOnDestroy(): void {
+    this.revokeCompanyImageObjectUrl();
   }
 
   get canApply(): boolean {
-    return Boolean(
-      this.offer &&
+    return !!this.offer &&
       this.offer.status === 'OPEN' &&
       !this.offer.applied &&
-      !this.applying
-    );
+      !this.pendingOfferInvitation;
   }
 
-  get hasTechnologies(): boolean {
-    return (
-      this.offer?.technologies?.length ?? 0
-    ) > 0;
+  get hasPendingOfferInvitation(): boolean {
+    return this.pendingOfferInvitation !== null;
+  }
+
+  get applicationStatusLabel(): string {
+    switch (this.offer?.applicationStatus) {
+      case 'PENDING':
+        return 'En attente';
+      case 'ACCEPTED':
+        return 'Acceptée';
+      case 'REJECTED':
+        return 'Non retenue';
+      case 'WITHDRAWN':
+        return 'Retirée';
+      default:
+        return '';
+    }
+  }
+
+  get applicationStatusClass(): string {
+    switch (this.offer?.applicationStatus) {
+      case 'PENDING':
+        return 'status-pending';
+      case 'ACCEPTED':
+        return 'status-accepted';
+      case 'REJECTED':
+        return 'status-rejected';
+      case 'WITHDRAWN':
+        return 'status-withdrawn';
+      default:
+        return '';
+    }
   }
 
   loadOffer(offerId: string): void {
     this.loading = true;
     this.errorMessage = '';
-    this.clearMessages();
+    this.applicationErrorMessage = '';
+    this.applicationSuccessMessage = '';
 
     this.missionOfferService
       .getOfferById(offerId)
@@ -87,6 +122,14 @@ export class MissionOfferDetail implements OnInit {
           };
 
           this.loading = false;
+
+          this.loadCompanyImage(
+            this.offer.companyId
+          );
+
+          this.loadPendingOfferInvitation(
+            offer.id
+          );
         },
         error: (error: HttpErrorResponse) => {
           console.error(
@@ -114,87 +157,142 @@ export class MissionOfferDetail implements OnInit {
       });
   }
 
-  apply(): void {
-    const currentOffer = this.offer;
+  submitApplication(): void {
+    const offer = this.offer;
 
-    if (!currentOffer || !this.canApply) {
+    if (
+      !offer ||
+      !this.canApply ||
+      this.applying
+    ) {
       return;
     }
 
-    if (this.applicationMessage.length > 2000) {
-      this.actionErrorMessage =
+    const message = this.applicationMessage.trim();
+
+    if (message.length > 2000) {
+      this.applicationErrorMessage =
         'Votre message ne peut pas dépasser 2000 caractères.';
       return;
     }
 
     this.applying = true;
-    this.clearMessages();
+    this.applicationErrorMessage = '';
+    this.applicationSuccessMessage = '';
 
     this.missionApplicationService
       .apply(
-        currentOffer.id,
+        offer.id,
         {
-          message:
-            this.applicationMessage.trim() || null
+          message: message || null
         }
       )
       .subscribe({
-        next: application => {
-          this.offer = {
-            ...currentOffer,
-            applied: true,
-            applicationStatus: application.status,
-            applicationCount:
-              currentOffer.applicationCount + 1
-          };
-
+        next: (application: MissionApplication) => {
           this.applying = false;
           this.applicationMessage = '';
 
-          this.actionSuccessMessage =
-            'Votre candidature a bien été envoyée à l’entreprise.';
+          this.updateOfferFromApplication(application);
+
+          this.applicationSuccessMessage =
+            'Votre candidature a été envoyée à l’entreprise.';
         },
         error: (error: HttpErrorResponse) => {
           console.error(
-            'Erreur lors de la candidature :',
+            'Erreur lors de l’envoi de la candidature :',
             error
           );
 
           this.applying = false;
 
+          if (error.status === 400) {
+            this.applicationErrorMessage =
+              this.extractBackendMessage(
+                error,
+                'Les informations de votre candidature sont invalides.'
+              );
+            return;
+          }
+
           if (error.status === 403) {
-            this.actionErrorMessage =
-              'Vous n’êtes pas autorisé à postuler à cette mission.';
+            this.applicationErrorMessage =
+              this.extractBackendMessage(
+                error,
+                'Vous n’êtes pas autorisé à postuler à cette offre.'
+              );
             return;
           }
 
           if (error.status === 404) {
-            this.actionErrorMessage =
-              'Cette offre de mission est introuvable.';
+            this.applicationErrorMessage =
+              'Cette offre n’existe plus.';
             return;
           }
 
           if (error.status === 409) {
-            this.actionErrorMessage =
+            this.applicationErrorMessage =
               this.extractBackendMessage(
                 error,
-                'Vous ne pouvez pas postuler à cette mission.'
+                'Vous ne pouvez pas postuler à cette offre.'
               );
 
-            this.loadOffer(currentOffer.id);
+            this.loadPendingOfferInvitation(
+              offer.id
+            );
+
             return;
           }
 
-          this.actionErrorMessage =
+          this.applicationErrorMessage =
             'Impossible d’envoyer votre candidature.';
         }
       });
   }
 
-  getContractTypeLabel(
-    contractType: ContractType | null
-  ): string {
-    switch (contractType) {
+  viewPendingInvitation(): void {
+    if (!this.pendingOfferInvitation) {
+      return;
+    }
+
+    this.router.navigate(
+      ['/consultant/invitations'],
+      {
+        queryParams: {
+          invitationId:
+            this.pendingOfferInvitation.id
+        }
+      }
+    );
+  }
+
+  getOfferStatusLabel(): string {
+    switch (this.offer?.status) {
+      case 'OPEN':
+        return 'Ouverte';
+      case 'FILLED':
+        return 'Pourvue';
+      case 'CLOSED':
+        return 'Clôturée';
+      default:
+        return '';
+    }
+  }
+
+  getOfferStatusClass(): string {
+    switch (this.offer?.status) {
+      case 'OPEN':
+        return 'offer-open';
+      case 'FILLED':
+        return 'offer-filled';
+      case 'CLOSED':
+        return 'offer-closed';
+      default:
+        return '';
+    }
+  }
+
+  getContractTypeLabel(): string {
+    switch (this.offer?.contractType) {
       case 'CDI':
         return 'CDI';
       case 'CDD':
@@ -210,10 +308,8 @@ export class MissionOfferDetail implements OnInit {
     }
   }
 
-  getWorkModeLabel(
-    workMode: WorkMode | null
-  ): string {
-    switch (workMode) {
+  getWorkModeLabel(): string {
+    switch (this.offer?.workMode) {
       case 'ONSITE':
         return 'Sur site';
       case 'REMOTE':
@@ -225,51 +321,124 @@ export class MissionOfferDetail implements OnInit {
     }
   }
 
-  getSalaryLabel(
-    salary: number | null
-  ): string {
-    if (salary === null || salary === undefined) {
-      return 'Non renseignée';
-    }
-
-    return `${salary.toLocaleString('fr-FR')} DT`;
-  }
-
-  getExperienceLabel(
-    experienceYears: number | null
-  ): string {
+  getSalaryLabel(): string {
     if (
-      experienceYears === null ||
-      experienceYears === undefined
+      this.offer?.salary === null ||
+      this.offer?.salary === undefined
     ) {
       return 'Non renseignée';
     }
 
-    if (experienceYears === 0) {
+    return `${this.offer.salary.toLocaleString('fr-FR')} DT`;
+  }
+
+  getExperienceLabel(): string {
+    const years =
+      this.offer?.minimumExperienceYears;
+
+    if (
+      years === null ||
+      years === undefined
+    ) {
+      return 'Non renseignée';
+    }
+
+    if (years === 0) {
       return 'Débutant accepté';
     }
 
-    return `${experienceYears} an(s) minimum`;
+    return `${years} an(s) minimum`;
   }
 
-  getApplicationStatusLabel(): string {
-    switch (this.offer?.applicationStatus) {
-      case 'PENDING':
-        return 'Votre candidature est en attente de réponse.';
-      case 'ACCEPTED':
-        return 'Votre candidature a été acceptée.';
-      case 'REJECTED':
-        return 'Votre candidature n’a pas été retenue.';
-      case 'WITHDRAWN':
-        return 'Votre candidature a été retirée.';
-      default:
-        return '';
+  trackTechnology(
+    index: number,
+    technology: string
+  ): string {
+    return technology;
+  }
+
+  private loadCompanyImage(
+    companyId: string
+  ): void {
+    this.revokeCompanyImageObjectUrl();
+
+    if (!companyId) {
+      return;
     }
+
+    this.companyService
+      .getProfileImage(companyId)
+      .subscribe({
+        next: blob => {
+          this.revokeCompanyImageObjectUrl();
+
+          this.companyImageObjectUrl =
+            URL.createObjectURL(blob);
+        },
+        error: () => {
+          this.revokeCompanyImageObjectUrl();
+        }
+      });
   }
 
-  private clearMessages(): void {
-    this.actionSuccessMessage = '';
-    this.actionErrorMessage = '';
+  private revokeCompanyImageObjectUrl(): void {
+    if (!this.companyImageObjectUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(
+      this.companyImageObjectUrl
+    );
+
+    this.companyImageObjectUrl = null;
+  }
+
+  private loadPendingOfferInvitation(
+    offerId: string
+  ): void {
+    this.invitationCheckLoading = true;
+    this.invitationCheckErrorMessage = '';
+    this.pendingOfferInvitation = null;
+
+    this.invitationService
+      .getConsultantInvitations()
+      .subscribe({
+        next: invitations => {
+          this.pendingOfferInvitation =
+            (invitations ?? []).find(
+              invitation =>
+                invitation.missionOfferId === offerId &&
+                invitation.status === 'PENDING'
+            ) ?? null;
+
+          this.invitationCheckLoading = false;
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de la vérification des propositions :',
+            error
+          );
+
+          this.invitationCheckLoading = false;
+
+          this.invitationCheckErrorMessage =
+            'Impossible de vérifier vos propositions pour le moment.';
+        }
+      });
+  }
+
+  private updateOfferFromApplication(
+    application: MissionApplication
+  ): void {
+    if (!this.offer) {
+      return;
+    }
+
+    this.offer = {
+      ...this.offer,
+      applied: true,
+      applicationStatus: application.status
+    };
   }
 
   private extractBackendMessage(

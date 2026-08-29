@@ -88,7 +88,11 @@
 
     <section
       class="filters-card"
-      *ngIf="!loading && !errorMessage && invitations.length > 0"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        invitations.length > 0
+      "
     >
       <div class="filter-field">
         <label for="invitation-search">
@@ -118,10 +122,21 @@
           name="invitationStatus"
           [(ngModel)]="selectedStatus"
         >
-          <option value="ALL">Tous les statuts</option>
-          <option value="PENDING">En attente</option>
-          <option value="ACCEPTED">Acceptées</option>
-          <option value="REJECTED">Refusées</option>
+          <option value="ALL">
+            Tous les statuts
+          </option>
+
+          <option value="PENDING">
+            En attente
+          </option>
+
+          <option value="ACCEPTED">
+            Acceptées
+          </option>
+
+          <option value="REJECTED">
+            Refusées
+          </option>
         </select>
       </div>
 
@@ -143,7 +158,10 @@
 
       <div>
         <strong>Réponse enregistrée</strong>
-        <p>{{ actionSuccessMessage }}</p>
+
+        <p>
+          {{ actionSuccessMessage }}
+        </p>
       </div>
 
       <a routerLink="/consultant/missions">
@@ -159,14 +177,22 @@
 
       <div>
         <strong>Action impossible</strong>
-        <p>{{ actionErrorMessage }}</p>
+
+        <p>
+          {{ actionErrorMessage }}
+        </p>
       </div>
     </div>
 
-    <section class="state-card" *ngIf="loading">
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
       <div class="loader"></div>
 
-      <h2>Chargement de vos propositions</h2>
+      <h2>
+        Chargement de vos propositions
+      </h2>
 
       <p>
         TalentScope récupère les opportunités reçues...
@@ -177,10 +203,17 @@
       class="state-card error-state"
       *ngIf="!loading && errorMessage"
     >
-      <div class="state-icon error-icon">!</div>
+      <div class="state-icon error-icon">
+        !
+      </div>
 
-      <h2>Impossible de charger vos propositions</h2>
-      <p>{{ errorMessage }}</p>
+      <h2>
+        Impossible de charger vos propositions
+      </h2>
+
+      <p>
+        {{ errorMessage }}
+      </p>
 
       <button
         type="button"
@@ -192,11 +225,19 @@
 
     <section
       class="state-card"
-      *ngIf="!loading && !errorMessage && invitations.length === 0"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        invitations.length === 0
+      "
     >
-      <div class="state-icon empty-icon">✉</div>
+      <div class="state-icon empty-icon">
+        ✉
+      </div>
 
-      <h2>Aucune proposition reçue</h2>
+      <h2>
+        Aucune proposition reçue
+      </h2>
 
       <p>
         Les futures opportunités envoyées par les entreprises
@@ -217,9 +258,13 @@
         filteredInvitations.length === 0
       "
     >
-      <div class="state-icon empty-icon">⌕</div>
+      <div class="state-icon empty-icon">
+        ⌕
+      </div>
 
-      <h2>Aucun résultat</h2>
+      <h2>
+        Aucun résultat
+      </h2>
 
       <p>
         Aucune proposition ne correspond aux critères sélectionnés.
@@ -235,29 +280,64 @@
 
     <section
       class="invitations-grid"
-      *ngIf="!loading && !errorMessage && filteredInvitations.length > 0"
+      *ngIf="
+        !loading &&
+        !errorMessage &&
+        filteredInvitations.length > 0
+      "
     >
       <article
         class="invitation-card"
+        [id]="'invitation-' + invitation.id"
+        [class.focused-invitation]="
+          isFocusedInvitation(invitation.id)
+        "
         *ngFor="
           let invitation of filteredInvitations;
           trackBy: trackInvitation
         "
       >
+        <div
+          class="focused-label"
+          *ngIf="
+            isFocusedInvitation(invitation.id)
+          "
+        >
+          <span>✦</span>
+          Proposition liée à l’offre consultée
+        </div>
+
         <div class="invitation-header">
           <div class="company-information">
             <div class="company-avatar">
-              {{
-                invitation.companyName
-                  ? invitation.companyName.charAt(0).toUpperCase()
-                  : 'E'
-              }}
+              <img
+                *ngIf="
+                  getCompanyImageUrl(invitation.companyId) as companyImage;
+                  else companyInitial
+                "
+                [src]="companyImage"
+                [alt]="'Photo de ' + invitation.companyName"
+              >
+
+              <ng-template #companyInitial>
+                {{
+                  invitation.companyName
+                    ? invitation.companyName
+                        .charAt(0)
+                        .toUpperCase()
+                    : 'E'
+                }}
+              </ng-template>
             </div>
 
             <div>
-              <span class="card-label">ENTREPRISE</span>
+              <span class="card-label">
+                ENTREPRISE
+              </span>
 
-              <h2>{{ invitation.companyName }}</h2>
+              <h2>
+                {{ invitation.companyName }}
+              </h2>
 
               <p>
                 {{ invitation.subject }}
@@ -267,9 +347,17 @@
 
           <span
             class="status-badge"
-            [ngClass]="getStatusClass(invitation.status)"
+            [ngClass]="
+              getStatusClass(
+                invitation.status
+              )
+            "
           >
-            {{ getStatusLabel(invitation.status) }}
+            {{
+              getStatusLabel(
+                invitation.status
+              )
+            }}
           </span>
         </div>
 
@@ -278,7 +366,9 @@
             DESCRIPTION DE LA MISSION
           </span>
 
-          <p>{{ invitation.message }}</p>
+          <p>
+            {{ invitation.message }}
+          </p>
         </section>
 
         <section class="mission-details-grid">
@@ -288,7 +378,10 @@
             <strong>
               {{
                 invitation.startDate
-                  ? (invitation.startDate | date: 'dd/MM/yyyy')
+                  ? (
+                    invitation.startDate
+                      | date: 'dd/MM/yyyy'
+                  )
                   : 'Non renseignée'
               }}
             </strong>
@@ -300,7 +393,10 @@
             <strong>
               {{
                 invitation.endDate
-                  ? (invitation.endDate | date: 'dd/MM/yyyy')
+                  ? (
+                    invitation.endDate
+                      | date: 'dd/MM/yyyy'
+                  )
                   : 'Non définie'
               }}
             </strong>
@@ -308,46 +404,84 @@
 
           <article>
             <span>Contrat</span>
-            <strong>{{ getContractTypeLabel(invitation.contractType) }}</strong>
+
+            <strong>
+              {{
+                getContractTypeLabel(
+                  invitation.contractType
+                )
+              }}
+            </strong>
           </article>
 
           <article>
             <span>Mode</span>
-            <strong>{{ getWorkModeLabel(invitation.workMode) }}</strong>
+
+            <strong>
+              {{
+                getWorkModeLabel(
+                  invitation.workMode
+                )
+              }}
+            </strong>
           </article>
 
           <article>
             <span>Localisation</span>
-            <strong>{{ invitation.location || 'Non renseignée' }}</strong>
+
+            <strong>
+              {{
+                invitation.location ||
+                'Non renseignée'
+              }}
+            </strong>
           </article>
 
           <article>
             <span>Rémunération</span>
-            <strong>{{ getSalaryLabel(invitation.salary) }}</strong>
+
+            <strong>
+              {{
+                getSalaryLabel(
+                  invitation.salary
+                )
+              }}
+            </strong>
           </article>
         </section>
 
         <section class="technologies-section">
           <div class="section-line">
-            <span>Technologies recherchées</span>
+            <span>
+              Technologies recherchées
+            </span>
 
             <small>
-              {{ invitation.technologies.length }} compétence(s)
+              {{ invitation.technologies.length }}
+              compétence(s)
             </small>
           </div>
 
           <div
             class="empty-technologies"
-            *ngIf="invitation.technologies.length === 0"
+            *ngIf="
+              invitation.technologies.length === 0
+            "
           >
             Aucune technologie renseignée.
           </div>
 
           <div
             class="technologies-list"
-            *ngIf="invitation.technologies.length > 0"
+            *ngIf="
+              invitation.technologies.length > 0
+            "
           >
-            <span *ngFor="let technology of invitation.technologies">
+            <span
+              *ngFor="
+                let technology of invitation.technologies
+              "
+            >
               {{ technology }}
             </span>
           </div>
@@ -361,23 +495,39 @@
             NOTES COMPLÉMENTAIRES
           </span>
 
-          <p>{{ invitation.notes }}</p>
+          <p>
+            {{ invitation.notes }}
+          </p>
         </section>
 
         <div class="invitation-dates">
           <div>
-            <span>Proposition reçue</span>
+            <span>
+              Proposition reçue
+            </span>
 
             <strong>
-              {{ invitation.createdAt | date: 'dd/MM/yyyy à HH:mm' }}
+              {{
+                invitation.createdAt
+                  | date: 'dd/MM/yyyy à HH:mm'
+              }}
             </strong>
           </div>
 
-          <div *ngIf="invitation.respondedAt">
-            <span>Réponse envoyée</span>
+          <div
+            *ngIf="
+              invitation.respondedAt
+            "
+          >
+            <span>
+              Réponse envoyée
+            </span>
 
             <strong>
-              {{ invitation.respondedAt | date: 'dd/MM/yyyy à HH:mm' }}
+              {{
+                invitation.respondedAt
+                  | date: 'dd/MM/yyyy à HH:mm'
+              }}
             </strong>
           </div>
         </div>
@@ -405,33 +555,50 @@
 
         <div
           class="decision-notice"
-          *ngIf="invitation.status === 'PENDING'"
+          *ngIf="
+            invitation.status === 'PENDING'
+          "
         >
           <span>i</span>
 
           <p>
-            Vérifiez attentivement les conditions. En acceptant,
-            une mission active sera immédiatement créée.
+            Vérifiez attentivement les conditions.
+            En acceptant, une mission active sera
+            immédiatement créée.
           </p>
         </div>
 
         <div
           class="invitation-actions"
-          *ngIf="invitation.status === 'PENDING'"
+          *ngIf="
+            invitation.status === 'PENDING'
+          "
         >
           <button
             type="button"
             class="accept-button"
-            [disabled]="isInvitationProcessing(invitation.id)"
+            [disabled]="
+              isInvitationProcessing(
+                invitation.id
+              )
+            "
             (click)="acceptInvitation(invitation)"
           >
             {{
-              isInvitationProcessing(invitation.id)
+              isInvitationProcessing(
+                invitation.id
+              )
                 ? 'Traitement...'
                 : 'Accepter la proposition'
             }}
 
-            <span *ngIf="!isInvitationProcessing(invitation.id)">
+            <span
+              *ngIf="
+                !isInvitationProcessing(
+                  invitation.id
+                )
+              "
+            >
               ✓
             </span>
           </button>
@@ -439,7 +606,11 @@
           <button
             type="button"
             class="reject-button"
-            [disabled]="isInvitationProcessing(invitation.id)"
+            [disabled]="
+              isInvitationProcessing(
+                invitation.id
+              )
+            "
             (click)="rejectInvitation(invitation)"
           >
             Refuser
@@ -448,12 +619,16 @@
 
         <div
           class="closed-message accepted-message"
-          *ngIf="invitation.status === 'ACCEPTED'"
+          *ngIf="
+            invitation.status === 'ACCEPTED'
+          "
         >
           <span>✓</span>
 
           <div>
-            <strong>Proposition acceptée</strong>
+            <strong>
+              Proposition acceptée
+            </strong>
 
             <p>
               Une mission active a été créée automatiquement.
@@ -467,12 +642,16 @@
 
         <div
           class="closed-message rejected-message"
-          *ngIf="invitation.status === 'REJECTED'"
+          *ngIf="
+            invitation.status === 'REJECTED'
+          "
         >
           <span>×</span>
 
           <div>
-            <strong>Proposition clôturée</strong>
+            <strong>
+              Proposition clôturée
+            </strong>
 
             <p>
               Cette proposition a été refusée ou clôturée.
@@ -480,6 +659,116 @@
           </div>
         </div>
       </article>
+    </section>
+  </div>
+
+  <div
+    class="modal-backdrop"
+    *ngIf="
+      selectedInvitation &&
+      selectedAction
+    "
+    (click)="cancelActionModal()"
+  >
+    <section
+      class="confirmation-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="invitation-confirmation-title"
+      (click)="$event.stopPropagation()"
+    >
+      <div
+        class="modal-icon"
+        [class.accept-modal-icon]="
+          selectedAction === 'ACCEPT'
+        "
+        [class.reject-modal-icon]="
+          selectedAction === 'REJECT'
+        "
+      >
+        {{
+          selectedAction === 'ACCEPT'
+            ? '✓'
+            : '!'
+        }}
+      </div>
+
+      <span class="modal-eyebrow">
+        CONFIRMATION
+      </span>
+
+      <h2 id="invitation-confirmation-title">
+        {{ confirmationTitle }}
+      </h2>
+
+      <p>
+        {{ confirmationMessage }}
+      </p>
+
+      <div
+        class="accept-information"
+        *ngIf="
+          selectedAction === 'ACCEPT'
+        "
+      >
+        <span>✓</span>
+
+        <p>
+          Une mission active sera créée automatiquement.
+          Si cette proposition est liée à une offre publiée,
+          cette offre sera également marquée comme
+          <strong>Pourvue</strong>.
+        </p>
+      </div>
+
+      <div
+        class="reject-information"
+        *ngIf="
+          selectedAction === 'REJECT'
+        "
+      >
+        <span>!</span>
+
+        <p>
+          Cette proposition sera définitivement marquée
+          comme refusée.
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="modal-cancel-button"
+          [disabled]="
+            actionInvitationId !== null
+          "
+          (click)="cancelActionModal()"
+        >
+          Annuler
+        </button>
+
+        <button
+          type="button"
+          [class.modal-confirm-button]="
+            selectedAction === 'ACCEPT'
+          "
+          [class.modal-confirm-danger-button]="
+            selectedAction === 'REJECT'
+          "
+          [disabled]="
+            actionInvitationId !== null
+          "
+          (click)="confirmInvitationAction()"
+        >
+          {{
+            actionInvitationId
+              ? 'Traitement...'
+              : selectedAction === 'ACCEPT'
+                ? 'Accepter la proposition'
+                : 'Refuser la proposition'
+          }}
+        </button>
+      </div>
     </section>
   </div>
 </div>

@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ContractType, WorkMode } from '../../../core/models/invitation';
 import { Mission, MissionStatus } from '../../../core/models/mission';
+import { CompanyService } from '../../../core/services/company';
 import { MessagingService } from '../../../core/services/messaging';
 import { MissionService } from '../../../core/services/mission';
 
@@ -17,8 +18,9 @@ type MissionStatusFilter = 'ALL' | MissionStatus;
   templateUrl: './missions.html',
   styleUrl: './missions.css'
 })
-export class ConsultantMissions implements OnInit {
+export class ConsultantMissions implements OnInit, OnDestroy {
   missions: Mission[] = [];
+  companyImageUrls: Record<string, string> = {};
 
   loading = false;
   errorMessage = '';
@@ -29,14 +31,21 @@ export class ConsultantMissions implements OnInit {
   messagingParticipantId: string | null = null;
   messagingErrorMessage = '';
 
+  private readonly loadingCompanyImages = new Set<string>();
+
   constructor(
     private readonly missionService: MissionService,
     private readonly messagingService: MessagingService,
+    private readonly companyService: CompanyService,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadMissions();
+  }
+
+  ngOnDestroy(): void {
+    this.revokeAllCompanyImageUrls();
   }
 
   get filteredMissions(): Mission[] {
@@ -103,6 +112,8 @@ export class ConsultantMissions implements OnInit {
             })
           );
 
+          this.loadCompanyImages();
+
           this.loading = false;
         },
         error: (error: HttpErrorResponse) => {
@@ -139,9 +150,7 @@ export class ConsultantMissions implements OnInit {
       return;
     }
 
-    this.messagingParticipantId =
-      mission.companyId;
-
+    this.messagingParticipantId = mission.companyId;
     this.messagingErrorMessage = '';
 
     this.messagingService
@@ -177,6 +186,12 @@ export class ConsultantMissions implements OnInit {
     companyId: string
   ): boolean {
     return this.messagingParticipantId === companyId;
+  }
+
+  getCompanyImageUrl(
+    companyId: string
+  ): string | null {
+    return this.companyImageUrls[companyId] ?? null;
   }
 
   filterByStatus(status: MissionStatusFilter): void {
@@ -261,6 +276,71 @@ export class ConsultantMissions implements OnInit {
     mission: Mission
   ): string {
     return mission.id;
+  }
+
+  private loadCompanyImages(): void {
+    const companyIds = [
+      ...new Set(
+        this.missions
+          .map(mission => mission.companyId)
+          .filter(
+            (companyId): companyId is string =>
+              Boolean(companyId)
+          )
+      )
+    ];
+
+    companyIds.forEach(companyId => {
+      this.loadCompanyImage(companyId);
+    });
+  }
+
+  private loadCompanyImage(companyId: string): void {
+    if (
+      !companyId ||
+      this.companyImageUrls[companyId] ||
+      this.loadingCompanyImages.has(companyId)
+    ) {
+      return;
+    }
+
+    this.loadingCompanyImages.add(companyId);
+
+    this.companyService
+      .getProfileImage(companyId)
+      .subscribe({
+        next: blob => {
+          this.loadingCompanyImages.delete(companyId);
+
+          if (!blob || blob.size === 0) {
+            return;
+          }
+
+          const existingUrl =
+            this.companyImageUrls[companyId];
+
+          if (existingUrl) {
+            URL.revokeObjectURL(existingUrl);
+          }
+
+          this.companyImageUrls = {
+            ...this.companyImageUrls,
+            [companyId]: URL.createObjectURL(blob)
+          };
+        },
+        error: () => {
+          this.loadingCompanyImages.delete(companyId);
+        }
+      });
+  }
+
+  private revokeAllCompanyImageUrls(): void {
+    Object.values(this.companyImageUrls).forEach(
+      imageUrl => URL.revokeObjectURL(imageUrl)
+    );
+
+    this.companyImageUrls = {};
+    this.loadingCompanyImages.clear();
   }
 
   private countMissionsByStatus(

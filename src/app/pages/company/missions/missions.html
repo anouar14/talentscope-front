@@ -248,11 +248,22 @@
 
         <div class="consultant-block">
           <div class="avatar">
-            {{
-              mission.consultantName
-                ? mission.consultantName.charAt(0)
-                : 'C'
-            }}
+            <img
+              *ngIf="
+                getConsultantImageUrl(mission.consultantId) as consultantImage;
+                else consultantInitial
+              "
+              [src]="consultantImage"
+              [alt]="'Photo de ' + mission.consultantName"
+            >
+
+            <ng-template #consultantInitial>
+              {{
+                mission.consultantName
+                  ? mission.consultantName.charAt(0).toUpperCase()
+                  : 'C'
+              }}
+            </ng-template>
           </div>
 
           <div>

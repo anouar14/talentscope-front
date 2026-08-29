@@ -208,11 +208,26 @@
 
             <div class="candidate-header">
               <div class="avatar">
-                {{
-                  result.firstName
-                    ? result.firstName.charAt(0)
-                    : 'C'
-                }}
+                <img
+                  *ngIf="
+                    getProfileImageUrl(result.consultantId)
+                      as profileImage;
+                    else matchingInitial
+                  "
+                  [src]="profileImage"
+                  [alt]="
+                    'Photo de ' +
+                    (result.firstName || 'consultant')
+                  "
+                >
+
+                <ng-template #matchingInitial>
+                  {{
+                    result.firstName
+                      ? result.firstName.charAt(0)
+                      : 'C'
+                  }}
+                </ng-template>
               </div>
 
               <div class="consultant-identity">
@@ -340,10 +355,7 @@
             <section class="analysis-block">
               <span class="section-label">ANALYSE IA</span>
               <h4>Pourquoi ce profil ?</h4>
-
-              <p>
-                {{ result.explanation }}
-              </p>
+              <p>{{ result.explanation }}</p>
             </section>
           </div>
 
@@ -450,7 +462,6 @@
             <div class="skills-column">
               <div class="skills-heading">
                 <span class="skill-status matched-status">✓</span>
-
                 <h4>Compétences correspondantes</h4>
               </div>
 
@@ -471,7 +482,6 @@
             <div class="skills-column">
               <div class="skills-heading">
                 <span class="skill-status missing-status">!</span>
-
                 <h4>Compétences manquantes</h4>
               </div>
 
@@ -574,11 +584,26 @@
         >
           <div class="card-header">
             <div class="avatar small-avatar">
-              {{
-                consultant.firstName
-                  ? consultant.firstName.charAt(0)
-                  : 'C'
-              }}
+              <img
+                *ngIf="
+                  getProfileImageUrl(consultant.id)
+                    as consultantImage;
+                  else consultantInitial
+                "
+                [src]="consultantImage"
+                [alt]="
+                  'Photo de ' +
+                  (consultant.firstName || 'consultant')
+                "
+              >
+
+              <ng-template #consultantInitial>
+                {{
+                  consultant.firstName
+                    ? consultant.firstName.charAt(0)
+                    : 'C'
+                }}
+              </ng-template>
             </div>
 
             <div>

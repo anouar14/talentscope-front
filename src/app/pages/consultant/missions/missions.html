@@ -241,11 +241,22 @@
 
         <div class="company-block">
           <div class="avatar">
-            {{
-              mission.companyName
-                ? mission.companyName.charAt(0)
-                : 'E'
-            }}
+            <img
+              *ngIf="
+                getCompanyImageUrl(mission.companyId) as companyImage;
+                else companyInitial
+              "
+              [src]="companyImage"
+              [alt]="'Photo de ' + mission.companyName"
+            >
+
+            <ng-template #companyInitial>
+              {{
+                mission.companyName
+                  ? mission.companyName.charAt(0).toUpperCase()
+                  : 'E'
+              }}
+            </ng-template>
           </div>
 
           <div>

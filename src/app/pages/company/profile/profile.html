@@ -3,11 +3,19 @@
     <section class="profile-header">
       <div class="company-identity">
         <div class="avatar">
-          {{
-            company.companyName
-              ? company.companyName.charAt(0)
-              : 'E'
-          }}
+          <img
+            *ngIf="profileImageObjectUrl; else companyInitial"
+            [src]="profileImageObjectUrl"
+            alt="Photo de l'entreprise"
+          >
+
+          <ng-template #companyInitial>
+            {{
+              company.companyName
+                ? company.companyName.charAt(0)
+                : 'E'
+            }}
+          </ng-template>
         </div>
 
         <div>
@@ -60,6 +68,90 @@
               dans TalentScope.
             </p>
           </div>
+        </div>
+
+        <div class="profile-photo-editor">
+          <div class="profile-photo-preview">
+            <img
+              *ngIf="profileImageObjectUrl; else companyProfileInitial"
+              [src]="profileImageObjectUrl"
+              alt="Photo de l'entreprise"
+            >
+
+            <ng-template #companyProfileInitial>
+              {{
+                company.companyName
+                  ? company.companyName.charAt(0)
+                  : 'E'
+              }}
+            </ng-template>
+          </div>
+
+          <div class="profile-photo-content">
+            <strong>Photo de l'entreprise</strong>
+
+            <p>
+              Ajoutez votre logo ou une image représentative afin
+              d'identifier plus facilement votre entreprise.
+            </p>
+
+            <small>
+              JPEG, PNG ou WEBP · 5 Mo maximum
+            </small>
+          </div>
+
+          <div class="profile-photo-actions">
+            <input
+              #profileImageInput
+              class="hidden-file-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              (change)="onProfileImageSelected($event)"
+            >
+
+            <button
+              type="button"
+              class="photo-primary-button"
+              [disabled]="uploadingImage || deletingImage"
+              (click)="profileImageInput.click()"
+            >
+              {{
+                uploadingImage
+                  ? 'Envoi...'
+                  : company.profileImageUrl
+                    ? 'Modifier la photo'
+                    : 'Ajouter une photo'
+              }}
+            </button>
+
+            <button
+              *ngIf="company.profileImageUrl"
+              type="button"
+              class="photo-delete-button"
+              [disabled]="uploadingImage || deletingImage"
+              (click)="deleteProfileImage()"
+            >
+              {{
+                deletingImage
+                  ? 'Suppression...'
+                  : 'Supprimer'
+              }}
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="photo-feedback photo-success"
+          *ngIf="imageSuccessMessage"
+        >
+          ✓ {{ imageSuccessMessage }}
+        </div>
+
+        <div
+          class="photo-feedback photo-error"
+          *ngIf="imageErrorMessage"
+        >
+          ! {{ imageErrorMessage }}
         </div>
 
         <div class="form-grid">

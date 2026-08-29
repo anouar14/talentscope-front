@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ContractType, WorkMode } from '../../core/models/invitation';
 import { Mission, MissionStatus } from '../../core/models/mission';
+import { CompanyService } from '../../core/services/company';
+import { ConsultantService } from '../../core/services/consultant';
 import { MissionService } from '../../core/services/mission';
 
 @Component({
@@ -13,8 +15,11 @@ import { MissionService } from '../../core/services/mission';
   templateUrl: './mission-detail.html',
   styleUrl: './mission-detail.css'
 })
-export class MissionDetail implements OnInit {
+export class MissionDetail implements OnInit, OnDestroy {
   mission: Mission | null = null;
+
+  companyImageObjectUrl: string | null = null;
+  consultantImageObjectUrl: string | null = null;
 
   loading = false;
   updating = false;
@@ -31,7 +36,9 @@ export class MissionDetail implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly missionService: MissionService
+    private readonly missionService: MissionService,
+    private readonly companyService: CompanyService,
+    private readonly consultantService: ConsultantService
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +53,10 @@ export class MissionDetail implements OnInit {
     }
 
     this.loadMission(missionId);
+  }
+
+  ngOnDestroy(): void {
+    this.revokeProfileImageUrls();
   }
 
   get consultantInitial(): string {
@@ -80,6 +91,9 @@ export class MissionDetail implements OnInit {
           ...mission,
           technologies: mission.technologies ?? []
         };
+
+        this.loadCompanyImage(mission.companyId);
+        this.loadConsultantImage(mission.consultantId);
 
         this.loading = false;
       },
@@ -188,6 +202,87 @@ export class MissionDetail implements OnInit {
     }
 
     return `${salary.toLocaleString('fr-FR')} DT`;
+  }
+
+  private loadCompanyImage(companyId: string): void {
+    this.revokeCompanyImageUrl();
+
+    if (!companyId) {
+      return;
+    }
+
+    this.companyService
+      .getProfileImage(companyId)
+      .subscribe({
+        next: blob => {
+          if (!blob || blob.size === 0) {
+            return;
+          }
+
+          this.revokeCompanyImageUrl();
+          this.companyImageObjectUrl =
+            URL.createObjectURL(blob);
+        },
+        error: () => {
+          this.revokeCompanyImageUrl();
+        }
+      });
+  }
+
+  private loadConsultantImage(
+    consultantId: string
+  ): void {
+    this.revokeConsultantImageUrl();
+
+    if (!consultantId) {
+      return;
+    }
+
+    this.consultantService
+      .getProfileImage(consultantId)
+      .subscribe({
+        next: blob => {
+          if (!blob || blob.size === 0) {
+            return;
+          }
+
+          this.revokeConsultantImageUrl();
+          this.consultantImageObjectUrl =
+            URL.createObjectURL(blob);
+        },
+        error: () => {
+          this.revokeConsultantImageUrl();
+        }
+      });
+  }
+
+  private revokeCompanyImageUrl(): void {
+    if (!this.companyImageObjectUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(
+      this.companyImageObjectUrl
+    );
+
+    this.companyImageObjectUrl = null;
+  }
+
+  private revokeConsultantImageUrl(): void {
+    if (!this.consultantImageObjectUrl) {
+      return;
+    }
+
+    URL.revokeObjectURL(
+      this.consultantImageObjectUrl
+    );
+
+    this.consultantImageObjectUrl = null;
+  }
+
+  private revokeProfileImageUrls(): void {
+    this.revokeCompanyImageUrl();
+    this.revokeConsultantImageUrl();
   }
 
   private updateStatus(status: MissionStatus): void {

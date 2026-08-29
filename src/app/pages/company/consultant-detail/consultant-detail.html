@@ -6,18 +6,28 @@
       (click)="goBack()"
     >
       <span>←</span>
-      Retour aux consultants
+
+      {{
+        missionOfferId
+          ? 'Retour au matching'
+          : 'Retour aux consultants'
+      }}
     </button>
 
     <section class="state-card" *ngIf="loading">
       <div class="loader"></div>
       <h2>Chargement du profil</h2>
-      <p>Récupération des informations du consultant...</p>
+
+      <p>
+        Récupération des informations du consultant...
+      </p>
     </section>
 
-    <section class="state-card error-state" *ngIf="errorMessage">
+    <section
+      class="state-card error-state"
+      *ngIf="errorMessage"
+    >
       <div class="state-icon">!</div>
-
       <h2>Profil indisponible</h2>
       <p>{{ errorMessage }}</p>
 
@@ -30,15 +40,28 @@
       <section class="profile-header">
         <div class="identity">
           <div class="avatar">
-            {{
-              consultant.firstName
-                ? consultant.firstName.charAt(0)
-                : 'C'
-            }}
+            <img
+              *ngIf="profileImageObjectUrl; else consultantInitial"
+              [src]="profileImageObjectUrl"
+              [alt]="
+                'Photo de ' +
+                (consultant.firstName || 'consultant')
+              "
+            >
+
+            <ng-template #consultantInitial>
+              {{
+                consultant.firstName
+                  ? consultant.firstName.charAt(0)
+                  : 'C'
+              }}
+            </ng-template>
           </div>
 
           <div class="identity-content">
-            <span class="eyebrow">PROFIL CONSULTANT</span>
+            <span class="eyebrow">
+              PROFIL CONSULTANT
+            </span>
 
             <h1>
               {{ consultant.firstName || 'Prénom' }}
@@ -46,18 +69,27 @@
             </h1>
 
             <p class="title">
-              {{ consultant.title || 'Titre non renseigné' }}
+              {{
+                consultant.title ||
+                'Titre non renseigné'
+              }}
             </p>
 
             <div class="profile-meta">
               <span>
                 <i>⌖</i>
-                {{ consultant.location || 'Localisation non renseignée' }}
+
+                {{
+                  consultant.location ||
+                  'Localisation non renseignée'
+                }}
               </span>
 
               <span>
                 <i>◷</i>
-                {{ consultant.experienceYears || 0 }} an(s) d'expérience
+
+                {{ consultant.experienceYears || 0 }}
+                an(s) d'expérience
               </span>
             </div>
           </div>
@@ -80,17 +112,30 @@
           <button
             type="button"
             class="mission-button"
-            [disabled]="!consultant.available"
+            [disabled]="
+              !consultant.available ||
+              offerLoading
+            "
             (click)="openInvitationForm()"
           >
             {{
-              consultant.available
-                ? 'Proposer une mission'
-                : 'Consultant indisponible'
+              !consultant.available
+                ? 'Consultant indisponible'
+                : missionOffer
+                  ? 'Proposer cette mission'
+                  : 'Proposer une mission'
             }}
           </button>
         </div>
       </section>
+
+      <div
+        class="alert error-alert"
+        *ngIf="offerErrorMessage"
+      >
+        <span>!</span>
+        {{ offerErrorMessage }}
+      </div>
 
       <div
         class="alert success-alert"
@@ -99,6 +144,60 @@
         <span>✓</span>
         {{ invitationSuccessMessage }}
       </div>
+
+      <section
+        class="actions-card"
+        *ngIf="offerLoading"
+      >
+        <div class="action-decoration">✦</div>
+
+        <div>
+          <span class="eyebrow">
+            OFFRE DE MISSION
+          </span>
+
+          <h2>Chargement de l’offre...</h2>
+
+          <p>
+            TalentScope prépare automatiquement votre
+            proposition à partir de l’offre sélectionnée.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="actions-card"
+        *ngIf="missionOffer"
+      >
+        <div class="action-decoration">
+          ✦
+        </div>
+
+        <div>
+          <span class="eyebrow">
+            PROPOSITION ISSUE DU MATCHING
+          </span>
+
+          <h2>{{ missionOffer.title }}</h2>
+
+          <p>
+            Le formulaire de proposition a été prérempli
+            automatiquement à partir de cette offre.
+            Vous pouvez modifier les informations avant
+            l’envoi.
+          </p>
+        </div>
+
+        <a
+          [routerLink]="[
+            '/company/mission-offers',
+            missionOffer.id,
+            'matching'
+          ]"
+        >
+          Retour au matching
+        </a>
+      </section>
 
       <section class="profile-grid">
         <article class="information-card">
@@ -110,8 +209,13 @@
             </span>
 
             <div>
-              <span class="eyebrow">INFORMATIONS</span>
-              <h2>Profil professionnel</h2>
+              <span class="eyebrow">
+                INFORMATIONS
+              </span>
+
+              <h2>
+                Profil professionnel
+              </h2>
             </div>
           </div>
 
@@ -120,15 +224,21 @@
               <span>Localisation</span>
 
               <strong>
-                {{ consultant.location || 'Non renseignée' }}
+                {{
+                  consultant.location ||
+                  'Non renseignée'
+                }}
               </strong>
             </div>
 
             <div class="information-item">
-              <span>Expérience professionnelle</span>
+              <span>
+                Expérience professionnelle
+              </span>
 
               <strong>
-                {{ consultant.experienceYears || 0 }} an(s)
+                {{ consultant.experienceYears || 0 }}
+                an(s)
               </strong>
             </div>
 
@@ -159,7 +269,9 @@
                     }}
                   </span>
 
-                  <span *ngIf="!cvDownloadLoading">↓</span>
+                  <span *ngIf="!cvDownloadLoading">
+                    ↓
+                  </span>
                 </button>
               </div>
             </div>
@@ -176,11 +288,18 @@
 
         <article class="skills-card">
           <div class="card-heading">
-            <span class="card-icon skills-icon">✦</span>
+            <span class="card-icon skills-icon">
+              ✦
+            </span>
 
             <div>
-              <span class="eyebrow">EXPERTISE</span>
-              <h2>Compétences techniques</h2>
+              <span class="eyebrow">
+                EXPERTISE
+              </span>
+
+              <h2>
+                Compétences techniques
+              </h2>
             </div>
 
             <span class="skill-count">
@@ -206,16 +325,26 @@
         </article>
       </section>
 
-      <section class="actions-card">
-        <div class="action-decoration">✦</div>
+      <section
+        class="actions-card"
+        *ngIf="!missionOffer"
+      >
+        <div class="action-decoration">
+          ✦
+        </div>
 
         <div>
-          <span class="eyebrow">COLLABORATION</span>
-          <h2>Ce profil correspond à votre besoin ?</h2>
+          <span class="eyebrow">
+            COLLABORATION
+          </span>
+
+          <h2>
+            Ce profil correspond à votre besoin ?
+          </h2>
 
           <p>
-            Envoyez une proposition de mission complète directement
-            au consultant.
+            Envoyez une proposition de mission complète
+            directement au consultant.
           </p>
         </div>
 
@@ -230,7 +359,9 @@
               : 'Profil indisponible'
           }}
 
-          <span *ngIf="consultant.available">→</span>
+          <span *ngIf="consultant.available">
+            →
+          </span>
         </button>
       </section>
 
@@ -240,17 +371,37 @@
       >
         <div class="form-header">
           <div>
-            <span class="eyebrow">NOUVELLE PROPOSITION</span>
+            <span class="eyebrow">
+              {{
+                missionOffer
+                  ? 'PROPOSITION LIÉE À UNE OFFRE'
+                  : 'NOUVELLE PROPOSITION'
+              }}
+            </span>
 
             <h2>
-              Créer une mission pour
+              {{
+                missionOffer
+                  ? 'Proposer « ' +
+                    missionOffer.title +
+                    ' » à'
+                  : 'Créer une mission pour'
+              }}
+
               {{ consultant.firstName }}
               {{ consultant.lastName }}
             </h2>
 
-            <p>
-              Renseignez les informations nécessaires afin que le
-              consultant puisse évaluer précisément votre proposition.
+            <p *ngIf="!missionOffer">
+              Renseignez les informations nécessaires
+              afin que le consultant puisse évaluer
+              précisément votre proposition.
+            </p>
+
+            <p *ngIf="missionOffer">
+              Les informations ci-dessous proviennent de
+              votre offre. Vous pouvez encore les adapter
+              avant d’envoyer la proposition au consultant.
             </p>
           </div>
 
@@ -270,8 +421,13 @@
             <span>01</span>
 
             <div>
-              <strong>Informations générales</strong>
-              <small>Présentation de la mission</small>
+              <strong>
+                Informations générales
+              </strong>
+
+              <small>
+                Présentation de la mission
+              </small>
             </div>
           </div>
 
@@ -300,12 +456,13 @@
                 id="invitationMessage"
                 name="invitationMessage"
                 [(ngModel)]="invitationMessage"
-                maxlength="3000"
+                maxlength="5000"
                 placeholder="Présentez le contexte, les responsabilités et les objectifs..."
               ></textarea>
 
               <small>
-                Décrivez clairement le contexte et les responsabilités.
+                Décrivez clairement le contexte et les
+                responsabilités.
               </small>
             </div>
           </div>
@@ -317,7 +474,10 @@
 
             <div>
               <strong>Organisation</strong>
-              <small>Dates, contrat et mode de travail</small>
+
+              <small>
+                Dates, contrat et mode de travail
+              </small>
             </div>
           </div>
 
@@ -360,7 +520,9 @@
                 name="invitationContractType"
                 [(ngModel)]="invitationContractType"
               >
-                <option value="">Sélectionner</option>
+                <option value="">
+                  Sélectionner
+                </option>
 
                 <option
                   *ngFor="let contractType of contractTypes"
@@ -381,7 +543,9 @@
                 name="invitationWorkMode"
                 [(ngModel)]="invitationWorkMode"
               >
-                <option value="">Sélectionner</option>
+                <option value="">
+                  Sélectionner
+                </option>
 
                 <option
                   *ngFor="let workMode of workModes"
@@ -399,8 +563,13 @@
             <span>03</span>
 
             <div>
-              <strong>Détails complémentaires</strong>
-              <small>Lieu, rémunération et technologies</small>
+              <strong>
+                Détails complémentaires
+              </strong>
+
+              <small>
+                Lieu, rémunération et technologies
+              </small>
             </div>
           </div>
 
@@ -498,10 +667,14 @@
             {{
               invitationLoading
                 ? 'Envoi en cours...'
-                : 'Envoyer la proposition'
+                : missionOffer
+                  ? 'Proposer cette mission'
+                  : 'Envoyer la proposition'
             }}
 
-            <span *ngIf="!invitationLoading">→</span>
+            <span *ngIf="!invitationLoading">
+              →
+            </span>
           </button>
         </div>
       </section>

@@ -610,6 +610,7 @@
   display: grid;
   place-items: center;
   flex-shrink: 0;
+  overflow: hidden;
   border-radius: 15px;
   color: #ffffff;
   background: linear-gradient(
@@ -620,6 +621,14 @@
   font-size: 18px;
   font-weight: 900;
   text-transform: uppercase;
+}
+
+.consultant-avatar img,
+.activity-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .consultant-identity > div:last-child {
@@ -706,6 +715,7 @@
   height: 42px;
   display: grid;
   place-items: center;
+  overflow: hidden;
   border-radius: 11px;
   color: #5546d7;
   background: #ebe8ff;

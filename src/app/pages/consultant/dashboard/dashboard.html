@@ -330,11 +330,22 @@
 
           <div class="consultant-identity">
             <div class="consultant-avatar">
-              {{
-                consultant.firstName
-                  ? consultant.firstName.charAt(0)
-                  : 'C'
-              }}
+              <img
+                *ngIf="
+                  consultantImageObjectUrl;
+                  else consultantInitial
+                "
+                [src]="consultantImageObjectUrl"
+                [alt]="consultant.firstName + ' ' + consultant.lastName"
+              >
+
+              <ng-template #consultantInitial>
+                {{
+                  consultant.firstName
+                    ? consultant.firstName.charAt(0).toUpperCase()
+                    : 'C'
+                }}
+              </ng-template>
             </div>
 
             <div>
@@ -433,11 +444,22 @@
                 "
               >
                 <div class="activity-avatar">
-                  {{
-                    invitation.companyName
-                      ? invitation.companyName.charAt(0)
-                      : 'E'
-                  }}
+                  <img
+                    *ngIf="
+                      getCompanyImageUrl(invitation.companyId) as companyImage;
+                      else invitationCompanyInitial
+                    "
+                    [src]="companyImage"
+                    [alt]="invitation.companyName"
+                  >
+
+                  <ng-template #invitationCompanyInitial>
+                    {{
+                      invitation.companyName
+                        ? invitation.companyName.charAt(0).toUpperCase()
+                        : 'E'
+                    }}
+                  </ng-template>
                 </div>
 
                 <div class="activity-content">
@@ -503,11 +525,22 @@
                 ]"
               >
                 <div class="activity-avatar mission-avatar">
-                  {{
-                    mission.companyName
-                      ? mission.companyName.charAt(0)
-                      : 'M'
-                  }}
+                  <img
+                    *ngIf="
+                      getCompanyImageUrl(mission.companyId) as companyImage;
+                      else missionCompanyInitial
+                    "
+                    [src]="companyImage"
+                    [alt]="mission.companyName"
+                  >
+
+                  <ng-template #missionCompanyInitial>
+                    {{
+                      mission.companyName
+                        ? mission.companyName.charAt(0).toUpperCase()
+                        : 'M'
+                    }}
+                  </ng-template>
                 </div>
 
                 <div class="activity-content">

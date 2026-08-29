@@ -1,0 +1,486 @@
+<div class="matching-page">
+  <div class="matching-container">
+    <a
+      *ngIf="offer"
+      class="back-link"
+      [routerLink]="[
+        '/company/mission-offers',
+        offer.id,
+        'applications'
+      ]"
+    >
+      <span>←</span>
+      Retour à l’offre
+    </a>
+
+    <a
+      *ngIf="!offer"
+      class="back-link"
+      routerLink="/company/mission-offers"
+    >
+      <span>←</span>
+      Retour aux offres
+    </a>
+
+    <section
+      class="state-card"
+      *ngIf="loading"
+    >
+      <div class="loader"></div>
+      <h2>Préparation du matching</h2>
+
+      <p>
+        TalentScope récupère les critères de votre offre...
+      </p>
+    </section>
+
+    <section
+      class="state-card error-state"
+      *ngIf="!loading && errorMessage"
+    >
+      <div class="state-icon error-icon">!</div>
+
+      <h2>
+        Impossible de préparer le matching
+      </h2>
+
+      <p>{{ errorMessage }}</p>
+
+      <a routerLink="/company/mission-offers">
+        Retour aux offres
+      </a>
+    </section>
+
+    <main *ngIf="!loading && !errorMessage && offer">
+      <section class="page-hero">
+        <div class="hero-content">
+          <span class="eyebrow">
+            MATCHING INTELLIGENT
+          </span>
+
+          <h1>
+            Les meilleurs profils pour
+            <span>{{ offer.title }}.</span>
+          </h1>
+
+          <p>
+            TalentScope utilise directement les informations de votre
+            offre pour identifier et classer les consultants disponibles
+            selon leur compatibilité avec la mission.
+          </p>
+        </div>
+
+        <div class="ai-badge">
+          <span>✦</span>
+
+          <div>
+            <strong>TalentScope AI</strong>
+            <small>Matching hybride et explicable</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="offer-context">
+        <div class="context-heading">
+          <div>
+            <span class="eyebrow">
+              CRITÈRES DE LA MISSION
+            </span>
+
+            <h2>
+              Offre utilisée pour l’analyse
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            [disabled]="matchingLoading"
+            (click)="launchMatching()"
+          >
+            <span>✦</span>
+
+            {{
+              matchingLoading
+                ? 'Analyse en cours...'
+                : 'Relancer le matching'
+            }}
+          </button>
+        </div>
+
+        <div class="criteria-grid">
+          <article>
+            <span>Contrat</span>
+            <strong>{{ getContractTypeLabel() }}</strong>
+          </article>
+
+          <article>
+            <span>Mode</span>
+            <strong>{{ getWorkModeLabel() }}</strong>
+          </article>
+
+          <article>
+            <span>Localisation</span>
+
+            <strong>
+              {{ offer.location || 'Non renseignée' }}
+            </strong>
+          </article>
+
+          <article>
+            <span>Expérience minimale</span>
+
+            <strong>
+              {{
+                offer.minimumExperienceYears !== null &&
+                offer.minimumExperienceYears !== undefined
+                  ? offer.minimumExperienceYears + ' an(s)'
+                  : 'Non renseignée'
+              }}
+            </strong>
+          </article>
+        </div>
+
+        <div
+          class="technology-list"
+          *ngIf="offer.technologies.length > 0"
+        >
+          <span
+            *ngFor="
+              let technology of offer.technologies;
+              trackBy: trackSkill
+            "
+          >
+            {{ technology }}
+          </span>
+        </div>
+      </section>
+
+      <section
+        class="matching-loader-card"
+        *ngIf="matchingLoading"
+      >
+        <div class="large-loader"></div>
+
+        <div>
+          <span class="eyebrow">
+            ANALYSE EN COURS
+          </span>
+
+          <h2>
+            TalentScope analyse les consultants
+          </h2>
+
+          <p>
+            Pré-sélection objective, analyse qualitative et
+            calcul du score hybride en cours...
+          </p>
+        </div>
+
+        <div class="matching-steps">
+          <span>Critères</span>
+          <i>→</i>
+          <span>Profils</span>
+          <i>→</i>
+          <span>IA</span>
+          <i>→</i>
+          <span>Classement</span>
+        </div>
+      </section>
+
+      <div
+        class="feedback error-feedback"
+        *ngIf="matchingErrorMessage"
+      >
+        <span>!</span>
+        {{ matchingErrorMessage }}
+      </div>
+
+      <section
+        class="results-header"
+        *ngIf="
+          matchingExecuted &&
+          !matchingLoading &&
+          !matchingErrorMessage
+        "
+      >
+        <div>
+          <span class="eyebrow">
+            RÉSULTATS
+          </span>
+
+          <h2>
+            Consultants recommandés
+          </h2>
+
+          <p>
+            {{ analyzedConsultants }} profil(s) analysé(s) par
+            le moteur de matching TalentScope.
+          </p>
+        </div>
+
+        <div
+          class="top-score"
+          *ngIf="topResult"
+        >
+          <span>MEILLEUR SCORE</span>
+
+          <strong>
+            {{ topResult.score }}%
+          </strong>
+        </div>
+      </section>
+
+      <section
+        class="state-card"
+        *ngIf="
+          matchingExecuted &&
+          !matchingLoading &&
+          !matchingErrorMessage &&
+          results.length === 0
+        "
+      >
+        <div class="state-icon empty-icon">
+          ◎
+        </div>
+
+        <h2>Aucun consultant recommandé</h2>
+
+        <p>
+          Aucun profil disponible ne correspond suffisamment aux
+          critères actuels de cette mission.
+        </p>
+      </section>
+
+      <section
+        class="results-grid"
+        *ngIf="
+          matchingExecuted &&
+          !matchingLoading &&
+          !matchingErrorMessage &&
+          results.length > 0
+        "
+      >
+        <article
+          class="result-card"
+          *ngFor="
+            let result of results;
+            let index = index;
+            trackBy: trackResult
+          "
+        >
+          <div class="result-header">
+            <div class="identity">
+              <span class="rank">
+                {{ index + 1 }}
+              </span>
+
+              <div class="avatar">
+                <img
+                  *ngIf="
+                    getProfileImageUrl(result.consultantId)
+                      as profileImage;
+                    else consultantInitial
+                  "
+                  [src]="profileImage"
+                  [alt]="
+                    'Photo de ' +
+                    (result.firstName || 'consultant')
+                  "
+                >
+
+                <ng-template #consultantInitial>
+                  {{
+                    result.firstName
+                      ? result.firstName.charAt(0)
+                      : 'C'
+                  }}{{
+                    result.lastName
+                      ? result.lastName.charAt(0)
+                      : ''
+                  }}
+                </ng-template>
+              </div>
+
+              <div>
+                <h3>
+                  {{ result.firstName }}
+                  {{ result.lastName }}
+                </h3>
+
+                <p>
+                  {{
+                    result.title ||
+                    'Titre non renseigné'
+                  }}
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="score-badge"
+              [ngClass]="getScoreClass(result.score)"
+            >
+              <strong>{{ result.score }}%</strong>
+
+              <span>
+                {{ getScoreLabel(result.score) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="profile-meta">
+            <article>
+              <span>Expérience</span>
+
+              <strong>
+                {{ result.experienceYears }} an(s)
+              </strong>
+            </article>
+
+            <article>
+              <span>Localisation</span>
+
+              <strong>
+                {{
+                  result.location ||
+                  'Non renseignée'
+                }}
+              </strong>
+            </article>
+
+            <article>
+              <span>Confiance</span>
+
+              <strong>
+                {{ result.confidence }}%
+              </strong>
+            </article>
+          </div>
+
+          <div class="confidence-row">
+            <span>
+              {{ getConfidenceLabel(result.confidence) }}
+            </span>
+
+            <div>
+              <i
+                [style.width.%]="result.confidence"
+              ></i>
+            </div>
+          </div>
+
+          <section
+            class="skills-section matched-section"
+            *ngIf="result.matchedSkills.length > 0"
+          >
+            <span class="section-label">
+              COMPÉTENCES CORRESPONDANTES
+            </span>
+
+            <div>
+              <span
+                *ngFor="
+                  let skill of result.matchedSkills;
+                  trackBy: trackSkill
+                "
+              >
+                ✓ {{ skill }}
+              </span>
+            </div>
+          </section>
+
+          <section
+            class="skills-section missing-section"
+            *ngIf="result.missingSkills.length > 0"
+          >
+            <span class="section-label">
+              COMPÉTENCES À VÉRIFIER
+            </span>
+
+            <div>
+              <span
+                *ngFor="
+                  let skill of result.missingSkills;
+                  trackBy: trackSkill
+                "
+              >
+                {{ skill }}
+              </span>
+            </div>
+          </section>
+
+          <section
+            class="analysis-section"
+            *ngIf="result.explanation"
+          >
+            <span>
+              ✦ ANALYSE TALENTSCOPE
+            </span>
+
+            <p>
+              {{ result.explanation }}
+            </p>
+          </section>
+
+          <section
+            class="strengths-section"
+            *ngIf="result.strengths.length > 0"
+          >
+            <span>POINTS FORTS</span>
+
+            <ul>
+              <li *ngFor="let strength of result.strengths">
+                <i>✓</i>
+                {{ strength }}
+              </li>
+            </ul>
+          </section>
+
+          <section
+            class="skills-section missing-section"
+            *ngIf="result.weaknesses.length > 0"
+          >
+            <span class="section-label">
+              POINTS À VÉRIFIER
+            </span>
+
+            <div>
+              <span *ngFor="let weakness of result.weaknesses">
+                {{ weakness }}
+              </span>
+            </div>
+          </section>
+
+          <div class="result-actions">
+            <button
+              type="button"
+              (click)="
+                viewConsultantProfile(
+                  result.consultantId
+                )
+              "
+            >
+              Consulter le profil
+            </button>
+
+            <button
+              type="button"
+              *ngIf="
+                result.available &&
+                offer.status === 'OPEN'
+              "
+              (click)="
+                proposeOffer(
+                  result.consultantId
+                )
+              "
+            >
+              Proposer cette mission
+              <span>→</span>
+            </button>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+</div>

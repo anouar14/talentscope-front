@@ -1,18 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
 import {
   ContractType,
   Invitation,
   InvitationStatus,
   WorkMode
 } from '../../../core/models/invitation';
+import { CompanyService } from '../../../core/services/company';
 import { InvitationService } from '../../../core/services/invitation';
 import { MessagingService } from '../../../core/services/messaging';
 
 type InvitationStatusFilter = 'ALL' | InvitationStatus;
+type InvitationAction = 'ACCEPT' | 'REJECT';
 
 @Component({
   selector: 'app-invitations',
@@ -21,8 +24,9 @@ type InvitationStatusFilter = 'ALL' | InvitationStatus;
   templateUrl: './invitations.html',
   styleUrl: './invitations.css'
 })
-export class Invitations implements OnInit {
+export class Invitations implements OnInit, OnDestroy {
   invitations: Invitation[] = [];
+  companyImageUrls: Record<string, string> = {};
 
   loading = false;
   errorMessage = '';
@@ -36,18 +40,36 @@ export class Invitations implements OnInit {
 
   messagingParticipantId: string | null = null;
 
+  focusedInvitationId: string | null = null;
+
+  selectedInvitation: Invitation | null = null;
+  selectedAction: InvitationAction | null = null;
+
   constructor(
     private readonly invitationService: InvitationService,
     private readonly messagingService: MessagingService,
+    private readonly companyService: CompanyService,
+    private readonly activatedRoute: ActivatedRoute,
     private readonly router: Router
   ) {}
 
   ngOnInit(): void {
+    this.focusedInvitationId =
+      this.activatedRoute.snapshot.queryParamMap.get(
+        'invitationId'
+      );
+
     this.loadInvitations();
   }
 
+  ngOnDestroy(): void {
+    this.clearCompanyImages();
+  }
+
   get filteredInvitations(): Invitation[] {
-    const search = this.searchTerm.trim().toLowerCase();
+    const search = this.searchTerm
+      .trim()
+      .toLowerCase();
 
     return this.invitations.filter(invitation => {
       const matchesStatus =
@@ -67,7 +89,8 @@ export class Invitations implements OnInit {
         .toLowerCase();
 
       const matchesSearch =
-        !search || searchableContent.includes(search);
+        !search ||
+        searchableContent.includes(search);
 
       return matchesStatus && matchesSearch;
     });
@@ -86,16 +109,38 @@ export class Invitations implements OnInit {
   }
 
   get hasActiveFilters(): boolean {
-    return (
-      this.selectedStatus !== 'ALL' ||
-      this.searchTerm.trim().length > 0
-    );
+    return this.selectedStatus !== 'ALL' ||
+      this.searchTerm.trim().length > 0;
+  }
+
+  get confirmationTitle(): string {
+    if (!this.selectedInvitation) {
+      return '';
+    }
+
+    return this.selectedAction === 'ACCEPT'
+      ? 'Accepter cette proposition ?'
+      : 'Refuser cette proposition ?';
+  }
+
+  get confirmationMessage(): string {
+    if (!this.selectedInvitation) {
+      return '';
+    }
+
+    if (this.selectedAction === 'ACCEPT') {
+      return `Vous allez accepter la proposition « ${this.selectedInvitation.subject} » de ${this.selectedInvitation.companyName}.`;
+    }
+
+    return `Vous allez refuser la proposition « ${this.selectedInvitation.subject} » de ${this.selectedInvitation.companyName}.`;
   }
 
   loadInvitations(): void {
     this.loading = true;
     this.errorMessage = '';
     this.clearActionMessages();
+
+    this.clearCompanyImages();
 
     this.invitationService
       .getConsultantInvitations()
@@ -104,11 +149,20 @@ export class Invitations implements OnInit {
           this.invitations = (invitations ?? []).map(
             invitation => ({
               ...invitation,
-              technologies: invitation.technologies ?? []
+              technologies:
+                invitation.technologies ?? []
             })
           );
 
+          this.invitations.forEach(invitation => {
+            this.loadCompanyImage(
+              invitation.companyId
+            );
+          });
+
           this.loading = false;
+
+          this.focusRequestedInvitation();
         },
         error: (error: HttpErrorResponse) => {
           console.error(
@@ -136,6 +190,12 @@ export class Invitations implements OnInit {
       });
   }
 
+  getCompanyImageUrl(
+    companyId: string
+  ): string | null {
+    return this.companyImageUrls[companyId] ?? null;
+  }
+
   contactCompany(invitation: Invitation): void {
     if (
       !invitation.companyId ||
@@ -159,7 +219,8 @@ export class Invitations implements OnInit {
             ['/messaging'],
             {
               queryParams: {
-                conversationId: conversation.id
+                conversationId:
+                  conversation.id
               }
             }
           );
@@ -181,67 +242,102 @@ export class Invitations implements OnInit {
   isOpeningConversation(
     companyId: string
   ): boolean {
-    return this.messagingParticipantId === companyId;
+    return this.messagingParticipantId ===
+      companyId;
   }
 
-  acceptInvitation(invitation: Invitation): void {
+  acceptInvitation(
+    invitation: Invitation
+  ): void {
+    this.openActionModal(
+      invitation,
+      'ACCEPT'
+    );
+  }
+
+  rejectInvitation(
+    invitation: Invitation
+  ): void {
+    this.openActionModal(
+      invitation,
+      'REJECT'
+    );
+  }
+
+  openActionModal(
+    invitation: Invitation,
+    action: InvitationAction
+  ): void {
     if (
       invitation.status !== 'PENDING' ||
-      this.isInvitationProcessing(invitation.id)
+      this.isInvitationProcessing(
+        invitation.id
+      )
     ) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Voulez-vous accepter la proposition « ${invitation.subject} » de ${invitation.companyName} ?`
-    );
-
-    if (confirmed) {
-      this.respondToInvitation(
-        invitation,
-        true
-      );
-    }
+    this.selectedInvitation = invitation;
+    this.selectedAction = action;
+    this.clearActionMessages();
   }
 
-  rejectInvitation(invitation: Invitation): void {
-    if (
-      invitation.status !== 'PENDING' ||
-      this.isInvitationProcessing(invitation.id)
-    ) {
+  cancelActionModal(): void {
+    if (this.actionInvitationId) {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Voulez-vous refuser la proposition « ${invitation.subject} » de ${invitation.companyName} ?`
-    );
+    this.selectedInvitation = null;
+    this.selectedAction = null;
+  }
 
-    if (confirmed) {
-      this.respondToInvitation(
-        invitation,
-        false
-      );
+  confirmInvitationAction(): void {
+    const invitation =
+      this.selectedInvitation;
+
+    const action =
+      this.selectedAction;
+
+    if (!invitation || !action) {
+      return;
     }
+
+    this.respondToInvitation(
+      invitation,
+      action === 'ACCEPT'
+    );
   }
 
   filterByStatus(
     status: InvitationStatusFilter
   ): void {
     this.selectedStatus = status;
+    this.clearFocusedInvitation();
   }
 
   resetFilters(): void {
     this.searchTerm = '';
     this.selectedStatus = 'ALL';
+    this.clearFocusedInvitation();
   }
 
   isInvitationProcessing(
     invitationId: string
   ): boolean {
-    return this.actionInvitationId === invitationId;
+    return this.actionInvitationId ===
+      invitationId;
   }
 
-  getStatusLabel(status: InvitationStatus): string {
+  isFocusedInvitation(
+    invitationId: string
+  ): boolean {
+    return this.focusedInvitationId ===
+      invitationId;
+  }
+
+  getStatusLabel(
+    status: InvitationStatus
+  ): string {
     switch (status) {
       case 'PENDING':
         return 'En attente';
@@ -254,7 +350,9 @@ export class Invitations implements OnInit {
     }
   }
 
-  getStatusClass(status: InvitationStatus): string {
+  getStatusClass(
+    status: InvitationStatus
+  ): string {
     switch (status) {
       case 'PENDING':
         return 'status-pending';
@@ -301,8 +399,13 @@ export class Invitations implements OnInit {
     }
   }
 
-  getSalaryLabel(salary: number | null): string {
-    if (salary === null || salary === undefined) {
+  getSalaryLabel(
+    salary: number | null
+  ): string {
+    if (
+      salary === null ||
+      salary === undefined
+    ) {
       return 'Non renseignée';
     }
 
@@ -316,11 +419,66 @@ export class Invitations implements OnInit {
     return invitation.id;
   }
 
+  private loadCompanyImage(
+    companyId: string
+  ): void {
+    if (
+      !companyId ||
+      this.companyImageUrls[companyId]
+    ) {
+      return;
+    }
+
+    this.companyService
+      .getProfileImage(companyId)
+      .subscribe({
+        next: blob => {
+          this.companyImageUrls = {
+            ...this.companyImageUrls,
+            [companyId]: URL.createObjectURL(blob)
+          };
+        },
+        error: () => {
+          this.removeCompanyImageUrl(companyId);
+        }
+      });
+  }
+
+  private removeCompanyImageUrl(
+    companyId: string
+  ): void {
+    const currentUrl =
+      this.companyImageUrls[companyId];
+
+    if (currentUrl) {
+      URL.revokeObjectURL(currentUrl);
+    }
+
+    const {
+      [companyId]: removed,
+      ...remainingUrls
+    } = this.companyImageUrls;
+
+    this.companyImageUrls = remainingUrls;
+  }
+
+  private clearCompanyImages(): void {
+    Object.values(
+      this.companyImageUrls
+    ).forEach(url => {
+      URL.revokeObjectURL(url);
+    });
+
+    this.companyImageUrls = {};
+  }
+
   private respondToInvitation(
     invitation: Invitation,
     accepted: boolean
   ): void {
-    this.actionInvitationId = invitation.id;
+    this.actionInvitationId =
+      invitation.id;
+
     this.clearActionMessages();
 
     this.invitationService
@@ -337,6 +495,8 @@ export class Invitations implements OnInit {
           });
 
           this.actionInvitationId = null;
+          this.selectedInvitation = null;
+          this.selectedAction = null;
 
           this.actionSuccessMessage = accepted
             ? 'Proposition acceptée. Une mission active a été créée.'
@@ -349,6 +509,9 @@ export class Invitations implements OnInit {
           );
 
           this.actionInvitationId = null;
+          this.selectedInvitation = null;
+          this.selectedAction = null;
+
           this.actionErrorMessage =
             this.getActionErrorMessage(error);
 
@@ -359,15 +522,86 @@ export class Invitations implements OnInit {
       });
   }
 
+  private focusRequestedInvitation(): void {
+    const invitationId =
+      this.focusedInvitationId;
+
+    if (!invitationId) {
+      return;
+    }
+
+    const invitationExists =
+      this.invitations.some(
+        invitation =>
+          invitation.id === invitationId
+      );
+
+    if (!invitationExists) {
+      this.focusedInvitationId = null;
+
+      this.removeInvitationIdFromUrl();
+
+      return;
+    }
+
+    this.searchTerm = '';
+    this.selectedStatus = 'ALL';
+
+    setTimeout(() => {
+      const element =
+        document.getElementById(
+          this.buildInvitationElementId(
+            invitationId
+          )
+        );
+
+      element?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+    });
+  }
+
+  private clearFocusedInvitation(): void {
+    if (!this.focusedInvitationId) {
+      return;
+    }
+
+    this.focusedInvitationId = null;
+
+    this.removeInvitationIdFromUrl();
+  }
+
+  private removeInvitationIdFromUrl(): void {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.activatedRoute,
+        queryParams: {
+          invitationId: null
+        },
+        queryParamsHandling: 'merge',
+        replaceUrl: true
+      }
+    );
+  }
+
+  private buildInvitationElementId(
+    invitationId: string
+  ): string {
+    return `invitation-${invitationId}`;
+  }
+
   private replaceInvitation(
     updatedInvitation: Invitation
   ): void {
-    this.invitations = this.invitations.map(
-      invitation =>
-        invitation.id === updatedInvitation.id
-          ? updatedInvitation
-          : invitation
-    );
+    this.invitations =
+      this.invitations.map(
+        invitation =>
+          invitation.id === updatedInvitation.id
+            ? updatedInvitation
+            : invitation
+      );
   }
 
   private countByStatus(
@@ -416,12 +650,10 @@ export class Invitations implements OnInit {
       error.error?.detail ||
       error.error?.error;
 
-    return (
-      typeof backendMessage === 'string' &&
+    return typeof backendMessage === 'string' &&
       backendMessage.trim()
-        ? backendMessage
-        : defaultMessage
-    );
+      ? backendMessage
+      : defaultMessage;
   }
 
   private clearActionMessages(): void {
