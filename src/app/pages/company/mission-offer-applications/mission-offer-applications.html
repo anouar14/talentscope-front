@@ -342,8 +342,27 @@
           >
             <button
               type="button"
+              class="contact-button"
+              [disabled]="
+                isContacting(application.consultantId) ||
+                processingApplicationId !== null
+              "
+              (click)="contactConsultant(application)"
+            >
+              {{
+                isContacting(application.consultantId)
+                  ? 'Ouverture...'
+                  : 'Contacter'
+              }}
+            </button>
+
+            <button
+              type="button"
               class="accept-button"
-              [disabled]="isProcessing(application.id)"
+              [disabled]="
+                isProcessing(application.id) ||
+                contactingConsultantId !== null
+              "
               (click)="openActionModal(application, 'ACCEPT')"
             >
               Accepter
@@ -352,7 +371,10 @@
             <button
               type="button"
               class="reject-button"
-              [disabled]="isProcessing(application.id)"
+              [disabled]="
+                isProcessing(application.id) ||
+                contactingConsultantId !== null
+              "
               (click)="openActionModal(application, 'REJECT')"
             >
               Refuser

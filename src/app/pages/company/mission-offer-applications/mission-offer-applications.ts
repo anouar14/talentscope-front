@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { MissionApplication } from '../../../core/models/mission-application';
 import { MissionOffer } from '../../../core/models/mission-offer';
+import { MessagingService } from '../../../core/services/messaging';
 import { MissionApplicationService } from '../../../core/services/mission-application';
 import { MissionOfferService } from '../../../core/services/mission-offer';
 
@@ -36,6 +37,7 @@ export class MissionOfferApplications implements OnInit {
   errorMessage = '';
 
   processingApplicationId: string | null = null;
+  contactingConsultantId: string | null = null;
 
   selectedApplication: MissionApplication | null = null;
   selectedAction: ApplicationAction | null = null;
@@ -47,7 +49,8 @@ export class MissionOfferApplications implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly missionOfferService: MissionOfferService,
-    private readonly missionApplicationService: MissionApplicationService
+    private readonly missionApplicationService: MissionApplicationService,
+    private readonly messagingService: MessagingService
   ) {}
 
   ngOnInit(): void {
@@ -143,6 +146,69 @@ export class MissionOfferApplications implements OnInit {
             'Impossible de charger cette offre.';
         }
       });
+  }
+
+  contactConsultant(
+    application: MissionApplication
+  ): void {
+    if (
+      !application.consultantId ||
+      application.status !== 'PENDING' ||
+      this.contactingConsultantId
+    ) {
+      return;
+    }
+
+    this.contactingConsultantId =
+      application.consultantId;
+
+    this.clearActionMessages();
+
+    this.messagingService
+      .openConversation(application.consultantId)
+      .subscribe({
+        next: conversation => {
+          this.contactingConsultantId = null;
+
+          this.router.navigate(
+            ['/messaging'],
+            {
+              queryParams: {
+                conversationId: conversation.id
+              }
+            }
+          );
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error(
+            'Erreur lors de l’ouverture de la conversation :',
+            error
+          );
+
+          this.contactingConsultantId = null;
+
+          if (error.status === 403) {
+            this.actionErrorMessage =
+              'Vous ne pouvez pas contacter ce consultant.';
+            return;
+          }
+
+          if (error.status === 404) {
+            this.actionErrorMessage =
+              'Ce consultant est introuvable.';
+            return;
+          }
+
+          this.actionErrorMessage =
+            'Impossible d’ouvrir la conversation avec ce consultant.';
+        }
+      });
+  }
+
+  isContacting(
+    consultantId: string
+  ): boolean {
+    return this.contactingConsultantId === consultantId;
   }
 
   openActionModal(

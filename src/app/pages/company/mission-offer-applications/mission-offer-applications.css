@@ -456,17 +456,28 @@
 }
 
 .application-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-top: 10px;
 }
 
 .application-actions button {
   min-height: 39px;
-  flex: 1;
   border-radius: 9px;
   font-size: 8px;
   font-weight: 800;
+}
+
+.contact-button {
+  border: 1px solid #d9d3ff;
+  color: #5546d7;
+  background: #f6f4ff;
+}
+
+.contact-button:hover:not(:disabled) {
+  border-color: #bcb3ff;
+  background: #eeebff;
 }
 
 .accept-button {
@@ -482,6 +493,7 @@
 }
 
 .application-actions button:disabled {
+  cursor: not-allowed;
   opacity: 0.55;
 }
 
@@ -752,7 +764,7 @@
   }
 
   .application-actions {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 
   .modal-actions {
